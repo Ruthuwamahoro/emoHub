@@ -1,0 +1,28 @@
+node_modules
+.next
+out 
+public
+/src/components/ui
+src/components/ui
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+/.github/
+
+*.sql
