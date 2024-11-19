@@ -1,207 +1,193 @@
 "use client";
 import React, { useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
-} from "@tabler/icons-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { FaHome } from "react-icons/fa";
-import { BiMessageRounded } from "react-icons/bi";
-import { IoNotifications } from "react-icons/io5";
-import { MdTravelExplore } from "react-icons/md";
-import { TiGroup } from "react-icons/ti";
-import { MdEventRepeat } from "react-icons/md";
-import { SiGoogleanalytics } from "react-icons/si";
-import { MdHelpOutline } from "react-icons/md";
-import HeaderDashboard from "./TopNav";
-import { Button } from "../ui/button";
 import { MeteorsDemo } from "./Posts";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function SidebarDemo() {
-  const links = [
-    {
-        label: "Home Feed",
-        href: "#",
-        icon: (
-          <FaHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-      label: "Dashboard",
-      href: "#",
-      icon: (
-        <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Profile",
-      href: "#",
-      icon: (
-        <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-        label: "Messages",
-        href: "#",
-        icon: (
-          <BiMessageRounded className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-        label: "Notifications",
-        href: "#",
-        icon: (
-          <IoNotifications className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
+const TabButton = ({ active, children, onClick }) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "px-4 py-2 rounded-lg transition-colors",
+      active 
+        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white" 
+        : "text-gray-400 hover:text-white"
+    )}
+  >
+    {children}
+  </button>
+);
 
-    {
-        label: "Explore",
-        href: "#",
-        icon: (
-          <MdTravelExplore className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-        label: "Groups/Community",
-        href: "#",
-        icon: (
-          <TiGroup className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-        label: "Events",
-        href: "#",
-        icon: (
-          <MdEventRepeat className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-        label: "Analytics",
-        href: "#",
-        icon: (
-          <SiGoogleanalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    
-    {
-      label: "Settings",
-      href: "#",
-      icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-        label: "Help & Support",
-        href: "#",
-        icon: (
-          <MdHelpOutline className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-      },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
+export function  Dashboard(){
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("new");
+  const postsPerPage = 3;
+
+  // Sample posts data for each tab
+  const posts = {
+    new: Array(15).fill(null),
+    popular: Array(12).fill(null),
+    trending: Array(18).fill(null)
+  };
+
+  const tabs = [
+    { id: "new", label: "New Posts" },
+    { id: "popular", label: "Popular" },
+    { id: "trending", label: "Trending" }
   ];
-  const [open, setOpen] = useState(false);
-  return (
-    <div
-      className={cn(
-        "rounded-md flex flex-col md:flex-row  w-full flex-1  mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-white",
-        "h-screen"
-      )}
-    >
-      <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
-            </div>
-          </div>
-          <Button className="p-[3px] relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg  border-none" />
-            <div className="px-8 py-2 rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent  border-none">
-              <div>
-                <SidebarLink
-                  link={{
-                    label: "Manu Arora",
-                    href: "#",
-                    icon: (
-                      <Image
-                        src="https://assets.aceternity.com/manu.png"
-                        className="h-7 w-7 flex-shrink-0 rounded-full"
-                        width={50}
-                        height={50}
-                        alt="Avatar"
-                      />
-                    ),
-                  }}
-                />
-              </div>
-            </div>
-          </Button>
-        </SidebarBody>
-      </Sidebar>
-      <Dashboard />
-    </div>
-  );
-}
-export const Logo = () => {
-  return (
-    <Link
-      href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
-    >
-      <div className="h-5 w-6 bg- dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium text-black dark:text-white whitespace-pre"
-      >
-        talkHeal
-      </motion.span>
-    </Link>
-  );
-};
-export const LogoIcon = () => {
-  return (
-    <Link
-      href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
-    >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
-    </Link>
-  );
-};
 
-const Dashboard = () => {
+  // Calculate total pages based on active tab's post count
+  const totalPosts = posts[activeTab].length;
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+
+  // Calculate current page's posts
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts[activeTab].slice(indexOfFirstPost, indexOfLastPost);
+
+  // Calculate the range of pages to show
+  const getPageNumbers = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="flex">
-      <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 border-none bg-white  flex flex-col gap-2 flex-1 w-full h-full">
-          {/* <HeaderDashboard /> */}
-          <div className="flex w-3/4">
-            <div className="flex">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6">
+      <div className="w-full flex flex-col gap-6">
+        {/* Tabs Navigation */}
+        <div className="flex gap-4 px-8">
+          {tabs.map((tab) => (
+            <TabButton
+              key={tab.id}
+              active={activeTab === tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setCurrentPage(1); // Reset to first page when changing tabs
+              }}
+            >
+              {tab.label}
+            </TabButton>
+          ))}
+        </div>
+
+        {/* Posts Grid */}
+        <div className="space-y-6 mb-12">
+          {currentPosts.map((_, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
               <MeteorsDemo />
-              <MeteorsDemo />
-              <MeteorsDemo />
-            </div>
-            <div className="bg-red-300 w-1/4 absolute right-0">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero ipsa voluptatibus accusamus voluptate aspernatur! Facilis, sed voluptates. Culpa iusto molestias ipsa excepturi nostrum, error suscipit nam earum tempora dignissimos numquam rerum aliquam a, eligendi ut repellendus voluptatum in exercitationem dolor eum minus, quaerat soluta odit. Cumque asperiores consectetur corporis rem quis quisquam fugiat officia. Debitis ad, fugit, molestias voluptate pariatur nemo alias cumque illo, error facere ratione harum culpa saepe minus officia quaerat enim nam iure magnam exercitationem sit voluptatum quidem aut ea. Qui, quidem fugiat! Dignissimos officiis officia odio accusantium placeat? Expedita sit, quae placeat explicabo suscipit cupiditate unde?
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Pagination Container */}
+        <div className="flex justify-center items-center mt-10">
+          <div className="bg-gray-900/50 p-4 rounded-xl backdrop-blur-lg border border-gray-700 shadow-2xl">
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "p-2 rounded-lg",
+                  currentPage === 1
+                    ? "text-gray-500 cursor-not-allowed"
+                    : "text-white hover:bg-gray-700"
+                )}
+                onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </motion.button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-2">
+                {getPageNumbers().map((page, index) => (
+                  <React.Fragment key={index}>
+                    {page === "..." ? (
+                      <span className="text-gray-500 px-3">...</span>
+                    ) : (
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handlePageChange(page)}
+                        className="relative w-10 h-10 rounded-lg font-medium transition-all duration-200"
+                      >
+                        {currentPage === page && (
+                          <motion.div
+                            layoutId="activePage"
+                            className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg"
+                            transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+                          />
+                        )}
+                        <span className={cn(
+                          "relative z-10",
+                          currentPage === page
+                            ? "text-white"
+                            : "text-gray-400 hover:text-white"
+                        )}>
+                          {page}
+                        </span>
+                      </motion.button>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "p-2 rounded-lg",
+                  currentPage === totalPages
+                    ? "text-gray-500 cursor-not-allowed"
+                    : "text-white hover:bg-gray-700"
+                )}
+                onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </motion.button>
             </div>
           </div>
-          </div>
+        </div>
+      </div>
     </div>
   );
 };

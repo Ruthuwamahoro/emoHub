@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import HeaderDashboard from "@/components/Dashboard/TopNav";
+import { SidebarDemo } from "@/components/Dashboard/SideBar";
+import  { RightSidebar } from "@/components/Dashboard/RightSideBar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,10 +14,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return ( 
+  return (
     <html lang="en" suppressHydrationWarning>
-      <body
-      >
+      <body>
         {children}
       </body>
     </html>

@@ -1,9 +1,9 @@
-import { Dashboard } from "@/components/Dashboard/Dashboard";
 
+import { LoginForm } from "@/components/auth/LoginForm";
 export default function Home() {
   return (
     <div className="">
-      <Dashboard />
+      <LoginForm/>
     </div>
   );
 }

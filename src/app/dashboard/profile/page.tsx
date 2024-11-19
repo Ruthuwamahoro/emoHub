@@ -1,9 +1,9 @@
-import { Dashboard } from "@/components/Dashboard/Dashboard";
 
+import { UserProfile } from "@/components/Dashboard/Profile";
 export default function Home() {
   return (
     <div className="">
-      <Dashboard />
+      <UserProfile />
     </div>
   );
 }

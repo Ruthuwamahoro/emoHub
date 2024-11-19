@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-// import "../globals.css";
+import "./globals.css";
 import HeaderDashboard from "@/components/Dashboard/TopNav";
+import { SidebarDemo } from "@/components/Dashboard/SideBar";
+import  { RightSidebar } from "@/components/Dashboard/RightSideBar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,11 +14,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return ( 
+  return (
     <html lang="en" suppressHydrationWarning>
-      <body
-      >
-        {children}
+      <body>
+        <div className="flex">
+          <SidebarDemo />
+          <div className="flex-1 w-full">
+            <div className="p-4">
+              <HeaderDashboard />
+            </div>
+            <div className="flex">
+              <div className="flex-1 overflow-y-auto">
+                {children}
+              </div>
+              <RightSidebar />
+            </div>
+          </div>
+        </div>
       </body>
     </html>
   );
