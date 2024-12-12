@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import HeaderDashboard from "@/components/Dashboard/TopNav";
-import { SidebarDemo } from "@/components/Dashboard/SideBar";
-import  { RightSidebar } from "@/components/Dashboard/RightSideBar";
+import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
+import { SessionProvider } from "@/utils/providers/sessionProvider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        {children}
+        <SessionProvider>
+          <ReactQueryProvider>
+            <Toaster />
+            {children}
+          </ReactQueryProvider>
+        </SessionProvider>
       </body>
     </html>
   );
