@@ -38,7 +38,7 @@ export default function HeaderDashboard() {
   if (isLoading) {
     return (
       <div className="w-full">
-        <header className="flex bg-white mt-2 rounded-[4px] items-center gap-4 px-4 lg:h-[60px] lg:px-6 w-full">
+        <header className="flex mt-2 rounded-[4px] items-center gap-4 px-4 lg:h-[60px] lg:px-6 w-full">
           <div className="w-full items-center justify-between flex">
             <div className="gap-3 flex items-center">
               <Skeleton className="w-10 h-10 rounded-full" />
@@ -55,9 +55,9 @@ export default function HeaderDashboard() {
     );
   }
   return (
-    <header className="w-full max-w-full">
+    <header className="relative w-full max-w-full top-0">
       <div className="w-full">
-        <Card className="flex flex-wrap border-none mt-2 rounded-[4px] items-center gap-4 px-2  py-3  dark:bg-[#1e293b] w-full">
+        <Card className="flex flex-wrap border-none rounded-[4px] items-center gap-4 px-2  py-3 dark:bg-[#1e293b] w-full">
           <div className="w-full flex gap-2 flex-1 pl-2 items-center">
             <FaBackward />
             <div className="flex items-center gap-2">

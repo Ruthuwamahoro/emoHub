@@ -13,7 +13,7 @@ import {
   Activity,
   Shield,
   Heart,
-  X, // Importing X icon for exit button
+  X, 
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Assuming you have an Avatar component
 

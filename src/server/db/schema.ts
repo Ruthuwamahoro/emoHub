@@ -157,21 +157,34 @@ const HealthTest = pgTable('health_tests', {
   //   }
 });
 
+const GroupCategories = pgTable("GroupCategories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+})
+
 const Group = pgTable('groups', {
   id: uuid('id').defaultRandom().primaryKey(), 
-    name: varchar('name', { length: 255 }).notNull(),
-    description: text('description').notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
-  });
+  name: varchar('name', { length: 255 }).notNull(),
+  categories: uuid("id").references(() => GroupCategories.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => User.id, { onDelete: 'cascade' }),
+  image: text('image'),
+  description: text('description').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+
   
-const GroupMember = pgTable('group_members', {
-  id: uuid('id').defaultRandom().primaryKey(), 
-    groupId: uuid('group_id').references(() => Group.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').references(() => User.id, { onDelete: 'cascade' }),
-    role: varchar('role', { length: 50 }), // 'Member', 'Admin'
-    joinedAt: timestamp('joined_at').defaultNow(),
-  });
+// const GroupMember = pgTable('group_members', {
+//   id: uuid('id').defaultRandom().primaryKey(), 
+//     groupId: uuid('group_id').references(() => Group.id, { onDelete: 'cascade' }),
+//     userId: uuid('user_id').references(() => User.id, { onDelete: 'cascade' }),
+//     role: varchar('role', { length: 50 }), // 'Member', 'Admin'
+//     joinedAt: timestamp('joined_at').defaultNow(),
+//   });
 
 const Notification = pgTable('notifications', {
   id: uuid('id').defaultRandom().primaryKey(), 
@@ -268,8 +281,8 @@ const Comment = pgTable('comments', {
     Message,
     HealthTest,
     Group,
-    GroupMember,
     Notification,
+    GroupCategories,
     Post,
     Like,
     Comment,
