@@ -1,193 +1,417 @@
+// components/DashboardHomeFeed.tsx
 "use client";
-import React, { useState } from "react";
-import { MeteorsDemo } from "./Posts";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState } from 'react';
+import { Calendar, Clock, Users, MessageCircle, Brain, Heart, Zap, Activity, Compass } from 'lucide-react';
+import DialogueJoinModal from './DialogueJoinModal';
 
-const TabButton = ({ active, children, onClick }) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "px-4 py-2 rounded-lg transition-colors",
-      active 
-        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white" 
-        : "text-gray-400 hover:text-white"
-    )}
-  >
-    {children}
-  </button>
-);
+interface DialogueSession {
+  id: string;
+  title: string;
+  topic: string;
+  participants: number;
+  maxParticipants: number;
+  facilitator: string;
+  time: string;
+  date: string;
+}
 
-export function  Dashboard(){
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("new");
-  const postsPerPage = 3;
+interface EmotionLog {
+  date: string;
+  emotion: string;
+  intensity: number;
+}
 
-  // Sample posts data for each tab
-  const posts = {
-    new: Array(15).fill(null),
-    popular: Array(12).fill(null),
-    trending: Array(18).fill(null)
-  };
+interface ReflectionPrompt {
+  id: string;
+  question: string;
+  category: string;
+}
 
-  const tabs = [
-    { id: "new", label: "New Posts" },
-    { id: "popular", label: "Popular" },
-    { id: "trending", label: "Trending" }
+const DashboardHomeFeed: React.FC = () => {
+  const [currentEmotion, setCurrentEmotion] = useState<string>('');
+  const [emotionIntensity, setEmotionIntensity] = useState<number>(5);
+  const [emotionLogs, setEmotionLogs] = useState<EmotionLog[]>([
+    { date: '2025-03-05', emotion: 'Calm', intensity: 7 },
+    { date: '2025-03-04', emotion: 'Anxious', intensity: 6 },
+    { date: '2025-03-03', emotion: 'Joyful', intensity: 9 },
+    { date: '2025-03-02', emotion: 'Frustrated', intensity: 4 },
+    { date: '2025-03-01', emotion: 'Hopeful', intensity: 8 },
+  ]);
+  
+  // State for dialogue join modal
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState<boolean>(false);
+  const [selectedDialogue, setSelectedDialogue] = useState<DialogueSession | null>(null);
+  const [joinedDialogues, setJoinedDialogues] = useState<string[]>([]);
+  const [joinSuccess, setJoinSuccess] = useState<boolean>(false);
+
+  const upcomingDialogues: DialogueSession[] = [
+    {
+      id: '1',
+      title: 'Navigating Work Uncertainty',
+      topic: 'Stress Management',
+      participants: 5,
+      maxParticipants: 8,
+      facilitator: 'Dr. Maya Chen',
+      time: '2:00 PM',
+      date: 'Today'
+    },
+    {
+      id: '2',
+      title: 'Building Deeper Connections',
+      topic: 'Relationships',
+      participants: 3,
+      maxParticipants: 6,
+      facilitator: 'Sam Johnson',
+      time: '6:30 PM',
+      date: 'Tomorrow'
+    }
   ];
 
-  // Calculate total pages based on active tab's post count
-  const totalPosts = posts[activeTab].length;
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
-
-  // Calculate current page's posts
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = posts[activeTab].slice(indexOfFirstPost, indexOfLastPost);
-
-  // Calculate the range of pages to show
-  const getPageNumbers = () => {
-    const delta = 2;
-    const range = [];
-    const rangeWithDots = [];
-
-    for (
-      let i = Math.max(2, currentPage - delta);
-      i <= Math.min(totalPages - 1, currentPage + delta);
-      i++
-    ) {
-      range.push(i);
-    }
-
-    if (currentPage - delta > 2) {
-      rangeWithDots.push(1, "...");
-    } else {
-      rangeWithDots.push(1);
-    }
-
-    rangeWithDots.push(...range);
-
-    if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push("...", totalPages);
-    } else if (totalPages > 1) {
-      rangeWithDots.push(totalPages);
-    }
-
-    return rangeWithDots;
+  const dailyPrompt: ReflectionPrompt = {
+    id: 'prompt-1',
+    question: 'What moment today made you feel most connected to yourself or others?',
+    category: 'Connection'
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const emotionOptions = [
+    'Joyful', 'Grateful', 'Calm', 'Hopeful', 'Proud',
+    'Anxious', 'Frustrated', 'Sad', 'Overwhelmed', 'Uncertain'
+  ];
+
+  const handleJoinDialogue = (dialogue: DialogueSession) => {
+    setSelectedDialogue(dialogue);
+    setIsJoinModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsJoinModalOpen(false);
+    setJoinSuccess(false);
+    
+    // Wait a bit before clearing selected dialogue to avoid UI jumps
+    setTimeout(() => {
+      setSelectedDialogue(null);
+    }, 300);
+  };
+
+  const handleDialogueJoin = (intention: string) => {
+    // Add dialogue to joined list
+    if (selectedDialogue) {
+      setJoinedDialogues(prev => [...prev, selectedDialogue.id]);
+      setJoinSuccess(true);
+      
+      // Close modal after showing success state
+      setTimeout(() => {
+        handleCloseModal();
+      }, 3000);
+    }
+  };
+
+  const logEmotion = () => {
+    if (currentEmotion) {
+      const newLog = {
+        date: new Date().toISOString().split('T')[0],
+        emotion: currentEmotion,
+        intensity: emotionIntensity
+      };
+      setEmotionLogs([newLog, ...emotionLogs]);
+      setCurrentEmotion('');
+      setEmotionIntensity(5);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6">
-      <div className="w-full flex flex-col gap-6">
-        {/* Tabs Navigation */}
-        <div className="flex gap-4 px-8">
-          {tabs.map((tab) => (
-            <TabButton
-              key={tab.id}
-              active={activeTab === tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setCurrentPage(1); // Reset to first page when changing tabs
-              }}
-            >
-              {tab.label}
-            </TabButton>
-          ))}
-        </div>
-
-        {/* Posts Grid */}
-        <div className="space-y-6 mb-12">
-          {currentPosts.map((_, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <MeteorsDemo />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Pagination Container */}
-        <div className="flex justify-center items-center mt-10">
-          <div className="bg-gray-900/50 p-4 rounded-xl backdrop-blur-lg border border-gray-700 shadow-2xl">
-            <div className="flex items-center gap-2">
-              {/* Previous Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={cn(
-                  "p-2 rounded-lg",
-                  currentPage === 1
-                    ? "text-gray-500 cursor-not-allowed"
-                    : "text-white hover:bg-gray-700"
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-2">Welcome back, Alex</h1>
+        <p className="text-slate-600 mb-8">Your personal space for emotional growth and meaningful conversations</p>
+        
+        {joinSuccess && (
+          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 animate-fadeIn">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                <Users className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-emerald-700">You've joined the dialogue!</h3>
+                <p className="text-sm text-slate-600">
+                  You'll receive a reminder 15 minutes before "{selectedDialogue?.title}" begins.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Daily Wellness Pulse Card */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-1 bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <Heart className="text-rose-500 mr-2" />
+                <h2 className="text-xl font-semibold">Daily Wellness Pulse</h2>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">How are you feeling right now?</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4">
+                  {emotionOptions.map(emotion => (
+                    <button 
+                      key={emotion}
+                      onClick={() => setCurrentEmotion(emotion)}
+                      className={`py-2 px-3 rounded-md text-sm transition-colors ${
+                        currentEmotion === emotion 
+                          ? 'bg-indigo-600 text-white' 
+                          : 'bg-slate-100 hover:bg-slate-200'
+                      }`}
+                    >
+                      {emotion}
+                    </button>
+                  ))}
+                </div>
+                
+                {currentEmotion && (
+                  <>
+                    <label className="block text-sm font-medium mb-2">
+                      Intensity: {emotionIntensity}
+                    </label>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="10" 
+                      value={emotionIntensity}
+                      onChange={(e) => setEmotionIntensity(parseInt(e.target.value))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    />
+                    <button 
+                      onClick={logEmotion}
+                      className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+                    >
+                      Log Emotion
+                    </button>
+                  </>
                 )}
-                onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </motion.button>
-
-              {/* Page Numbers */}
-              <div className="flex items-center gap-2">
-                {getPageNumbers().map((page, index) => (
-                  <React.Fragment key={index}>
-                    {page === "..." ? (
-                      <span className="text-gray-500 px-3">...</span>
-                    ) : (
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handlePageChange(page)}
-                        className="relative w-10 h-10 rounded-lg font-medium transition-all duration-200"
-                      >
-                        {currentPage === page && (
-                          <motion.div
-                            layoutId="activePage"
-                            className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg"
-                            transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
-                          />
-                        )}
-                        <span className={cn(
-                          "relative z-10",
-                          currentPage === page
-                            ? "text-white"
-                            : "text-gray-400 hover:text-white"
-                        )}>
-                          {page}
-                        </span>
-                      </motion.button>
-                    )}
-                  </React.Fragment>
-                ))}
               </div>
 
-              {/* Next Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={cn(
-                  "p-2 rounded-lg",
-                  currentPage === totalPages
-                    ? "text-gray-500 cursor-not-allowed"
-                    : "text-white hover:bg-gray-700"
-                )}
-                onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </motion.button>
+              <div>
+                <h3 className="font-medium text-sm mb-2 text-slate-600">Recent Emotions</h3>
+                <div className="space-y-3">
+                  {emotionLogs.slice(0, 3).map((log, index) => (
+                    <div key={index} className="flex items-center justify-between py-2 border-b border-slate-100">
+                      <div className="flex items-center">
+                        <div className={`w-3 h-3 rounded-full mr-3 ${
+                          log.intensity > 7 ? 'bg-emerald-500' : 
+                          log.intensity > 4 ? 'bg-amber-500' : 'bg-rose-500'
+                        }`}></div>
+                        <span>{log.emotion}</span>
+                      </div>
+                      <span className="text-sm text-slate-500">{log.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dialogue Spaces Card */}
+          <div className="col-span-1 bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <MessageCircle className="text-indigo-500 mr-2" />
+                <h2 className="text-xl font-semibold">Dialogue Spaces</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {upcomingDialogues.map(dialogue => {
+                  const isJoined = joinedDialogues.includes(dialogue.id);
+                  
+                  return (
+                    <div key={dialogue.id} className="bg-slate-50 rounded-lg p-4">
+                      <h3 className="font-medium text-indigo-700">{dialogue.title}</h3>
+                      <div className="text-sm text-slate-600 mt-1">{dialogue.topic}</div>
+                      <div className="flex justify-between items-center mt-3">
+                        <div className="flex items-center text-xs text-slate-500">
+                          <Users className="w-4 h-4 mr-1" />
+                          <span>{dialogue.participants}/{dialogue.maxParticipants}</span>
+                        </div>
+                        <div className="flex items-center text-xs text-slate-500">
+                          <Clock className="w-4 h-4 mr-1" />
+                          <span>{dialogue.time}, {dialogue.date}</span>
+                        </div>
+                      </div>
+                      {isJoined ? (
+                        <div className="flex items-center mt-3 text-emerald-600 text-sm">
+                          <div className="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center mr-2">
+                            <Users className="w-3 h-3 text-emerald-600" />
+                          </div>
+                          <span>You're joining this dialogue</span>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleJoinDialogue(dialogue)}
+                          className="w-full mt-3 bg-indigo-100 text-indigo-700 py-1.5 px-3 rounded-md text-sm hover:bg-indigo-200 transition-colors"
+                        >
+                          Join Conversation
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+                <button className="w-full mt-2 border border-dashed border-indigo-300 text-indigo-600 py-2 px-4 rounded-md text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center">
+                  <span className="mr-1">+</span> Browse More Dialogues
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Reflection & Growth Card */}
+          <div className="col-span-1 bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <Brain className="text-violet-500 mr-2" />
+                <h2 className="text-xl font-semibold">Reflection & Growth</h2>
+              </div>
+              
+              <div className="bg-violet-50 rounded-lg p-4 mb-4">
+                <div className="text-xs font-medium text-violet-600 mb-1">DAILY REFLECTION PROMPT</div>
+                <p className="text-sm font-medium text-slate-700">{dailyPrompt.question}</p>
+                <textarea 
+                  className="w-full mt-3 p-3 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 h-24 resize-none"
+                  placeholder="Write your thoughts here..."
+                ></textarea>
+                <button className="mt-2 bg-violet-600 text-white py-1.5 px-4 rounded-md text-sm hover:bg-violet-700 transition-colors">
+                  Save Reflection
+                </button>
+              </div>
+              
+              <div className="border-t border-slate-100 pt-4">
+                <div className="flex items-center mb-2">
+                  <Zap className="text-amber-500 w-4 h-4 mr-2" />
+                  <h3 className="font-medium text-sm">Growth Insight</h3>
+                </div>
+                <div className="bg-amber-50 p-3 rounded-lg">
+                  <p className="text-sm text-slate-700">
+                    When feeling overwhelmed, practice the "5-4-3-2-1" grounding technique: Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Rest of dashboard components */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <Compass className="text-emerald-500 mr-2" />
+                <h2 className="text-xl font-semibold">Mindfulness & Connection</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex items-center mb-3">
+                    <Activity className="text-emerald-500 w-4 h-4 mr-2" />
+                    <h3 className="font-medium text-sm">Mindfulness Minute</h3>
+                  </div>
+                  <div className="bg-emerald-50 rounded-lg p-4 h-48 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle,#34d399_0%,transparent_70%)]"></div>
+                    <p className="text-emerald-700 font-medium mb-3">Box Breathing Exercise</p>
+                    <p className="text-sm text-slate-600 mb-4">A simple 4-second pattern to calm your nervous system</p>
+                    <button className="bg-emerald-600 text-white py-2 px-6 rounded-full text-sm hover:bg-emerald-700 transition-colors flex items-center">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Start 60-Second Practice
+                    </button>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex items-center mb-3">
+                    <Users className="text-blue-500 w-4 h-4 mr-2" />
+                    <h3 className="font-medium text-sm">Connection Capsule</h3>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 h-48">
+                    <p className="text-blue-700 font-medium mb-2">Your Support Network</p>
+                    <p className="text-sm text-slate-600 mb-3">Based on your recent emotions, consider reaching out to:</p>
+                    
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center bg-white p-2 rounded-md">
+                        <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-600 mr-3">JM</div>
+                        <div>
+                          <div className="text-sm font-medium">Jamie Miller</div>
+                          <div className="text-xs text-slate-500">For practical advice</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center bg-white p-2 rounded-md">
+                        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 mr-3">SK</div>
+                        <div>
+                          <div className="text-sm font-medium">Sam Kumar</div>
+                          <div className="text-xs text-slate-500">For emotional support</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-span-1 bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <MessageCircle className="text-blue-500 mr-2" />
+                <h2 className="text-xl font-semibold">Dialogue Insights</h2>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-sm mb-3 text-slate-600">Recently Shared Wisdom</h3>
+                <div className="space-y-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-xs text-blue-600 mb-1">FROM "NAVIGATING UNCERTAINTY"</div>
+                    <p className="text-sm">
+                      "Uncertainty becomes less frightening when we acknowledge it together rather than fighting it alone."
+                    </p>
+                  </div>
+                  <div className="bg-violet-50 p-3 rounded-lg">
+                    <div className="text-xs text-violet-600 mb-1">FROM "BOUNDARIES & SELF-CARE"</div>
+                    <p className="text-sm">
+                      "Setting boundaries isn't about limiting connection, but creating the space where authentic connection can happen."
+                    </p>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <div className="text-xs text-amber-600 mb-1">FROM "EMOTIONAL AWARENESS"</div>
+                    <p className="text-sm">
+                      "Naming an emotion is the first step to understanding its message and purpose in your life."
+                    </p>
+                  </div>
+                </div>
+                <button className="w-full mt-4 border border-blue-300 text-blue-600 py-2 px-4 rounded-md text-sm hover:bg-blue-50 transition-colors">
+                  View All Insights
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Join Dialogue Modal */}
+      {selectedDialogue && (
+        <DialogueJoinModal 
+          dialogue={selectedDialogue}
+          isOpen={isJoinModalOpen}
+          onClose={handleCloseModal}
+          onJoin={handleDialogueJoin}
+        />
+      )}
+      
+      {/* Add global styles for animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
+
+export default DashboardHomeFeed;

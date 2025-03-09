@@ -1,9 +1,9 @@
 
-import { DayPlanner } from "@/components/Dashboard/PlanDay";
+import DailyMoodPlanner from "@/components/Dashboard/PlanDay";
 export default function Home() {
   return (
     <div className="">
-      < DayPlanner/>
+      <DailyMoodPlanner/>
     </div>
   );
 }

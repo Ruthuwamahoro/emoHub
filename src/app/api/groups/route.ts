@@ -1,12 +1,99 @@
-import { NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
+import db from "@/server/db";
+import { Group} from "@/server/db/schema";
+import cloudinary from "@/utils/cloudinary";
 
-export const POST = async( req:NextRequest, res: NextResponse) => {
-    try{
-        const { name, description, numberOfUsers } = await req.json();
-
-    } catch(err){
-        const error = err instanceof Error ? err.message : 'Internal Server Error';
-        return sendResponse(500, error, 'Internal Server Error');
+export const uploadImage = async (imageUrl: string): Promise<string> => {
+  try {
+    const uploadResponse = await cloudinary.uploader.upload(imageUrl, {
+      folder: "groups_posters",
+      resource_type: "auto",
+      transformation: [
+        { width: 1200, height: 630, crop: "fill" },
+        { quality: "auto" },
+        { fetch_format: "auto" },
+      ],
+    });
+    return uploadResponse.secure_url;
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "Internal Server Error";
+    throw new Error(error);
+  }
+};
+export const POST = async (req: NextRequest, res: NextResponse) => {
+  try {
+    // const userId = await getUserIdFromSession();
+    // if(!userId){
+    //     return sendResponse(401, 'Unauthorized', 'You are not authorized to perform this action')
+    // }
+    const { name, categoryId, description, image } = await req.json();
+    if (!name || !categoryId || !description) {
+      return sendResponse(
+        400,
+        "Bad Request",
+        "Please provide all the required fields"
+      );
     }
-}
+
+    let processedImage = null;
+    if (image) {
+      processedImage = await uploadImage(image);
+    }
+    await db.insert(Group).values({
+      name,
+      categoryId,
+      description,
+      image: processedImage,
+    });
+    return sendResponse(200, null, "Group Created Successfully");
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "Internal Server Error";
+    return sendResponse(500, error, "Internal Server Error");
+  }
+};
+export async function GET(req: Request) {
+    try {
+      const { searchParams } = new URL(req.url);
+      const userId = searchParams.get("userId");
+  
+      const groups = await db.query.Group.findMany({
+        with: {
+          category: true,
+          members: userId ? {
+            where: (members, { eq }) => eq(members.user_id, userId)
+          } : undefined
+        }
+      });
+  
+      const groupsWithJoinStatus = groups.map(group => ({
+        ...group,
+        isJoined: userId 
+          ? group.members && group.members.length > 0 
+          : false
+      }));
+  
+      return NextResponse.json({
+        data: groupsWithJoinStatus,
+        status: 200
+      });
+    } catch (error) {
+      console.error("Detailed error fetching groups:", {
+        error,
+        errorName: error instanceof Error ? error.name : 'Unknown Error',
+        errorMessage: error instanceof Error ? error.message : 'No message',
+        errorStack: error instanceof Error ? error.stack : 'No stack trace'
+      });
+      return NextResponse.json(
+        { 
+          error: "Failed to fetch groups", 
+          details: error instanceof Error ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+          } : 'Unknown error' 
+        },
+        { status: 500 }
+      );
+    }
+  }

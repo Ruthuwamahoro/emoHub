@@ -36,29 +36,15 @@ export function SidebarDemo() {
         ),
     },
     {
-      label: "Profile",
-      href: "/dashboard/profile",
-      icon: (
-        <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-        label: "Messages",
-        href: "/dashboard/messages",
-        icon: (
-          <BiMessageRounded className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
-    {
-        label: "Test your daily health",
-        href: "/dashboard/wellnesscheckin",
+        label: "plan/daily health",
+        href: "/dashboard/dayplan",
         icon: (
           <RiMentalHealthFill className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
         ),
     },
     {
-      label: "Appointments",
-      href: "#",
+      label: "Appointments/psychologists",
+      href: "/dashboard/appointments",
       icon: (
         < MdOutlineCalendarToday className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
@@ -70,21 +56,13 @@ export function SidebarDemo() {
         <GrResources  className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
-    {
-      label: "Plan your day",
-      href: "./dayplan",
-      icon: (
-        <MdSchedule className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-
-    {
-        label: "Explore",
-        href: "#",
-        icon: (
-          <MdTravelExplore className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-        ),
-    },
+    // {
+    //   label: "Plan your day",
+    //   href: "./dayplan",
+    //   icon: (
+    //     <MdSchedule className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    //   ),
+    // },
     {
         label: "Groups/Community",
         href: "/dashboard/community",
@@ -100,8 +78,8 @@ export function SidebarDemo() {
         ),
     },
     {
-        label: "Analytics",
-        href: "./analytics",
+        label: "Emotions insights",
+        href: "/dashboard/emotions",
         icon: (
           <SiGoogleanalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
         ),
@@ -140,13 +118,12 @@ export function SidebarDemo() {
   return (
     <div
       className={cn(
-        // "rounded-md flex flex-col md:flex-row  mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-red-500",
-        "h-screen"
+        "h-screen", 
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden">
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
@@ -178,7 +155,6 @@ export function SidebarDemo() {
           </Button>
         </SidebarBody>
       </Sidebar>
-      {/* <Dashboard /> */}
     </div>
   );
 }

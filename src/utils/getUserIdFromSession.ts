@@ -5,9 +5,6 @@ import { options } from "@/auth";
 export async function getUserIdFromSession(): Promise<string | null> {
   try {
     const session = await getServerSession(options);
-
-    console.log("sessionsssssssssss", session)
-
     if (!session || !session.user?.id) {
       console.error("Unauthorized: No valid session or user ID found.");
       return null;

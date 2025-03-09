@@ -42,7 +42,7 @@ export const RightSidebar = () => {
 
   return (
     <div className="w-80 bg-gray-900 text-white h-screen overflow-y-auto p-4 border-l border-gray-800 flex flex-col">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overflow-hidden">
         {/* Quick Links */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">

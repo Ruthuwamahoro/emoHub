@@ -1,517 +1,265 @@
 "use client"
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger , TooltipProvider} from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { PlusCircle, Calendar as CalendarIcon, BarChart, CheckCircle, Edit, Trash2 } from 'lucide-react';
 
-import { 
-  Clock, 
-  CheckCircle2, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Star, 
-  Activity, 
-  PersonStanding,
-  Timer,
-  BarChart3,
-  Mic,
-  Trophy,
-  Target,
-  Share2,
-  Users
-} from 'lucide-react';
+const DailyMoodPlanner = () => {
+  const [date, setDate] = useState(new Date());
+  const [tasks, setTasks] = useState([
+    { id: 1, title: 'Morning meditation', completed: false },
+    { id: 2, title: 'Work on project', completed: true },
+    { id: 3, title: 'Evening walk', completed: false },
+  ]);
+  const [newTask, setNewTask] = useState('');
+  const [mood, setMood] = useState(7);
+  const [notes, setNotes] = useState('');
+  const [activeTab, setActiveTab] = useState('plan');
 
-// Types for better type safety
-type TaskCategory = 'Work' | 'Self-Care' | 'Social' | 'Wellness';
-type TaskPriority = 'Low' | 'Medium' | 'High';
-
-type GoalType = 'Short-Term' | 'Long-Term';
-
-interface Goal {
-  id: string;
-  title: string;
-  type: GoalType;
-  targetDate: Date;
-  tasks: Task[];
-  progress: number;
-}
-
-interface Task {
-  id: string;
-  title: string;
-  category: TaskCategory;
-  priority: TaskPriority;
-  time: string;
-  completed: boolean;
-  assignedTo?: string[]; 
-  points: number;
-}
-
-interface Reward {
-  id: string;
-  title: string;
-  requiredPoints: number;
-  unlocked: boolean;
-}
-
-
-export const DayPlanner: React.FC = () => {
-
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [goals, setGoals] = useState<Goal[]>([]);
-    const [rewards, setRewards] = useState<Reward[]>([
-      { 
-        id: 'reward1', 
-        title: 'Wellness Champion', 
-        requiredPoints: 100, 
-        unlocked: false 
-      },
-      { 
-        id: 'reward2', 
-        title: 'Productivity Master', 
-        requiredPoints: 250, 
-        unlocked: false 
-      }
-    ]);
-  
-    const [totalPoints, setTotalPoints] = useState(0);
-    const [taskStreak, setTaskStreak] = useState(0);
-  
-    // Voice Command Simulation (Mock Implementation)
-    const handleVoiceCommand = (command: string) => {
-      console.log('Voice Command Received:', command);
-      // Parse and execute voice command logic here
-    };
-
-  const [newTask, setNewTask] = useState<Partial<Task>>({});
-  const [pomodoroTimer, setPomodoroTimer] = useState({
-    active: false,
-    workTime: 25,
-    breakTime: 5,
-    remainingTime: 25 * 60
-  });
-
-  const [selectedTheme, setSelectedTheme] = useState('default');
-
-  const themes = {
-    default: {
-      background: 'bg-white',
-      text: 'text-gray-800',
-      accent: 'bg-blue-500'
-    },
-    calm: {
-      background: 'bg-green-50',
-      text: 'text-green-900',
-      accent: 'bg-green-500'
-    },
-    energetic: {
-      background: 'bg-orange-50',
-      text: 'text-orange-900',
-      accent: 'bg-orange-500'
-    }
+  // Format date for display
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
+  // Add new task
   const addTask = () => {
-    if (newTask.title) {
-      const task: Task = {
-        id: Date.now().toString(),
-        title: newTask.title!,
-        category: newTask.category || 'Work',
-        priority: newTask.priority || 'Medium',
-        time: newTask.time || '09:00',
-        completed: false
-      };
-      setTasks([...tasks, task]);
-      setNewTask({});
+    if (newTask.trim() !== '') {
+      setTasks([...tasks, { id: Date.now(), title: newTask, completed: false }]);
+      setNewTask('');
     }
   };
 
-  const calculateTaskPoints = (priority: TaskPriority): number => {
-    switch(priority) {
-      case 'High': return 50;
-      case 'Medium': return 25;
-      case 'Low': return 10;
-    }
-  };
-
-  const completeTask = (taskId: string) => {
-    const updatedTasks = tasks.map(task => {
-      if (task.id === taskId && !task.completed) {
-        setTotalPoints(prev => prev + task.points);
-        setTaskStreak(prev => prev + 1);
-        return { ...task, completed: true };
-      }
-      return task;
-    });
-
-    setTasks(updatedTasks);
-    checkRewardsUnlock();
-  };
-
-  const checkRewardsUnlock = () => {
-    const updatedRewards = rewards.map(reward => {
-      if (!reward.unlocked && totalPoints >= reward.requiredPoints) {
-        return { ...reward, unlocked: true };
-      }
-      return reward;
-    });
-
-    setRewards(updatedRewards);
-  };
-
-  const addGoal = (goal: Partial<Goal>) => {
-    const newGoal: Goal = {
-      id: Date.now().toString(),
-      title: goal.title || '',
-      type: goal.type || 'Short-Term',
-      targetDate: goal.targetDate || new Date(),
-      tasks: goal.tasks || [],
-      progress: goal.progress || 0
-    };
-
-    setGoals([...goals, newGoal]);
-  };
-
-  const toggleTaskCompletion = (taskId: string) => {
+  // Toggle task completion
+  const toggleTask = (id) => {
     setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, completed: !task.completed } 
-        : task
+      task.id === id ? { ...task, completed: !task.completed } : task
     ));
   };
 
-  const deleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  // Delete task
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
-  const startPomodoroTimer = () => {
-    setPomodoroTimer({
-      ...pomodoroTimer,
-      active: true
-    });
+  // Get mood color
+  const getMoodColor = (value) => {
+    if (value <= 3) return 'text-red-500';
+    if (value <= 6) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
-  const renderWellnessSuggestions = () => {
-    const suggestions = [
-      { 
-        icon: <PersonStanding />, 
-        title: 'Take a 15-min walk', 
-        description: 'Boost your energy and mental clarity' 
-      },
-      { 
-        icon: <Activity />, 
-        title: 'Stretch Break', 
-        description: 'Quick 5-min stretching routine' 
-      }
-    ];
-
-    return (
-      <div className="space-y-2">
-        {suggestions.map((suggestion, index) => (
-          <div 
-            key={index} 
-            className="flex items-center space-x-3 p-2 border rounded-lg hover:bg-gray-100 cursor-pointer"
-          >
-            <div className="bg-primary/10 rounded-full p-2">
-              {suggestion.icon}
-            </div>
-            <div>
-              <h4 className="font-medium">{suggestion.title}</h4>
-              <p className="text-xs text-muted-foreground">{suggestion.description}</p>
-            </div>
-            <Button size="sm" variant="outline" className="ml-auto">Add</Button>
-          </div>
-        ))}
-      </div>
-    );
+  // Get mood text
+  const getMoodText = (value) => {
+    if (value <= 3) return 'Low';
+    if (value <= 6) return 'Neutral';
+    return 'High';
   };
 
-  const renderTaskList = () => {
-    return tasks.map(task => (
-      <div 
-        key={task.id} 
-        className={`flex items-center space-x-3 p-3 border-b ${task.completed ? 'bg-green-50' : ''}`}
-      >
-        <input 
-          type="checkbox" 
-          checked={task.completed}
-          onChange={() => toggleTaskCompletion(task.id)}
-          className="form-checkbox"
-        />
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <span className={`${task.completed ? 'line-through text-gray-500' : ''}`}>
-              {task.title}
-            </span>
-            <Badge variant="outline">{task.category}</Badge>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            <Clock className="inline-block mr-1 h-4 w-4" />
-            {task.time}
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button size="icon" variant="ghost">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => deleteTask(task.id)}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
-      </div>
-    ));
-  };
-
-  const renderCollaborativeTasks = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Users className="inline-block mr-2" /> Collaborative Tasks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Collaborative Task Management */}
-          <div className="space-y-2">
-            <Button variant="outline" className="w-full">
-              <Share2 className="mr-2" /> Invite Collaborators
-            </Button>
-            <div className="text-sm text-muted-foreground">
-              No collaborative tasks yet. Start by inviting team members!
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderGoalTracking = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Target className="inline-block mr-2" /> Goal Tracking
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full">
-            <Plus className="mr-2" /> Add New Goal
-          </Button>
-          {goals.map(goal => (
-            <div 
-              key={goal.id} 
-              className="border rounded-lg p-3 hover:bg-gray-50 transition"
-            >
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">{goal.title}</h3>
-                <Badge variant="outline">{goal.type}</Badge>
-              </div>
-              <Progress value={goal.progress} className="mt-2" />
-              <div className="text-xs text-muted-foreground mt-1">
-                Target Date: {goal.targetDate.toLocaleDateString()}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  };
-  const renderGamificationSection = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trophy className="inline-block mr-2" /> Achievements
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span>Total Points</span>
-              <Badge variant="secondary">{totalPoints}</Badge>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Task Streak</span>
-              <Badge variant="outline">{taskStreak} Days</Badge>
-            </div>
-            
-            <h4 className="text-sm font-medium mt-4">Rewards</h4>
-            {rewards.map(reward => (
-              <div 
-                key={reward.id} 
-                className={`flex justify-between items-center p-2 rounded-lg ${
-                  reward.unlocked ? 'bg-green-50' : 'bg-gray-100'
-                }`}
-              >
-                <span>{reward.title}</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      {reward.unlocked ? (
-                        <CheckCircle2 className="text-green-500" />
-                      ) : (
-                        <Star className="text-yellow-500" />
-                      )}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {reward.unlocked 
-                        ? 'Reward Unlocked!' 
-                        : `Unlock at ${reward.requiredPoints} points`}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  
-  const renderVoiceAssistant = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Mic className="inline-block mr-2" /> Voice Assistant
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => handleVoiceCommand('Plan 15 minutes for mindfulness at 10 AM')}
-          >
-            <Mic className="mr-2" /> Start Voice Command
-          </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            Tip: Say something like "Add a wellness task at 3 PM"
-          </p>
-        </CardContent>
-      </Card>
-    );
+  // Calculate completion percentage
+  const getCompletionPercentage = () => {
+    if (tasks.length === 0) return 0;
+    const completed = tasks.filter(task => task.completed).length;
+    return Math.round((completed / tasks.length) * 100);
   };
 
   return (
-    <div className={`container mx-auto p-4 ${themes[selectedTheme].background} ${themes[selectedTheme].text}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Plan Your Day</h1>
-        <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Theme" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="default">Default Theme</SelectItem>
-            <SelectItem value="calm">Calm Theme</SelectItem>
-            <SelectItem value="energetic">Energetic Theme</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Task Management Column */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Today's Tasks</CardTitle>
-            <CardDescription>Organize and track your daily activities</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex space-x-2 mb-4">
-              <Input
-                placeholder="Add a new task"
-                value={newTask.title || ''}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-              />
-              <Select 
-                value={newTask.category} 
-                onValueChange={(val: TaskCategory) => setNewTask({ ...newTask, category: val })}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Work">Work</SelectItem>
-                  <SelectItem value="Self-Care">Self-Care</SelectItem>
-                  <SelectItem value="Social">Social</SelectItem>
-                  <SelectItem value="Wellness">Wellness</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={addTask}>
-                <Plus className="mr-2 h-4 w-4" /> Add Task
-              </Button>
+    <div className="max-w-5xl mx-auto p-4">
+      <Card className="shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-2xl font-bold">Daily Mood & Planner</CardTitle>
+              <CardDescription className="text-blue-100">{formatDate(date)}</CardDescription>
             </div>
-            
-            <div className="border rounded-lg">
-              {renderTaskList()}
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Today's Mood:</span>
+              <span className={`font-bold text-lg ${getMoodColor(mood)}`}>
+                {getMoodText(mood)}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-3 w-full rounded-none">
+              <TabsTrigger value="plan" className="py-3">
+                <CalendarIcon className="mr-2 h-4 w-4" /> Daily Plan
+              </TabsTrigger>
+              <TabsTrigger value="mood" className="py-3">
+                <BarChart className="mr-2 h-4 w-4" /> Mood Tracker
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="py-3">
+                <CalendarIcon className="mr-2 h-4 w-4" /> Calendar
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Wellness and Productivity Tools */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Wellness Suggestions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderWellnessSuggestions()}
-            </CardContent>
-          </Card>
+            {/* Daily Plan Tab */}
+            <TabsContent value="plan" className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Input 
+                    placeholder="Add a new task..." 
+                    value={newTask} 
+                    onChange={(e) => setNewTask(e.target.value)} 
+                    onKeyPress={(e) => e.key === 'Enter' && addTask()}
+                  />
+                  <Button onClick={addTask} size="icon">
+                    <PlusCircle className="h-5 w-5" />
+                  </Button>
+                </div>
 
-          {/* Pomodoro Timer */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Timer className="inline-block mr-2" /> Pomodoro Timer
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4">
-                <BarChart3 className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-medium">Focus Session</h3>
-                  <Progress value={50} className="w-full" />
-                  <div className="text-sm text-muted-foreground mt-2">
-                    25 mins work | 5 mins break
+                <div className="mt-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium">Tasks for Today</h3>
+                    <span className="text-sm text-gray-500">
+                      {getCompletionPercentage()}% completed
+                    </span>
+                  </div>
+                  
+                  <div className="h-2 w-full bg-gray-200 rounded-full mb-4">
+                    <div 
+                      className="h-2 bg-green-500 rounded-full" 
+                      style={{ width: `${getCompletionPercentage()}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {tasks.length === 0 ? (
+                      <p className="text-center text-gray-500 py-4">No tasks for today. Add one above!</p>
+                    ) : (
+                      tasks.map((task) => (
+                        <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                          <div className="flex items-center">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={`rounded-full mr-2 ${task.completed ? 'text-green-500' : 'text-gray-400'}`}
+                              onClick={() => toggleTask(task.id)}
+                            >
+                              <CheckCircle className={`h-5 w-5 ${task.completed ? 'fill-green-500' : ''}`} />
+                            </Button>
+                            <span className={task.completed ? 'line-through text-gray-500' : ''}>
+                              {task.title}
+                            </span>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => deleteTask(task.id)}>
+                            <Trash2 className="h-4 w-4 text-gray-500" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
-                <Button onClick={startPomodoroTimer}>
-                  Start
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="space-y-4">
-          {renderCollaborativeTasks()}
-          {renderGoalTracking()}
-          {renderGamificationSection()}
-          {renderVoiceAssistant()}
-        </div>
-      </div>
+            </TabsContent>
+
+            {/* Mood Tracker Tab */}
+            <TabsContent value="mood" className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium mb-4">How are you feeling today?</h3>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex justify-between text-sm text-gray-500 mb-2">
+                        <span>Low</span>
+                        <span>Neutral</span>
+                        <span>High</span>
+                      </div>
+                      <Slider 
+                        value={[mood]} 
+                        min={1} 
+                        max={10} 
+                        step={1}
+                        onValueChange={(value) => setMood(value[0])}
+                        className="mb-2"
+                      />
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">Mood Level:</span>
+                        <span className={`font-bold ${getMoodColor(mood)}`}>
+                          {mood}/10 - {getMoodText(mood)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium mb-2">Mood factors</h3>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="What influenced your mood today?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="work">Work</SelectItem>
+                          <SelectItem value="relationships">Relationships</SelectItem>
+                          <SelectItem value="health">Health</SelectItem>
+                          <SelectItem value="weather">Weather</SelectItem>
+                          <SelectItem value="sleep">Sleep</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium mb-2">Notes</h3>
+                      <Textarea 
+                        placeholder="How was your day? Any thoughts or reflections?" 
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="h-24"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Calendar Tab */}
+            <TabsContent value="calendar" className="p-6">
+              <div className="flex flex-col items-center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => newDate && setDate(newDate)}
+                  className="rounded-md border mb-4"
+                />
+                <Card className="w-full mt-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{formatDate(date)}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Mood:</span>
+                        <span className={getMoodColor(mood)}>{getMoodText(mood)} ({mood}/10)</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Tasks:</span>
+                        <span>{tasks.filter(t => t.completed).length}/{tasks.length} completed</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        <CardFooter className="flex justify-end gap-2 p-4 bg-gray-50 rounded-b-lg">
+          <Button variant="outline">Reset</Button>
+          <Button>Save Day</Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
 
+export default DailyMoodPlanner;

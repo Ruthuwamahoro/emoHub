@@ -12,7 +12,17 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
             return sendResponse(400, null, 'Name and Description are required')
         }
         await db.insert(GroupCategories).values({name, description})
-        return sendResponse(201, null, 'Category Created Successfully')
+        return sendResponse(200, null, 'Category Created Successfully')
+    } catch(err){
+        const error = err instanceof Error ? err.message : 'Internal Server Error';
+        return sendResponse(500, error, 'Internal Server Error')
+    }
+}
+export const GET = async(req: NextRequest, res: NextResponse) => {
+    try{
+        const categories = await db.select().from(GroupCategories)
+        return sendResponse(200, categories, 'Categories Fetched Successfully')
+
     } catch(err){
         const error = err instanceof Error ? err.message : 'Internal Server Error';
         return sendResponse(500, error, 'Internal Server Error')
