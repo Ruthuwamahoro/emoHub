@@ -18,7 +18,7 @@ export const uploadImage = async (imageUrl: string): Promise<string> => {
     return uploadResponse.secure_url;
   } catch (err) {
     const error = err instanceof Error ? err.message : "Internal Server Error";
-    throw new Error(error);
+    return error;
   }
 };
 export const POST = async (req: NextRequest, res: NextResponse) => {

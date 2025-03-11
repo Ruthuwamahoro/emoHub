@@ -208,18 +208,8 @@ export const groupRelations = relations(Group, ({ many, one }) => ({
   })
 }));
 
-const Challenges = pgTable("Challenges", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  group_id: uuid("group_id").references(() => Group.id, { onDelete: "cascade" }),
-  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }),
-  description: text("description"),
-  image: text("image"),
-  start_date: timestamp("start_date"),
-  end_date: timestamp("end_date"),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
+
+
 
 export const groupMemberRelations = relations(GroupMember, ({ one }) => ({
   group: one(Group, {
@@ -333,6 +323,98 @@ const verificationTokens = pgTable(
   })
 );
 
+const Challenges = pgTable("Challenges", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  group_id: uuid("group_id").references(() => Group.id, { onDelete: "cascade" }),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  image: text("image"),
+  total_points: integer("total_points").default(0),
+  start_date: timestamp("start_date").notNull(),
+  end_date: timestamp("end_date").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+const ChallengeElements = pgTable("challenge_elements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  question: text("question"),
+  points: integer("points").default(0).notNull(),
+  order: integer("order").default(0),
+  notes: text("notes"), 
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+const ChallengeElementProgress = pgTable("challenge_element_progress", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  element_id: uuid("element_id").references(() => ChallengeElements.id, { onDelete: "cascade" }),
+  is_completed: boolean("is_completed").default(false),
+  completion_date: timestamp("completion_date"),
+  notes: text("notes"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow()
+});
+
+const UserChallengeParticipation = pgTable("user_challenge_participation", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
+  join_date: timestamp("join_date").defaultNow(),
+  total_points_earned: integer("total_points_earned").default(0),
+  streak_days: integer("streak_days").default(0),
+  is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const challengesRelations = relations(Challenges, ({ many, one }) => ({
+  group: one(Group, {
+    fields: [Challenges.group_id],
+    references: [Group.id]
+  }),
+  creator: one(User, {
+    fields: [Challenges.user_id],
+    references: [User.id]
+  }),
+  elements: many(ChallengeElements),
+  participants: many(UserChallengeParticipation)
+}));
+
+export const challengeElementsRelations = relations(ChallengeElements, ({ many, one }) => ({
+  challenge: one(Challenges, {
+    fields: [ChallengeElements.challenge_id],
+    references: [Challenges.id]
+  }),
+  progress: many(ChallengeElementProgress)
+}));
+
+export const challengeElementProgressRelations = relations(ChallengeElementProgress, ({ one }) => ({
+  element: one(ChallengeElements, {
+    fields: [ChallengeElementProgress.element_id],
+    references: [ChallengeElements.id]
+  }),
+  user: one(User, {
+    fields: [ChallengeElementProgress.user_id],
+    references: [User.id]
+  })
+}));
+
+export const userChallengeParticipationRelations = relations(UserChallengeParticipation, ({ one }) => ({
+  challenge: one(Challenges, {
+    fields: [UserChallengeParticipation.challenge_id],
+    references: [Challenges.id]
+  }),
+  user: one(User, {
+    fields: [UserChallengeParticipation.user_id],
+    references: [User.id]
+  })
+}));
+
 export {
   User,
   UserProfile,
@@ -347,7 +429,6 @@ export {
   GroupMember,
   Notification,
   GroupCategories,
-  Challenges,
   Post,
   Like,
   Comment,
@@ -355,4 +436,8 @@ export {
   sessions,
   verificationTokens,
   Role,
+  Challenges,
+  ChallengeElements,
+  ChallengeElementProgress,
+  UserChallengeParticipation
 };

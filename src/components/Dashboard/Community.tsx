@@ -63,7 +63,7 @@ export function CommunityGroups() {
   };
 
   const handleViewGroup = (group_id: number) => {
-    router.push(`/groups/${group_id}`);
+    router.push(`/dashboard/community/groups/${group_id}`);
   };
 
   return (

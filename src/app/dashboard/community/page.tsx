@@ -3,10 +3,7 @@ import { Search } from "lucide-react";
 
 export default function Page() {
   return (
-    <div className="">
-        <div>
-
-        </div>
+    <div>
       <CommunityGroups />
     </div>
   );
