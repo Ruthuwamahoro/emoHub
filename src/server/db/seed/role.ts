@@ -24,6 +24,16 @@ const seedRoles = async () => {
     name: 'Counsellor',
     description: 'Counsellor with basic access',
     },
+    {
+      id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3723',
+      name: 'Admin',
+      description: 'This is the admin role',
+    },
+    {
+      id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3724',
+      name: 'Super Admin',
+      description: 'This is the super admin role',
+    },
   ];
 
   for (const role of roles) {

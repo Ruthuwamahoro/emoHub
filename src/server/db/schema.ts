@@ -12,6 +12,13 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+const Role = pgTable("roles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).unique().notNull(),
+  description: varchar("description", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 const User = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -31,13 +38,7 @@ const User = pgTable("users", {
   isActive: boolean("is_active").default(true),
 });
 
-const Role = pgTable("roles", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", { length: 255 }).unique().notNull(),
-  description: varchar("description", { length: 100 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+
 
 const UserProfile = pgTable("user_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -49,15 +50,31 @@ const UserProfile = pgTable("user_profiles", {
   location: text("location"),
 });
 
-const ForumPost = pgTable("forum_posts", {
+export const postContentTypeEnum = pgEnum("post_content_type", [
+  "text",
+  "image",
+  "video",
+  "audio",
+  "link",
+]);
+
+
+const Post = pgTable("Post", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => User.id, { onDelete: "set null" }),
+  groupId: uuid("group_id").references(() => Group.id, { onDelete: "set null" }),
   title: varchar("title", { length: 255 }).notNull(),
-  content: text("content").notNull(),
+  contentType: postContentTypeEnum("content_type").notNull(),
+  textContent: text("text_content"),
+  mediaUrl: varchar("media_url", { length: 1024 }),
+  mediaAlt: varchar("media_alt", { length: 255 }),
+  linkUrl: varchar("link_url", { length: 1024 }),
+  linkDescription: text("link_description"),
+  linkPreviewImage:  varchar("link_preview_image", { length: 1024 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  anonymous: boolean("anonymous").default(false),
 });
+
 
 const MentalHealthTracker = pgTable("mental_health_tracker", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -231,37 +248,9 @@ const Notification = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-const Post = pgTable("posts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
-  content: text("content").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-const Like = pgTable(
-  "likes",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-    postId: uuid("post_id").references(() => Post.id, { onDelete: "cascade" }),
-    commentId: uuid("comment_id").references(() => Comment.id, {
-      onDelete: "cascade",
-    }),
-    createdAt: timestamp("created_at").defaultNow(),
-  },
-  (table) => ({
-    uniquePostLike: uniqueIndex("unique_post_like").on(
-      table.userId,
-      table.postId
-    ),
-    uniqueCommentLike: uniqueIndex("unique_comment_like").on(
-      table.userId,
-      table.commentId
-    ),
-  })
-);
+
+
 
 const Comment = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -272,15 +261,29 @@ const Comment = pgTable("comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-const Reply = pgTable("replies", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  commentId: uuid("comment_id").references(() => Comment.id, {
-    onDelete: "cascade",
-  }),
-  content: text("content").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+const CommentLikes = pgTable("CommentLikes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  comment_id: uuid("comment_id")
+    .references(() => Comment.id, { onDelete: "cascade" })
+    .notNull(),
+  user_id: uuid("user_id")
+    .references(() => User.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+const CommentReplies = pgTable("CommentReplies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  comment_id: uuid("comment_id")
+    .references(() => Comment.id, { onDelete: "cascade" })
+    .notNull(),
+  user_id: uuid("user_id")
+    .references(() => User.id, { onDelete: "cascade" })
+    .notNull(),
+  commentReplies: text("commentReplies").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 const AppointmentStatus = pgEnum("appointment_status", [
@@ -340,85 +343,85 @@ const Challenges = pgTable("Challenges", {
 const ChallengeElements = pgTable("challenge_elements", {
   id: uuid("id").defaultRandom().primaryKey(),
   challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
-  question: text("question"),
-  points: integer("points").default(0).notNull(),
+  questions: varchar("questions", { length: 255 }).notNull(),
+  description: varchar("description", { length: 255 }).notNull(),
+  points: integer("points").default(0),
   order: integer("order").default(0),
-  notes: text("notes"), 
+  day_number: integer("day_number").default(0),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-const ChallengeElementProgress = pgTable("challenge_element_progress", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  element_id: uuid("element_id").references(() => ChallengeElements.id, { onDelete: "cascade" }),
-  is_completed: boolean("is_completed").default(false),
-  completion_date: timestamp("completion_date"),
-  notes: text("notes"),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow()
-});
+// const ChallengeElementProgress = pgTable("challenge_element_progress", {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+//   element_id: uuid("element_id").references(() => ChallengeElements.id, { onDelete: "cascade" }),
+//   is_completed: boolean("is_completed").default(false),
+//   completion_date: timestamp("completion_date"),
+//   notes: text("notes"),
+//   created_at: timestamp("created_at").defaultNow(),
+//   updated_at: timestamp("updated_at").defaultNow()
+// });
 
-const UserChallengeParticipation = pgTable("user_challenge_participation", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
-  join_date: timestamp("join_date").defaultNow(),
-  total_points_earned: integer("total_points_earned").default(0),
-  streak_days: integer("streak_days").default(0),
-  is_active: boolean("is_active").default(true),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
+// const UserChallengeParticipation = pgTable("user_challenge_participation", {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+//   challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
+//   join_date: timestamp("join_date").defaultNow(),
+//   total_points_earned: integer("total_points_earned").default(0),
+//   streak_days: integer("streak_days").default(0),
+//   is_active: boolean("is_active").default(true),
+//   created_at: timestamp("created_at").defaultNow(),
+//   updated_at: timestamp("updated_at").defaultNow(),
+// });
 
-export const challengesRelations = relations(Challenges, ({ many, one }) => ({
-  group: one(Group, {
-    fields: [Challenges.group_id],
-    references: [Group.id]
-  }),
-  creator: one(User, {
-    fields: [Challenges.user_id],
-    references: [User.id]
-  }),
-  elements: many(ChallengeElements),
-  participants: many(UserChallengeParticipation)
-}));
+// export const challengesRelations = relations(Challenges, ({ many, one }) => ({
+//   group: one(Group, {
+//     fields: [Challenges.group_id],
+//     references: [Group.id]
+//   }),
+//   creator: one(User, {
+//     fields: [Challenges.user_id],
+//     references: [User.id]
+//   }),
+//   elements: many(ChallengeElements),
+//   participants: many(UserChallengeParticipation)
+// }));
 
-export const challengeElementsRelations = relations(ChallengeElements, ({ many, one }) => ({
-  challenge: one(Challenges, {
-    fields: [ChallengeElements.challenge_id],
-    references: [Challenges.id]
-  }),
-  progress: many(ChallengeElementProgress)
-}));
+// export const challengeElementsRelations = relations(ChallengeElements, ({ many, one }) => ({
+//   challenge: one(Challenges, {
+//     fields: [ChallengeElements.challenge_id],
+//     references: [Challenges.id]
+//   }),
+//   progress: many(ChallengeElementProgress)
+// }));
 
-export const challengeElementProgressRelations = relations(ChallengeElementProgress, ({ one }) => ({
-  element: one(ChallengeElements, {
-    fields: [ChallengeElementProgress.element_id],
-    references: [ChallengeElements.id]
-  }),
-  user: one(User, {
-    fields: [ChallengeElementProgress.user_id],
-    references: [User.id]
-  })
-}));
+// export const challengeElementProgressRelations = relations(ChallengeElementProgress, ({ one }) => ({
+//   element: one(ChallengeElements, {
+//     fields: [ChallengeElementProgress.element_id],
+//     references: [ChallengeElements.id]
+//   }),
+//   user: one(User, {
+//     fields: [ChallengeElementProgress.user_id],
+//     references: [User.id]
+//   })
+// }));
 
-export const userChallengeParticipationRelations = relations(UserChallengeParticipation, ({ one }) => ({
-  challenge: one(Challenges, {
-    fields: [UserChallengeParticipation.challenge_id],
-    references: [Challenges.id]
-  }),
-  user: one(User, {
-    fields: [UserChallengeParticipation.user_id],
-    references: [User.id]
-  })
-}));
+// export const userChallengeParticipationRelations = relations(UserChallengeParticipation, ({ one }) => ({
+//   challenge: one(Challenges, {
+//     fields: [UserChallengeParticipation.challenge_id],
+//     references: [Challenges.id]
+//   }),
+//   user: one(User, {
+//     fields: [UserChallengeParticipation.user_id],
+//     references: [User.id]
+//   })
+// }));
 
 export {
   User,
   UserProfile,
-  ForumPost,
+  Post,
   MentalHealthTracker,
   Event,
   AIConversation,
@@ -429,15 +432,14 @@ export {
   GroupMember,
   Notification,
   GroupCategories,
-  Post,
-  Like,
+  CommentLikes,
   Comment,
-  Reply,
+  CommentReplies,
   sessions,
   verificationTokens,
   Role,
   Challenges,
   ChallengeElements,
-  ChallengeElementProgress,
-  UserChallengeParticipation
+  // ChallengeElementProgress,
+  // UserChallengeParticipation
 };

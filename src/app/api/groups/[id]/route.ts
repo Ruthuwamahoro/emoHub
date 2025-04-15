@@ -3,13 +3,9 @@ import { eq } from "drizzle-orm";
 import db from "@/server/db";
 import {
   Group,
-  Challenges,
-  ChallengeElements,
-  UserChallengeParticipation
-} from "@/server/db/schema";
+  Challenges} from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 
-// GET - Fetch a single group with all its challenges and challenge elements
 export async function GET(
   request: NextRequest,
   segmentedData: { params: Promise<{ id: string }> }
@@ -47,43 +43,8 @@ export async function GET(
       });
     }
     
-    const elements = await db
-      .select()
-      .from(ChallengeElements)
-      .where(
-        eq(ChallengeElements.challenge_id, challengeIds[0])
-      );
-    
-    const userParticipations = await db
-      .select()
-      .from(UserChallengeParticipation)
-      .where(
-        eq(UserChallengeParticipation.user_id, user_id)
-      );
-    
-    const enhancedChallenges = await Promise.all(
-      challenges.map(async (challenge) => {
-        const challengeElements = await db
-          .select()
-          .from(ChallengeElements)
-          .where(eq(ChallengeElements.challenge_id, challenge.id))
-          .orderBy(ChallengeElements.order);
-        
-        const participation = userParticipations.find(
-          p => p.challenge_id === challenge.id
-        );
-        
-        return {
-          ...challenge,
-          elements: challengeElements,
-          participation: participation || null
-        };
-      })
-    );
-    
     return NextResponse.json({status: 200, data:{
         group,
-        challenges: enhancedChallenges,
     },
     message: "Group details fetched successfully"});
     

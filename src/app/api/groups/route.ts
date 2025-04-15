@@ -3,6 +3,7 @@ import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db";
 import { Group} from "@/server/db/schema";
 import cloudinary from "@/utils/cloudinary";
+import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 
 export const uploadImage = async (imageUrl: string): Promise<string> => {
   try {
@@ -23,10 +24,10 @@ export const uploadImage = async (imageUrl: string): Promise<string> => {
 };
 export const POST = async (req: NextRequest, res: NextResponse) => {
   try {
-    // const userId = await getUserIdFromSession();
-    // if(!userId){
-    //     return sendResponse(401, 'Unauthorized', 'You are not authorized to perform this action')
-    // }
+    const userId = await getUserIdFromSession();
+    if(!userId){
+        return sendResponse(401, 'Unauthorized', 'You are not authorized to perform this action')
+    }
     const { name, categoryId, description, image } = await req.json();
     if (!name || !categoryId || !description) {
       return sendResponse(
