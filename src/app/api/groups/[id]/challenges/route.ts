@@ -1,11 +1,11 @@
-// app/api/groups/[id]/challenges/route.ts
 import { checkIfUserIsAdmin, getUserIdFromSession } from '@/utils/getUserIdFromSession';
 import { sendResponse } from '@/utils/Responses';
 import { NextResponse, NextRequest } from 'next/server';
 import { uploadImage } from '../../route';
 import db from '@/server/db';
-import { Challenges, ChallengeElements } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Challenges, ChallengeElements, ChallengeFeedback } from '@/server/db/schema';
+import { eq, and, gte, lte, sql } from 'drizzle-orm';
+import { userIsGroupMember } from '@/utils/userIsGroupMember';
 
 export const POST = async(
   req: NextRequest,
@@ -45,8 +45,16 @@ export const POST = async(
       return sendResponse(400, null, "Invalid date format");
     }
 
+    // Calculate total days of the challenge
+    const totalDays = Math.floor((parsedEndDate.getTime() - parsedStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Validate if we have enough questions for each day
+    if (questions.length < totalDays) {
+      return sendResponse(400, null, `Not enough questions for ${totalDays} days of challenge`);
+    }
+    
     // Insert the challenge
-    console.log("Inserting data", title)
+    console.log("Inserting challenge:", title);
     const [newChallenge] = await db.insert(Challenges).values({
       group_id: groupId,
       user_id: userIdSession,
@@ -58,31 +66,39 @@ export const POST = async(
       total_points
     }).returning();
 
-    const totalDays = Math.floor((parsedEndDate.getTime() - parsedStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    
+    // Calculate points distribution
     const totalQuestionsPoints = questions.reduce((sum: number, q: any) => sum + (q.points || 0), 0);
     const pointsMultiplier = totalQuestionsPoints > 0 ? total_points / totalQuestionsPoints : 0;
     
-    const elementsToInsert = questions.map((question: any, index: number) => {
-      const adjustedPoints = Math.round((question.points || 0) * pointsMultiplier);
+    // Distribute questions across days
+    const questionsPerDay = Math.ceil(questions.length / totalDays);
+    const elementsToInsert = [];
+    
+    for (let day = 0; day < totalDays; day++) {
+      const dayQuestions = questions.slice(day * questionsPerDay, (day + 1) * questionsPerDay);
       
-      return {
-        challenge_id: newChallenge.id,
-        questions: question.question,
-        description: question.description || "",
-        points: adjustedPoints,
-        day_number: 0,
-        order: index + 1
-      };
-    });
-
+      dayQuestions.forEach((question: any, index: number) => {
+        const adjustedPoints = Math.round((question.points || 0) * pointsMultiplier);
+        
+        elementsToInsert.push({
+          challenge_id: newChallenge.id,
+          questions: question.question,
+          description: question.description || "",
+          points: adjustedPoints,
+          day_number: day + 1, // Set the day number
+          order: index + 1
+        });
+      });
+    }
+    
     await db.insert(ChallengeElements).values(elementsToInsert);
     
-    return sendResponse(200, { 
+    return sendResponse(200, {
       challengeId: newChallenge.id,
       totalDays: totalDays,
       pointsDistribution: elementsToInsert.map(el => ({
-        questions: el.question,
+        question: el.questions,
+        day: el.day_number,
         points: el.points
       }))
     }, "Challenge Created Successfully");
@@ -93,20 +109,42 @@ export const POST = async(
 };
 
 export const GET = async(
-    request: Request,
-    segmentedData: { params: Promise<{id: string}>}
+  request: Request,
+  segmentedData: { params: Promise<{id: string}>}
 ) => {
-    const params = await segmentedData.params;
-    const groupId = await params.id;
-    const userSession = await getUserIdFromSession();
-    if (!userSession) {
-        return sendResponse(401, null, "Unauthorized");
+  const params = await segmentedData.params;
+  const groupId = await params.id;
+  if (!groupId) {
+      return sendResponse(400, null, "Group ID is required");
+  }
+
+  const userAuth = await userIsGroupMember(groupId);
+  if (!userAuth) {
+      return sendResponse(401, null, "Unauthorized");
+  }
+  
+  try {
+    const url = new URL(request.url);
+    const showActive = url.searchParams.get('active') === 'true';
+    const today = new Date();
+    
+    let query = db.select().from(Challenges).where(eq(Challenges.group_id, groupId));
+    
+    // Filter for active challenges only if requested
+    if (showActive) {
+      query = query.where(
+        and(
+          lte(Challenges.start_date, today),
+          gte(Challenges.end_date, today)
+        )
+      );
     }
-    try {
-      const allChallenges = await db.select().from(Challenges).where(eq(Challenges.group_id, groupId));
-      return sendResponse(200, allChallenges,"All challenges fetched successfully");
-    } catch (error) {
-        const err = error instanceof Error ? error.message : "Unexpected error occurred";
-        return sendResponse(500, null, err);
-    }
-}
+    
+    const allChallenges = await query;
+    
+    return sendResponse(200, allChallenges, "Challenges fetched successfully");
+  } catch (error) {
+    const err = error instanceof Error ? error.message : "Unexpected error occurred";
+    return sendResponse(500, null, err);
+  }
+};

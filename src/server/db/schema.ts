@@ -38,8 +38,6 @@ const User = pgTable("users", {
   isActive: boolean("is_active").default(true),
 });
 
-
-
 const UserProfile = pgTable("user_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
@@ -58,11 +56,12 @@ export const postContentTypeEnum = pgEnum("post_content_type", [
   "link",
 ]);
 
-
 const Post = pgTable("Post", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => User.id, { onDelete: "set null" }),
-  groupId: uuid("group_id").references(() => Group.id, { onDelete: "set null" }),
+  groupId: uuid("group_id").references(() => Group.id, {
+    onDelete: "set null",
+  }),
   title: varchar("title", { length: 255 }).notNull(),
   contentType: postContentTypeEnum("content_type").notNull(),
   textContent: text("text_content"),
@@ -70,11 +69,10 @@ const Post = pgTable("Post", {
   mediaAlt: varchar("media_alt", { length: 255 }),
   linkUrl: varchar("link_url", { length: 1024 }),
   linkDescription: text("link_description"),
-  linkPreviewImage:  varchar("link_preview_image", { length: 1024 }),
+  linkPreviewImage: varchar("link_preview_image", { length: 1024 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
 
 const MentalHealthTracker = pgTable("mental_health_tracker", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -83,15 +81,52 @@ const MentalHealthTracker = pgTable("mental_health_tracker", {
   stressLevel: integer("stress_level").notNull(),
   sleepQuality: integer("sleep_quality").notNull(),
   comments: text("comments"),
+  moodFactors: jsonb("mood_factors")
+    .$type<{
+      energy: number;
+      anxiety: number;
+      motivation: number;
+      socialConnection: {
+        connected: boolean;
+        feedback?: string;
+      };
+      activities: {
+        exercise?: {
+          done: boolean;
+          type?: string;
+        };
+        mindfulness?: {
+          done: boolean;
+          technique?: string;
+        };
+        nutrition: number;
+      };
+      stressors: {
+        work: number;
+        relationships: string;
+      };
+      copingStrategies: {
+        supportSystem?: {
+          reachedOut: boolean;
+          contact?: string;
+        };
+        selfCare: string[];
+      };
+      symptoms: {
+        physical: string[];
+        emotional: string[];
+      };
+    }>()
+    .notNull(),
+  analysisResults: jsonb("analysis_results").$type<{
+    status: "good" | "moderate" | "concerning";
+    insights: string[];
+    suggestions: string[];
+    followUpNeeded: boolean;
+    analysisDate: string;
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
-  // }, {
-  //     constraints: {
-  //         check: [
-  //             'mood_rating BETWEEN 1 AND 10',
-  //             'stress_level BETWEEN 1 AND 10',
-  //             'sleep_quality BETWEEN 1 AND 10'
-  //         ]
-  //     }
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 const Event = pgTable("events", {
@@ -204,39 +239,35 @@ const Group = pgTable("groups", {
 });
 
 const GroupMember = pgTable("group_members", {
-  // Changed from 'GroupMember' to 'group_members'
   id: uuid("id").defaultRandom().primaryKey(),
   group_id: uuid("group_id").references(() => Group.id, {
     onDelete: "cascade",
-  }), // Changed from groupId to group_id
-  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }), // Changed from userId to user_id
-  joined_at: timestamp("joined_at").defaultNow(), // Changed from joinedAt to joined_at
+  }),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  joined_at: timestamp("joined_at").defaultNow(),
 });
 
 export const groupRelations = relations(Group, ({ many, one }) => ({
   members: many(GroupMember),
   category: one(GroupCategories, {
     fields: [Group.categoryId],
-    references: [GroupCategories.id]
+    references: [GroupCategories.id],
   }),
   creator: one(User, {
     fields: [Group.userId],
-    references: [User.id]
-  })
+    references: [User.id],
+  }),
 }));
-
-
-
 
 export const groupMemberRelations = relations(GroupMember, ({ one }) => ({
   group: one(Group, {
     fields: [GroupMember.group_id],
-    references: [Group.id]
+    references: [Group.id],
   }),
   user: one(User, {
     fields: [GroupMember.user_id],
-    references: [User.id]
-  })
+    references: [User.id],
+  }),
 }));
 
 const Notification = pgTable("notifications", {
@@ -247,10 +278,6 @@ const Notification = pgTable("notifications", {
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
-
-
-
-
 
 const Comment = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -328,7 +355,9 @@ const verificationTokens = pgTable(
 
 const Challenges = pgTable("Challenges", {
   id: uuid("id").defaultRandom().primaryKey(),
-  group_id: uuid("group_id").references(() => Group.id, { onDelete: "cascade" }),
+  group_id: uuid("group_id").references(() => Group.id, {
+    onDelete: "cascade",
+  }),
   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
@@ -342,7 +371,9 @@ const Challenges = pgTable("Challenges", {
 
 const ChallengeElements = pgTable("challenge_elements", {
   id: uuid("id").defaultRandom().primaryKey(),
-  challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
+  challenge_id: uuid("challenge_id").references(() => Challenges.id, {
+    onDelete: "cascade",
+  }),
   questions: varchar("questions", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   points: integer("points").default(0),
@@ -350,6 +381,44 @@ const ChallengeElements = pgTable("challenge_elements", {
   day_number: integer("day_number").default(0),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+});
+
+const ChallengeFeedback = pgTable("challenge_feedback", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  challenge_id: uuid("challenge_id").references(() => Challenges.id, {
+    onDelete: "cascade",
+  }),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  question_id: uuid("question_id").references(() => ChallengeElements.id, {
+    onDelete: "cascade",
+  }),
+  response: text("response"),
+  completed: boolean("completed").default(false),
+  points_earned: integer("points_earned").default(0),
+  day_number: integer("day_number").notNull(),
+  submitted_at: timestamp("submitted_at").defaultNow(),
+});
+
+const ResourceCategory = pgTable("resource_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).unique().notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const Resource = pgTable("resources", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  categoryId: uuid("category_id").references(() => ResourceCategory.id, {
+    onDelete: "cascade",
+  }),
+  title: varchar("title", { length: 255 }).notNull(),
+  coverImage: text("cover_image"),
+  shortDescription: text("description").notNull(),
+  content: text("content").notNull(),
+  timeToRead: varchar("timeToRead"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // const ChallengeElementProgress = pgTable("challenge_element_progress", {
@@ -418,6 +487,80 @@ const ChallengeElements = pgTable("challenge_elements", {
 //   })
 // }));
 
+const TodoPriorityEnum = pgEnum("todo_priority", ["LOW", "MEDIUM", "HIGH"]);
+const TodoStatusEnum = pgEnum("todo_status", [
+  "PENDING",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "CANCELLED",
+]);
+
+const Todo = pgTable("todos", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  priority: TodoPriorityEnum("priority").default("MEDIUM"),
+  status: TodoStatusEnum("status").default("PENDING"),
+  dueDate: timestamp("due_date").notNull(),
+  reminderSet: boolean("reminder_set").default(false),
+  reminderTime: timestamp("reminder_time"),
+  category: varchar("category", { length: 100 }),
+  tags: text("tags").array(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const todoRelations = relations(Todo, ({ one }) => ({
+  user: one(User, {
+    fields: [Todo.userId],
+    references: [User.id],
+  }),
+}));
+
+const ActivityTypeEnum = pgEnum("activity_type", [
+  "TODO_CREATED",
+  "TODO_UPDATED",
+  "TODO_COMPLETED",
+  "TODO_DELETED",
+  "MOOD_TRACKED",
+  "RESOURCE_ACCESSED",
+  "GROUP_JOINED",
+  "CHALLENGE_STARTED",
+  "CHALLENGE_COMPLETED",
+]);
+
+const ActivityHistory = pgTable("activity_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  activityType: ActivityTypeEnum("activity_type").notNull(),
+  entityId: uuid("entity_id"), 
+  entityType: varchar("entity_type", { length: 50 }),
+  details: jsonb("details").$type<{
+    title?: string;
+    description?: string;
+    oldStatus?: string;
+    newStatus?: string;
+    changes?: Record<string, any>;
+    metadata?: Record<string, any>;
+  }>(),
+
+  performedAt: timestamp("performed_at").defaultNow(),
+  ip: varchar("ip", { length: 50 }),
+  userAgent: text("user_agent"),
+});
+
+export const activityHistoryRelations = relations(
+  ActivityHistory,
+  ({ one }) => ({
+    user: one(User, {
+      fields: [ActivityHistory.userId],
+      references: [User.id],
+    }),
+  })
+);
+
 export {
   User,
   UserProfile,
@@ -438,8 +581,14 @@ export {
   sessions,
   verificationTokens,
   Role,
+  ChallengeFeedback,
   Challenges,
   ChallengeElements,
-  // ChallengeElementProgress,
-  // UserChallengeParticipation
+  Resource,
+  ResourceCategory,
+  Todo,
+  TodoPriorityEnum,
+  TodoStatusEnum,
+  ActivityHistory,
+  ActivityTypeEnum,
 };

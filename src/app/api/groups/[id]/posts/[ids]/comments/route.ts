@@ -34,7 +34,8 @@ export const POST = async(
         return sendResponse(200, null, "Comment created successfully");
 
     } catch (error) {
-        return sendResponse(500, null, "Internal Server Error");
+        const err = error instanceof Error ? error.message : "Unexpected error occurred";
+        return sendResponse(500, null, err);
     }
 }
 
@@ -51,6 +52,7 @@ export const GET = async() => {
         return sendResponse(200, allComments, "Comments fetched successfully");
 
     } catch (error) {
-        return sendResponse(500, null, "Internal Server Error");
+        const err = error instanceof Error ? error.message : "Unexpected error occurred";
+        return sendResponse(500, null, err);
     }
 }

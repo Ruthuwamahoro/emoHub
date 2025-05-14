@@ -20,6 +20,8 @@ import axios from "axios";
 import { useParams } from 'next/navigation';
 import { useGetChallenges } from '@/hooks/users/groups/challenges/useGetChallenges';
 import { useGetAllChallengesElements } from '@/hooks/users/groups/challenges/elements/useGetAllChallengesElements';
+import CreatePostModal from '@/components/Dashboard/CreatePostModal';
+import PostsList from '@/components/Dashboard/Posts/PostsList';
 
 // API hook to fetch single group data
 export const useGetSingleGroup = (groupId: string) => {
@@ -80,18 +82,6 @@ interface Group {
   description: string;
   created_at: string;
   updated_at: string;
-}
-
-// Discussion Post Interface
-interface DiscussionPost {
-  id: number;
-  author: {
-    name: string;
-    image: string;
-  };
-  content: string;
-  timestamp: string;
-  likes: number;
 }
 
 function ChallengeView({ challenge, groupId }: { challenge: Challenge; groupId: string }) {
@@ -179,6 +169,7 @@ export function GroupDetailPage() {
   const { data, isPending } = useGetSingleGroup(id);
   const [activeTab, setActiveTab] = useState<'challenges' | 'discussions' | 'members'>('challenges');
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   
   // State to track element completion
   const [challengeProgress, setChallengeProgress] = useState<Record<string, Record<string, boolean>>>({});
@@ -202,30 +193,6 @@ export function GroupDetailPage() {
     // In a real app, you would make an API call here to update the completion status
     console.log(`Element ${elementId} in challenge ${challengeId} marked as ${completed ? 'completed' : 'incomplete'}`);
   };
-
-  // Placeholder data for discussions - this would be replaced with API data in a real app
-  const discussionPosts: DiscussionPost[] = [
-    {
-      id: 1,
-      author: {
-        name: "Alex Johnson",
-        image: "/api/placeholder/40/40"
-      },
-      content: "How do you all manage stress during challenging times? I'd love to hear your strategies.",
-      timestamp: "2 hours ago",
-      likes: 12
-    },
-    {
-      id: 2,
-      author: {
-        name: "Emily Rodriguez",
-        image: "/api/placeholder/40/40"
-      },
-      content: "I've been practicing mindfulness, and it's been transformative. Anyone want to share their experience?",
-      timestamp: "5 hours ago",
-      likes: 8
-    }
-  ];
 
   const { data: allChallenges, isPending: challengeIsPending } = useGetChallenges(id)
   const challenges = allChallenges?.data || [];
@@ -308,40 +275,24 @@ export function GroupDetailPage() {
           <MessageCircle className="mr-2 text-purple-600" /> 
           Community Discussions
         </h3>
-        <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-          Start New Discussion
+        <button 
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
+          onClick={() => setIsCreatePostModalOpen(true)}
+        >
+          <PlusCircle className="mr-2 w-5 h-5" /> Create Post
         </button>
       </div>
 
-      {discussionPosts.map(post => (
-        <div 
-          key={post.id} 
-          className="bg-white p-4 rounded-lg border hover:shadow-sm transition"
-        >
-          <div className="flex items-center mb-2">
-            <Image 
-              src={post.author.image} 
-              alt={post.author.name} 
-              width={40} 
-              height={40} 
-              className="rounded-full mr-3"
-            />
-            <div>
-              <h4 className="font-semibold">{post.author.name}</h4>
-              <p className="text-xs text-gray-500">{post.timestamp}</p>
-            </div>
-          </div>
-          <p className="text-gray-700">{post.content}</p>
-          <div className="flex justify-between items-center mt-3">
-            <button className="flex items-center text-gray-600 hover:text-purple-600">
-              <Heart className="mr-2 w-4 h-4" /> {post.likes} Likes
-            </button>
-            <button className="text-purple-600 hover:underline">
-              Reply
-            </button>
-          </div>
-        </div>
-      ))}
+      <PostsList 
+        groupId={id} 
+        onCreatePost={() => setIsCreatePostModalOpen(true)} 
+      />
+
+      <CreatePostModal 
+        groupId={id}
+        isOpen={isCreatePostModalOpen}
+        onClose={() => setIsCreatePostModalOpen(false)}
+      />
     </div>
   );
 
