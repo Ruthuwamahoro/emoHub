@@ -7,11 +7,11 @@ import { and, eq } from "drizzle-orm";
 
 export async function POST(
   req: NextRequest,
-  segmentedData: { params: Promise<{commentsId: string}>}
+  {params}: {params: Promise<{commentsId: string}>}
 ) {
   try {
-    const params = await segmentedData.params;
-    const commentId = params.commentsId;
+    const {commentsId} = await params;
+    const commentId = commentsId;
     const userId = await getUserIdFromSession();
 
     if (!userId) {

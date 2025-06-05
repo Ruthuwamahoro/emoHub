@@ -4,20 +4,19 @@ import { NextRequest } from "next/server";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
 
-export const POST = async(
+export async function POST(
     req: NextRequest,
-    segmentedData: {
-        params: {
-            ids: string;
-        }
-    }
-) => {
+    {params}: {params: Promise<{commentsId: string}>}
+
+    
+){
     try {
         const userId = await getUserIdFromSession();
         if (!userId) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
-        const postId = await segmentedData.params.ids;
+        const {commentsId} = await params;
+        const postId = commentsId
         if (!postId) {
             return new Response(JSON.stringify({ error: "Post ID is required" }), { status: 400 });
         }

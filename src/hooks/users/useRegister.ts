@@ -8,72 +8,79 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 const initialData = {
-    fullName: "",
-    username: "",
-    email: "",
-    password_hash: ""
+  fullName: "",
+  username: "",
+  email: "",
+  password_hash: ""
 };
 
 export const useAddUsers = () => {
-    const router = useRouter()
-    const [formData, setFormData] = useState<RegisterSchema>(initialData);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const queryClient = useQueryClient();
+  const router = useRouter();
+  const [formData, setFormData] = useState<RegisterSchema>(initialData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+  const queryClient = useQueryClient();
 
-    const { mutate, isPending } = useMutation({
-        mutationFn: addUser,
-        onSuccess: (response) => {
-            queryClient.invalidateQueries();
-            setFormData(initialData);
-            setErrors({});
-            showToast(response.message, "success");
-            setTimeout(() => {
-                router.push("/login")
+  const { mutate, isPending } = useMutation({
+    mutationFn: addUser,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries();
+      setFormData(initialData);
+      setErrors({});
+      showToast(response.message, "success");
+      
+      setTimeout(() => {
+        setShowVerificationPopup(true);
+      }, 4000)
+    },
+    onError: (err: unknown) => {
+      const error = err as Error;
+      const errorMessage = error.message || "Registration failed";
+      showToast(errorMessage, "error");
+    }
+  });
 
-            }, 3000)
-        },
-        onError: (err: unknown) => {
-            const error = err as Error;
-            const errorMessage = error.message || "Registration failed";
-            showToast(errorMessage, "error");
-        }
-    });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+    if (errors[id]) {
+      setErrors(prev => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        setFormData(prev => ({ ...prev, [id]: value }));
-        
-        if (errors[id]) {
-            setErrors(prev => {
-                const { [id]: _, ...rest } = prev;
-                return rest;
-            });
-        }
-    };
+  const handleSubmit = () => {
+    try {
+      registerSchema.parse(formData);
+      mutate(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors = error.errors.reduce(
+          (acc, curr) => {
+            acc[curr.path[0]] = curr.message;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        setErrors(fieldErrors);
+      }
+    }
+  };
 
-    const handleSubmit = () => {
-        try {
-            registerSchema.parse(formData);
-            mutate(formData);
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                const fieldErrors = error.errors.reduce(
-                    (acc, curr) => {
-                        acc[curr.path[0]] = curr.message;
-                        return acc;
-                    },
-                    {} as Record<string, string>
-                );
-                setErrors(fieldErrors);
-            }
-        }
-    };
+  const handleClosePopup = () => {
+    setShowVerificationPopup(false);
+    router.push("/register");
+  };
 
-    return {
-        formData,
-        errors,
-        handleChange,
-        handleSubmit,
-        isPending
-    };
+  return {
+    formData,
+    errors,
+    handleChange,
+    handleSubmit,
+    isPending,
+    showVerificationPopup,
+    handleClosePopup
+  };
 };

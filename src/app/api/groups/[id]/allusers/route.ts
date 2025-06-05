@@ -7,17 +7,13 @@ import { eq } from "drizzle-orm";
 import { emit } from "process";
 import { userIsGroupMember } from "@/utils/userIsGroupMember";
 
-export const GET = async (
+export async function  GET(
   req: NextRequest,
-  segmentedData: {
-    params: {
-      id: string;
-    };
-  }
-) => {
+  { params }: { params: Promise<{ id: string }> }
+){
 
-    const params = await segmentedData.params;
-    const groupId = await params.id;
+  const { id } = await params;
+    const groupId = id;
     if (!groupId) {
         return sendResponse(400, null, "Group ID is required");
     }
@@ -44,7 +40,6 @@ export const GET = async (
 
     return sendResponse(200, groupUsers, "Group members fetched successfully");
   } catch (error) {
-    console.error("Error fetching group members:", error);
     const err =
       error instanceof Error ? error.message : "Unexpected error occurred";
     return sendResponse(500, null, err);

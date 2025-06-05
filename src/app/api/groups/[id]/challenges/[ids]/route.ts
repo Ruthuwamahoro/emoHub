@@ -6,14 +6,12 @@ import { userIsGroupMember } from "@/utils/userIsGroupMember";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async(req: NextRequest, segmentedData: {
-    params: {
-        id: string;
-        ids: string;
-    }
-}) => {
-    const params = await segmentedData.params;
-    const groupId = await params.id;
+export async function GET (
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string , ids: string}> }
+  ){
+    const { id, ids } = await params;
+    const groupId = id
     if (!groupId) {
         return sendResponse(400, null, "Group ID is required");
     }
@@ -25,10 +23,6 @@ export const GET = async(req: NextRequest, segmentedData: {
 
     try {
         
-        
-        const params = await segmentedData.params;
-        const ids = await params.ids;
-
         if(!ids) {
             return sendResponse(400, null, "Challenge ID is required");
         }

@@ -5,19 +5,17 @@ import db from '@/server/db';
 import { Todo } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-export const PATCH = async (req: NextRequest, 
-    segmentedData: {
-        params: {
-            id: string;
-        }
-    }
+export const PATCH = async (req: NextRequest,
+    {params}: {params: Promise<{id: string}>}
+
 ) => {
+    const { id } = await params;
     const userId = await getUserIdFromSession();
     if (!userId) {
         return sendResponse(401, null, 'Unauthorized');
     }
     try {
-        const todoId = await segmentedData.params.id;
+        const todoId = id;
         const body = await req.json();
         const updateData = {
             ...body,
@@ -36,18 +34,16 @@ export const PATCH = async (req: NextRequest,
 
 export const DELETE = async (
     req: NextRequest, 
-    segmentedData: {
-        params: {
-            id: string;
-        }
-    }
+    {params}: {params: Promise<{id: string}>}
+
 ) => {
+    const { id } = await params;
     const userId = await getUserIdFromSession();
     if (!userId) {
         return sendResponse(401, null, 'Unauthorized');
     }
     try {
-        const todoId = await segmentedData.params.id;
+        const todoId = id;
         await db.delete(Todo).where(eq(Todo.id, todoId)).returning();
         return sendResponse(200, null, 'Todo deleted successfully');
     } catch (error) {
@@ -55,4 +51,26 @@ export const DELETE = async (
         return sendResponse(500, null, err);   
     }
 
+}
+
+export const GET = async(req:NextRequest,
+    {params}: {params: Promise<{id: string}>}
+) => {
+    const { id } = await params;
+
+    const userId = await getUserIdFromSession();
+    if (!userId) {
+        return sendResponse(401, null, 'Unauthorized');
+    }
+    try {
+        const todoId = id;
+        const todo = await db.select().from(Todo).where(eq(Todo.id, todoId)).execute();
+        if (todo.length === 0) {
+            return sendResponse(404, null, 'Todo not found');
+        }
+        return sendResponse(200, todo[0], 'Todo fetched successfully');
+    } catch (error) {
+        const err = error instanceof Error ? error?.message : 'Internal Server Error';
+        return sendResponse(500, null, err);   
+    }
 }

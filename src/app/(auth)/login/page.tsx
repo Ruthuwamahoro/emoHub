@@ -1,9 +1,9 @@
 
-import { LoginForm } from "@/components/auth/LoginForm";
+import EmoHubSignIn from "@/components/auth/LoginForm";
 export default function Home() {
   return (
     <div className="">
-      <LoginForm/>
+      <EmoHubSignIn/>
     </div>
   );
 }

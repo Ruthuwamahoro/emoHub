@@ -5,7 +5,7 @@ import { GroupCategories } from "@/server/db/schema";
 
 
 
-export const POST = async (req: NextRequest, res: NextResponse) => {
+export async function POST (req: NextRequest){
     try{
         const { name, description} = await req.json()
         if(!name || !description){
@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
         return sendResponse(500, error, 'Internal Server Error')
     }
 }
-export const GET = async(req: NextRequest, res: NextResponse) => {
+export async function GET(req: NextRequest){
     try{
         const categories = await db.select().from(GroupCategories)
         return sendResponse(200, categories, 'Categories Fetched Successfully')

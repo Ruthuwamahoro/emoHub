@@ -2,27 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db";
 import { Group} from "@/server/db/schema";
-import cloudinary from "@/utils/cloudinary";
+import { uploadImage } from "@/utils/cloudinary";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 
-export const uploadImage = async (imageUrl: string): Promise<string> => {
-  try {
-    const uploadResponse = await cloudinary.uploader.upload(imageUrl, {
-      folder: "groups_posters",
-      resource_type: "auto",
-      transformation: [
-        { width: 1200, height: 630, crop: "fill" },
-        { quality: "auto" },
-        { fetch_format: "auto" },
-      ],
-    });
-    return uploadResponse.secure_url;
-  } catch (err) {
-    const error = err instanceof Error ? err.message : "Internal Server Error";
-    return error;
-  }
-};
-export const POST = async (req: NextRequest, res: NextResponse) => {
+
+export const POST = async (req: NextRequest) => {
   try {
     const userId = await getUserIdFromSession();
     if(!userId){

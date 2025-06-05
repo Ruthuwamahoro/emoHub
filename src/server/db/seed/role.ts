@@ -6,34 +6,29 @@ const seedRoles = async () => {
   const roles = [
     {
       id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3719',
-      name: 'Specialists',
+      name: 'SuperAdmin',
       description: 'Administrator with full access',
     },
     {
       id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3720',
-      name: 'Care giver',
+      name: 'Admin',
       description: 'Care giver with limited access',
     },
     {
       id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3721',
-      name: 'User',
+      name: 'Moderator',
       description: 'Regular user with basic access',
     },
     {
     id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3722',
-    name: 'Counsellor',
+    name: 'Specialists',
     description: 'Counsellor with basic access',
     },
     {
       id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3723',
-      name: 'Admin',
+      name: 'User',
       description: 'This is the admin role',
-    },
-    {
-      id: '5d8fde84-524e-4f07-bdf5-f64ed3cb3724',
-      name: 'Super Admin',
-      description: 'This is the super admin role',
-    },
+    }
   ];
 
   for (const role of roles) {

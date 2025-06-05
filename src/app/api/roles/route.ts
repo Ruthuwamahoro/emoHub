@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import  db  from '@/server/db/index';
 import { sendResponse } from '@/utils/Responses';
 
-export const POST = async (request: NextRequest, response: NextResponse) => {
+export async function POST(request: NextRequest){
   try {
     const data = await request.json();
     const { name, description } = data;

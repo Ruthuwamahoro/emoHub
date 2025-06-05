@@ -56,39 +56,57 @@ export const options: NextAuthOptions = {
           if (!credentials?.email || !credentials.password_hash) {
             throw new Error("Missing credentials");
           }
-          
           const existingUser = await db
-            .select()
+            .select({
+              id: User.id,
+              email: User.email,
+              fullName: User.fullName,
+              username: User.username,
+              password: User.password,
+              profilePicUrl: User.profilePicUrl,
+              expertise: User.expertise,
+              isActive: User.isActive,
+              isVerified: User.isVerified,
+              roleName: Role.name,
+            })
             .from(User)
+            .innerJoin(Role, eq(User.role, Role.id)) 
             .where(eq(User.email, credentials.email))
-            .limit(1);
+            .limit(1)
           
           if (existingUser.length === 0) {
             throw new Error("No user found");
           }
+
           
           const user = existingUser[0];
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password_hash,
-            user.passwordHash ?? ""
-          );
-          
-          if (!isPasswordValid) {
-            throw new Error("Invalid password");
+
+          if(user.isVerified){
+            const isPasswordValid = await bcrypt.compare(
+              credentials.password_hash,
+              user.password ?? ""
+            );
+
+            
+            if (!isPasswordValid) {
+              throw new Error("Invalid password");
+            }
+            
+            return {
+              id: user.id,
+              email: user.email,
+              fullName: user.fullName,
+              username: user.username,
+              role: user.roleName, 
+              profilePicUrl: user.profilePicUrl,
+              expertise: user.expertise,
+              isActive: user.isActive,
+            };
           }
+
+          return "Please verify your email";
           
-          return {
-            id: user.id,
-            email: user.email,
-            fullName: user.fullName,
-            username: user.username,
-            role: user.role,
-            profilePicUrl: user.profilePicUrl,
-            expertise: user.expertise,
-            isActive: user.isActive,
-          };
         } catch (error) {
-          console.error("Auth error:", error);
           return null;
         }
       },
@@ -139,9 +157,40 @@ export const options: NextAuthOptions = {
         token.email = user.email;
         token.fullName = user.fullName;
         token.username = user.username;
-        token.role = user.role;
+        token.role = user.role; 
         token.profilePicUrl = user.profilePicUrl;
         token.expertise = user.expertise;
+      } else if (token.email) {
+        try {
+          const userData = await db
+            .select({
+              id: User.id,
+              email: User.email,
+              fullName: User.fullName,
+              username: User.username,
+              profilePicUrl: User.profilePicUrl,
+              expertise: User.expertise,
+              isActive: User.isActive,
+              roleName: Role.name,
+            })
+            .from(User)
+            .innerJoin(Role, eq(User.role, Role.id))
+            .where(eq(User.email, token.email))
+            .limit(1);
+
+          if (userData.length > 0) {
+            const user = userData[0];
+            token.id = user.id;
+            token.fullName = user.fullName;
+            token.username = user.username ?? undefined;
+            token.role = user.roleName;
+            token.profilePicUrl = user.profilePicUrl ?? undefined;
+            token.expertise = user.expertise ?? undefined;
+            token.isActive = user.isActive ?? false;
+          }
+        } catch (error) {
+          console.error("Error refreshing user data:", error);
+        }
       }
       
       return token;
@@ -157,7 +206,6 @@ export const options: NextAuthOptions = {
         session.user.expertise = token.expertise as string | undefined;
         session.user.isActive = token.isActive as boolean;
       }
-      
       return session;
     },
   },

@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  experimental: {
+    serverComponentsExternalPackages: ['swagger-jsdoc']
+  }
 };
 
 export default nextConfig;

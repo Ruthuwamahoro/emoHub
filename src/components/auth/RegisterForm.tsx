@@ -1,170 +1,259 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { LucideUser, LucideMail, LucideLock, LucideEye, LucideEyeOff } from "lucide-react";
-import { signIn } from "next-auth/react";
+import React, { FormEvent, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
+import Image from 'next/image';
 import Link from "next/link";
-import { FaRegUser } from "react-icons/fa";
+import { signIn } from "next-auth/react";
 import { useAddUsers } from "@/hooks/users/useRegister";
+import { VerificationPopup } from '@/components/auth/VerificationPopUp';
 
+export function LeftAuthPage() {
+  return (
+    <div className="hidden lg:flex flex-1 flex-col justify-center items-center px-6 xl:px-12 relative">
+      <Image 
+        src="/images/auth-background.png" 
+        alt="authentication background" 
+        fill 
+        className='absolute z-0'
+      />
+      <div className="absolute top-8 flex items-center justify-center space-x-3 mt-10">
+        <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center">
+          <div className="w-6 h-6 bg-slate-400 rounded-full"></div>
+        </div>
+        <span className="text-white text-xl font-medium">emoHub</span>
+      </div>
+
+      <div className="mb-16">
+        <div className="relative w-64 h-64 xl:w-72 xl:h-72">
+          <Image 
+            src="/images/image1-auth.png" 
+            alt="authentication background" 
+            fill 
+            className=''
+          />
+        </div>
+      </div>
+
+      <div className="text-center max-w-md z-10">
+        <h1 className="text-white text-2xl xl:text-3xl font-bold mb-6 leading-tight">
+          Online Community For<br />
+          Emotional intelligence
+        </h1>
+        <p className="text-slate-400 text-sm leading-relaxed">
+          Lorem ipsum dolor sit amet, consectetur adipiscing<br />
+          elit, sed do eiusmod tempor incididunt.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Main registration form component
 export function RegisterForm() {
+  // Local state for UI interactions
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const {         formData,
+  // Use the existing hook with all the working logic
+  const {
+    formData,
     errors,
     handleChange,
     handleSubmit,
-    isPending } = useAddUsers()
+    isPending,
+    showVerificationPopup,
+    handleClosePopup
+  } = useAddUsers();
 
-
+  // OAuth login handler from original form
   const handleOAuthLogin = async (provider: string) => {
     setLoading(true);
-    await signIn(provider, { callbackUrl: "/" });
+    await signIn(provider, { callbackUrl: "/dashboard" });
     setLoading(false);
   };
+  console.log(showVerificationPopup)
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="flex flex-row w-full max-w-6xl rounded-3xl overflow-hidden shadow-lg border-none">
-        <div className="relative w-1/2">
-          <Image
-            src="https://i.pinimg.com/736x/c1/40/78/c1407895e825217b71cafe4d259736ac.jpg"
-            alt="mental health image"
-            fill
-            className="object-cover"
-          />
-        </div>
+    <>
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        <LeftAuthPage />
 
-        <div className="w-1/2 bg-white p-8">
-          <CardContent className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-4xl font-bold text-gray-800 mb-2">Welcome to <span className="text-purple-600">talk</span>Heal!</h2>
-              <p className="text-gray-600">Create an account and explore endless possibilities.</p>
+        <div className="flex-1 bg-white flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-0">
+          {/* Mobile logo - only show on mobile */}
+          <div className="flex lg:hidden items-center justify-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
             </div>
-            <form onSubmit={(e: FormEvent) =>{
-              e.preventDefault();
-              handleSubmit()
-            }
-            }
-              >
-                <div className="space-y-4">
-                  <p className="mb-2 text-gray-600">Full Name</p>
-                  <div className="relative">
-                  {/* <FaRegUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20}/> */}
-                  <Input
-                      type="text"
-                      id= "fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="w-full py-4 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      required
-                    />
+            <span className="text-slate-700 text-lg font-medium">emoHub</span>
+          </div>
 
-                    {errors.fullName && <p className="text-red-500 text-sm mx-4">{errors.fullName}</p>}
-                  </div>
-                  <div>
-                    <p className="mb-2 text-gray-600">Username</p>
-                    <div className="relative">
-                      <FaRegUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20}/>
-                      <Input
-                        type="text"
-                        id="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="pl-12 w-full py-4 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        required
-                      />
-                      {errors.username && <p className="text-red-500 text-sm mx-4">{errors.username}</p>}
-                    </div>
-                  </div>
+          <div className="max-w-sm mx-auto w-full">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 text-center leading-tight">
+              Join & Connect The Online<br />
+              Community
+            </h2>
 
-                  <div>
-                    <p className="mb-2 text-gray-600">Email</p>
-                    <div className="relative">
-                      <LucideMail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Input
-                        type="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="pl-12 w-full py-4 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        required
-                      />
-                      {errors.email && <p className="text-red-500 text-sm mx-4">{errors.email}</p>}
-                    </div>
-                  </div>
+            {/* Google Sign Up Button */}
+            <button 
+              className="w-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded-lg py-3 px-4 flex items-center justify-center space-x-3 mb-6 mt-6 sm:mt-8"
+              onClick={() => handleOAuthLogin("google")}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              )}
+              <span className="text-gray-700 font-medium text-sm sm:text-base">
+                {loading ? 'Signing up...' : 'Sign up with Google'}
+              </span>
+            </button>
 
-                  <div>
-                    <p className="mb-2 text-gray-600">Password</p>
-                    <div className="relative">
-                      <LucideLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        id="password_hash"
-                        value={formData.password_hash}
-                        onChange={handleChange}
-                        className="pl-12 pr-12 w-full py-4 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        required
-                      />
-                      {errors.password_hash && <p className="text-red-500 text-sm mx-4">{errors.password_hash}</p>}
-
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 transition"
-                      >
-                        {showPassword ? <LucideEyeOff /> : <LucideEye />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <Button className="w-full py-3 my-5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-semibold">
-                  {isPending ? (
-                    <div className="flex items-center">
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Registering...
-                    </div>
-                  ) : (
-                    'Register now'
-                  )}                  
-                  </Button>
-                </div>
-
-              </form>
-
-            <Link href="/login" className="pt-2 flex justify-center">Already have an account? Sign In</Link>
-
-            <div className="flex items-center justify-center space-x-4">
+            {/* Divider */}
+            <div className="flex items-center justify-center space-x-4 mb-8 sm:mb-10">
               <div className="flex-grow border-t border-gray-300"></div>
               <span className="text-gray-500 text-sm">or</span>
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className="py-3 rounded-xl border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center space-x-2"
-                onClick={() => handleOAuthLogin("google")}
+            {/* Registration Form */}
+            <form onSubmit={(e: FormEvent) => {
+              e.preventDefault();
+              handleSubmit();
+            }}>
+              <div className="space-y-4 sm:space-y-5">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 sm:py-3 border-b border-gray-300 focus:border-orange-400 focus:outline-none bg-transparent text-sm sm:text-base"
+                    required
+                  />
+                  {errors.fullName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+                  )}
+                </div>
+
+                {/* Username */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Username</label>
+                  <input
+                    type="text"
+                    id="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 sm:py-3 border-b border-gray-300 focus:border-orange-400 focus:outline-none bg-transparent text-sm sm:text-base"
+                    required
+                  />
+                  {errors.username && (
+                    <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 sm:py-3 border-b border-gray-300 focus:border-orange-400 focus:outline-none bg-transparent text-sm sm:text-base"
+                    required
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password_hash"
+                      value={formData.password_hash}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 sm:py-3 border-b border-gray-300 focus:border-orange-400 focus:outline-none bg-transparent pr-10 text-sm sm:text-base"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-2 sm:top-3 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {errors.password_hash && (
+                    <p className="text-red-500 text-sm mt-1">{errors.password_hash}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Terms and Conditions Checkbox with Orange Styling */}
+              <div className="flex items-start space-x-3 mt-6">
+                <div className="flex items-center h-5 mt-0.5">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    className="w-4 h-4 rounded border-2 border-gray-300 text-orange-500 focus:ring-orange-600 focus:ring-2 focus:ring-offset-0 checked:bg-orange-600 checked:border-orange-500 hover:border-orange-400 transition-colors duration-200"
+                    style={{
+                      accentColor: '#fb923c' // This ensures the checkmark is orange in browsers that support it
+                    }}
+                  />
+                </div>
+                <label htmlFor="terms" className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  I accept the terms & Conditions
+                </label>
+              </div>
+
+              {/* Sign Up Button - Always enabled */}
+              <button 
+                type="submit"
+                disabled={isPending}
+                className="w-full bg-orange-400 hover:bg-orange-500 disabled:bg-orange-300 text-white font-semibold py-3 px-4 rounded-lg mt-6 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
               >
-                Google
-              </Button>
-              <Button
-                variant="outline"
-                className="py-3 rounded-xl border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center justify-center space-x-2"
-                onClick={() => handleOAuthLogin("github")}
-              >
-                Github
-              </Button>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  'SIGN UP'
+                )}
+              </button>
+            </form>
+
+            {/* Sign In Link */}
+            <div className="text-center mt-6">
+              <span className="text-sm text-gray-500">Own an Account? </span>
+              <Link href="/login" className="text-sm text-gray-700 font-medium hover:underline">
+                SIGN IN
+              </Link>
             </div>
-          </CardContent>
+          </div>
         </div>
-      </Card>
-    </div>
+      </div>
+      <VerificationPopup 
+        isOpen={showVerificationPopup}
+        onClose={handleClosePopup}
+        userEmail={formData.email}
+      />
+    </>
   );
 }
+
+export default RegisterForm;

@@ -5,17 +5,13 @@ import { ChallengeElements } from "@/server/db/schema";
 import db from "@/server/db";
 import { eq } from "drizzle-orm";
 
-export const GET = async (
+export async function GET (
   req: NextRequest,
-  segmentedData: {
-    params: {
-      ids: string;
-    };
-  }
-) => {
+  { params }: { params: Promise<{ id: string }> }
+){
   try {
-    const params = await segmentedData.params;
-    const challengeId = params.ids;
+    const { id } = await params;
+    const challengeId = id;
 
     const elements = await db
       .select()
@@ -35,17 +31,13 @@ export const GET = async (
   }
 };
 
-export const POST = async (
+export async function POST (
   req: NextRequest,
-  segmentedData: {
-    params: {
-      ids: string;
-    };
-  }
-) => {
+  { params }: { params: Promise<{ id: string }> }
+){
   try {
-    const params = segmentedData.params;
-    const challengeId = params.ids;
+    const { id } = await params;
+    const challengeId = id;
     const { questions, day_number } = await req.json();
 
     if (!Array.isArray(questions)) {

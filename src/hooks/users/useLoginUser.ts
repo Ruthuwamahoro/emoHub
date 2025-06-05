@@ -2,14 +2,16 @@
 
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useMutation, useQueryClient} from "@tanstack/react-query";
 import { z } from "zod";
 
 import { loginSchema } from "@/utils/validation/loginSchema";
 import showToast from "@/utils/showToast";
+import { userVerify } from "@/services/user/userVerify";
 
 const initialData = {
   email: "",
@@ -48,13 +50,16 @@ export const useLogin = () => {
       });
 
       setIsLoading(false);
-
       if (result?.error) {
-          setErrors({ general: 'Invalid Credentials. Please check your credentials and try again .'  });
-          showToast("Invalid Credentials. Please check your credentials and try again.", "error")
+        setErrors({ general: result.error });
+        if(result?.error === "AccessDenied"){
+          showToast("Unauthorized", "error");
+        } else {
+          showToast("Invalid credentials", "error")
+        }
       } else {
         showToast("Successfully logged in", "success")
-        router.push("/");
+        router.push("/onboarding");
       }
     } catch (error) {
       setIsLoading(false);
@@ -83,5 +88,68 @@ export const useLogin = () => {
     handleLoginInputField,
     errors,
     isLoading,
+  };
+};
+
+
+
+export const useVerifyEmail = ({ token }: { token: string }) => {
+  const queryClient = useQueryClient();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const hasTriedVerification = useRef(false);
+
+  const verifyMutation = useMutation({
+    mutationFn: userVerify,
+    onSuccess: (response) => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        setErrors({});
+      }
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Invalid or expired token";
+      setErrors({ general: errorMessage });
+      showToast(errorMessage, "error");
+    }
+  });
+
+  const handleVerifyEmailSubmission = useCallback(async (tokenToVerify?: string, forceRetry = false) => {
+    if (hasTriedVerification.current && !forceRetry) {
+      return;
+    }
+
+    const verificationToken = tokenToVerify || token;
+    
+    if (!verificationToken?.trim()) {
+      setErrors({ token: "Token is required" });
+      return;
+    }
+
+    hasTriedVerification.current = true;
+
+    try {
+      await verifyMutation.mutateAsync(verificationToken);
+    } catch (error) {
+      console.error("Verification error:", error);
+    }
+  }, [token, verifyMutation]);
+
+  const clearErrors = () => {
+    setErrors({});
+  };
+
+  const resetVerificationState = () => {
+    hasTriedVerification.current = false;
+    setErrors({});
+  };
+
+  return {
+    handleVerifyEmailSubmission,
+    errors,
+    clearErrors,
+    resetVerificationState,
+    isLoading: verifyMutation.isPending,
+    isSuccess: verifyMutation.isSuccess,
+    isError: verifyMutation.isError
   };
 };

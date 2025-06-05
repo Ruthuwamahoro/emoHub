@@ -87,6 +87,8 @@ interface Group {
 function ChallengeView({ challenge, groupId }: { challenge: Challenge; groupId: string }) {
   const { data: elementsData, isPending: isLoadingElements } = useGetAllChallengesElements(groupId, challenge.id);
   const elements = elementsData?.data || [];
+
+  console.log("challenges elemeents", elements);
   
   // Get start and end dates
   const startDate = new Date(challenge.start_date);
@@ -170,6 +172,7 @@ export function GroupDetailPage() {
   const [activeTab, setActiveTab] = useState<'challenges' | 'discussions' | 'members'>('challenges');
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  console.log("group data=========================", data?.data?.group.name);
   
   // State to track element completion
   const [challengeProgress, setChallengeProgress] = useState<Record<string, Record<string, boolean>>>({});
@@ -345,18 +348,18 @@ export function GroupDetailPage() {
       <div className="relative mb-8">
         <div className="h-64 overflow-hidden rounded-xl relative">
           <Image 
-            src="/api/placeholder/1200/300" 
-            alt={data?.data?.group?.name || "Group Cover"} 
+            src={data?.group?.image || data?.data?.group.image} 
+            alt={data?.group?.name || data?.data?.group.name} 
             width={1200}
             height={300}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-6">
             <h1 className="text-3xl font-bold text-white">
-              {data?.data?.group?.name || "Loading group..."}
+              {data?.group?.name || "Loading group..."}
             </h1>
             <p className="text-gray-200 mt-2">
-              {data?.data?.group?.description || ""}
+              {data?.group?.description || ""}
             </p>
           </div>
         </div>

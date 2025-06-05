@@ -2,13 +2,13 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
+  json,
   jsonb,
   pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
-  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -20,19 +20,42 @@ const Role = pgTable("roles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+
+const purposeEnum = pgEnum("user_purpose",[
+  "emotional_support",
+  "professional guidance",
+  "self_improvement",
+  "crisis_support",
+  "educational_resources"
+])
+
+const userOnBoardingProfile = pgTable("user_onboarding_profile", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id).notNull(),
+  primaryPurpose: purposeEnum("primary_purpose"),
+  goals: text('goals').notNull(),
+  experienceLevel: varchar("experience_level", { length: 500}),
+  preferences: json('preferences').$type<Record<string, any>>(),
+  completedAt: timestamp('completed_at'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 const User = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
-  passwordHash: text("password_hash"),
+  password: text("password_hash"),
   fullName: varchar("full_name", { length: 100 }).notNull(),
   username: varchar("username").notNull(),
-  role: uuid("role").references(() => Role.id, { onDelete: "cascade" }), // 'peer', 'specialist', 'caregiver', 'patient'
+  role: uuid("role").references(() => Role.id, { onDelete: "cascade" }),
   profilePicUrl: text("profile_pic_url"),
   bio: text("bio"),
   expertise: text("expertise"),
-  anonymityPreference: varchar("anonymity_preference", { length: 50 }), // e.g., 'Anonymous', 'Public'
+  anonymityPreference: varchar("anonymity_preference", { length: 50 }),
   badges: text("badges"),
   location: text("location"),
+  isVerified: boolean("is_Verified").default(false),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   isActive: boolean("is_active").default(true),
@@ -47,6 +70,9 @@ const UserProfile = pgTable("user_profiles", {
   badges: text("badges"),
   location: text("location"),
 });
+
+
+
 
 export const postContentTypeEnum = pgEnum("post_content_type", [
   "text",
@@ -134,8 +160,9 @@ const Event = pgTable("events", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
   date: timestamp("date").notNull(),
-  time: varchar("time", { length: 50 }), // Time of the event
-  location: text("location"), // In-person or online
+  time: varchar("time", { length: 50 }), 
+  location: text("location"), 
+  link: text("link"), 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -365,6 +392,7 @@ const Challenges = pgTable("Challenges", {
   total_points: integer("total_points").default(0),
   start_date: timestamp("start_date").notNull(),
   end_date: timestamp("end_date").notNull(),
+  isActive: boolean('is_active').default(true),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -399,27 +427,124 @@ const ChallengeFeedback = pgTable("challenge_feedback", {
   submitted_at: timestamp("submitted_at").defaultNow(),
 });
 
-const ResourceCategory = pgTable("resource_categories", {
+export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "text", "image"]);
+
+
+export const emotionCategoryEnum = pgEnum("emotionCategory", [
+  "self-regulation",
+  "self-awareness",
+  "motivation",
+  "empathy",
+  "social-skills",
+  "relationship-management",
+  "stress-management"
+]);
+
+
+
+const learningResources = pgTable('learning_resources', {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", { length: 255 }).unique().notNull(),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  coverImage: text('cover_image'),
+  userId: uuid('user_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
+  resourceType: resourceTypeEnum('resource_type').notNull(),
+  content: text('content').notNull(),
+  url: text('url'),
+  thumbnailUrl: text('thumbnail_url'),
+  duration: integer('duration'),
+  category: emotionCategoryEnum('category').notNull(),
+  tags: text('tags').array(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  isSaved: boolean('is_saved').default(false),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-const Resource = pgTable("resources", {
+
+export const userSavedResources = pgTable('user_saved_resources', {
   id: uuid("id").defaultRandom().primaryKey(),
-  categoryId: uuid("category_id").references(() => ResourceCategory.id, {
-    onDelete: "cascade",
-  }),
-  title: varchar("title", { length: 255 }).notNull(),
-  coverImage: text("cover_image"),
-  shortDescription: text("description").notNull(),
-  content: text("content").notNull(),
-  timeToRead: varchar("timeToRead"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  userId: uuid('user_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
+  resourceId: uuid('resource_id').notNull().references(() => learningResources.id, { onDelete: 'cascade' }),
+  savedAt: timestamp('saved_at').defaultNow().notNull(),
+  notes: text('notes'),
 });
+
+
+const ResourceAssessmentQuestions = pgTable('resource_assessment_questions', {
+  id: uuid("id").defaultRandom().primaryKey(),
+  question: text('question').notNull(),
+  resourceId: uuid('resource_id').notNull().references(() => learningResources.id, { onDelete: 'cascade' }),
+  score: integer('score').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+const ResourceAssessmentOptions = pgTable('resource_assessment_options', {
+  id: uuid("id").defaultRandom().primaryKey(),
+  questionId: uuid('question_id').notNull().references(() => ResourceAssessmentQuestions.id, { onDelete: 'cascade' }),
+  option: text('option').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  isCorrect: boolean("is_correct").default(false).notNull()
+});
+
+
+const ResourceAssessmentResults = pgTable('resource_assessment_results', {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() =>   User.id, { onDelete: 'cascade' }),
+  questionId: uuid('question_id')
+    .notNull()
+    .references(() => ResourceAssessmentQuestions.id, { onDelete: 'cascade' }),
+  choiceId: uuid('choice_id').notNull().references(() => ResourceAssessmentOptions.id, { onDelete: 'cascade' }),
+  answeredAt: timestamp('answered_at').defaultNow().notNull(),
+});
+
+const ResourceAssessmentScore = pgTable('resource_assessment_score', {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() =>   User.id, { onDelete: 'cascade' }),
+  questionId: uuid("question_id").notNull(),
+  score: integer("score").notNull(),
+  totalQuestions: integer("total_questions").notNull(),
+});
+
+
+
+// // Personalized exercises based on assessment
+// export const personalizedExercises = pgTable('personalized_exercises', {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+//   title: text('title').notNull(),
+//   description: text('description').notNull(),
+//   category: emotionCategoryEnum('category').notNull(),
+//   content: text('content').notNull(),
+//   isCompleted: boolean('is_completed').default(false),
+//   completedAt: timestamp('completed_at'),
+//   createdAt: timestamp('created_at').defaultNow().notNull(),
+//   dueDate: timestamp('due_date'),
+// });
+
+// // Growth tracking entries
+// export const emotionalGrowthEntries = pgTable('emotional_growth_entries', {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+//   entryDate: timestamp('entry_date').defaultNow().notNull(),
+//   moodRating: integer('mood_rating').notNull(), // Scale 1-10
+//   notes: text('notes'),
+//   challenges: text('challenges'),
+//   victories: text('victories'),
+//   goals: text('goals'),
+// });
+
+
+
+
+
+
+
+
+
 
 // const ChallengeElementProgress = pgTable("challenge_element_progress", {
 //   id: uuid("id").defaultRandom().primaryKey(),
@@ -581,14 +706,19 @@ export {
   sessions,
   verificationTokens,
   Role,
+  ResourceAssessmentQuestions,
+  ResourceAssessmentOptions,
+  ResourceAssessmentResults,
+  ResourceAssessmentScore,
   ChallengeFeedback,
   Challenges,
   ChallengeElements,
-  Resource,
-  ResourceCategory,
+  learningResources,
   Todo,
   TodoPriorityEnum,
   TodoStatusEnum,
   ActivityHistory,
   ActivityTypeEnum,
+  userOnBoardingProfile,
+  purposeEnum
 };

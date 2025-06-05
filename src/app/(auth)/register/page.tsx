@@ -7,7 +7,3 @@ export default function Home() {
     </div>
   );
 }
-
-function handleRegister() {
-    // Implement the registration logic here
-  }

@@ -15,18 +15,18 @@ import { userIsGroupMember } from "@/utils/userIsGroupMember";
 
 const validContentTypes = ["text", "image", "video", "audio", "link"];
 
-export const POST = async (
+export async function POST  (
   req: NextRequest,
-  context: { params: { id: string } }
-) => {
+  { params }: { params: Promise<{ id: string , ids: string}> }
+){
 
   try {
     const userId = await getUserIdFromSession();
     if (!userId) {
       return sendResponse(401, null, "Unauthorized");
     }
-
-    const groupId = context.params.id;
+    const {id} = await params
+    const groupId = id
     if (!groupId) {
       return sendResponse(400, null, "Group ID is required");
     }
@@ -150,15 +150,15 @@ export const POST = async (
 
 export const GET = async (
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string , ids: string}> }
 ) => {
   try {
     const userId = await getUserIdFromSession();
     if (!userId) {
       return sendResponse(401, null, "Unauthorized");
     }
-
-    const isGroupMember = await userIsGroupMember(context.params.id as string);
+    const contextId = (await params).id;
+    const isGroupMember = await userIsGroupMember(contextId as string);
     if (!isGroupMember) {
         return sendResponse(401, null, "Unauthorized");
     }
@@ -175,7 +175,7 @@ export const GET = async (
       })
       .from(Post)
       .leftJoin(User, eq(Post.userId, User.id))
-      .where(eq(Post.groupId, context.params.id))
+      .where(eq(Post.groupId, contextId))
       .orderBy(desc(Post.createdAt));
 
 
