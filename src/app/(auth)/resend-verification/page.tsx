@@ -1,4 +1,3 @@
-// app/resend-verification/page.tsx
 
 import { ResendVerificationPage } from "@/components/auth/resendVerification";
 

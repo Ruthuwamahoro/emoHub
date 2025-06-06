@@ -64,7 +64,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
       timestamp: new Date()
     };
 
-    // Add to recent queries
     setRecentQueries(prev => [
       { id: recentQueries.length, query: input, timestamp: new Date() },
       ...prev.slice(0, 4)
@@ -73,7 +72,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
     setMessages(prev => [...prev, newUserMessage]);
     setIsProcessing(true);
 
-    // Simulate AI processing (replace with actual API call)
     setTimeout(() => {
       const aiResponse: Message = {
         id: messages.length + 1,
@@ -119,7 +117,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[700px]  mx-auto bg-gray-950 text-white rounded-xl shadow-2xl overflow-hidden">
-      {/* Header */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-4 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <Zap className="text-yellow-400" />
@@ -131,9 +128,7 @@ export const AdvancedAskAIComponent: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Messages Container */}
         <div className="flex-[3] overflow-y-auto p-4 space-y-2 border-r border-gray-800">
           {messages.map(renderMessage)}
           <div ref={messagesEndRef} />
@@ -142,7 +137,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
           )}
         </div>
 
-        {/* Recent Queries Sidebar */}
         <div className="flex-1 bg-gray-900 p-3 overflow-y-auto">
           <h3 className="text-sm font-semibold mb-3 flex items-center">
             <Clock size={16} className="mr-2 text-blue-400" />
@@ -163,7 +157,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
         </div>
       </div>
 
-      {/* Suggested Prompts */}
       <div className="p-2 bg-gray-900 flex space-x-2 overflow-x-auto border-t border-gray-800">
         {suggestedPrompts.map((prompt, index) => (
           <button 
@@ -176,7 +169,6 @@ export const AdvancedAskAIComponent: React.FC = () => {
         ))}
       </div>
 
-      {/* Input Area */}
       <div className="p-4 bg-gray-900 border-t border-gray-800 flex items-center space-x-2">
         <button className="p-2 bg-blue-900 rounded-full text-white">
           <Mic />

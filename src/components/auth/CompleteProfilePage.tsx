@@ -28,7 +28,6 @@ export default function CompleteProfilePage() {
     isPending,
   } = useUpdateProfile();
 
-  // Handle image upload
   const handleImageUpload = (imageUrl: string) => {
     setData((prev) => ({ 
       ...prev, 
@@ -36,7 +35,6 @@ export default function CompleteProfilePage() {
     }));
   };
 
-  // Skip profile completion
   const handleSkip = () => {
     router.push('/');
     toast('Profile completion skipped', { 
@@ -45,12 +43,10 @@ export default function CompleteProfilePage() {
     });
   };
 
-  // Form submission handler
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsFormSubmitted(true);
     
-    // Basic validation
     const validationErrors: string[] = [];
 
     if (!Data.expertise) {
@@ -72,7 +68,6 @@ export default function CompleteProfilePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-200 p-4">
       <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden flex">
-        {/* Sidebar */}
         <div className="w-1/3 bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex flex-col justify-center p-8">
           <h2 className="text-3xl font-bold mb-4 tracking-tight">Complete Profile</h2>
           <p className="text-purple-100 mb-6">
@@ -85,12 +80,10 @@ export default function CompleteProfilePage() {
           </div>
         </div>
 
-        {/* Main Form */}
         <form 
           onSubmit={onSubmit}
           className="w-2/3 p-8 space-y-6"
         >
-          {/* Image Uploader */}
           <div className="flex flex-col items-center space-y-4">
             <ImageUploader 
               onImageUpload={handleImageUpload}
@@ -98,9 +91,7 @@ export default function CompleteProfilePage() {
             />
           </div>
 
-          {/* Profile Details */}
           <div className="space-y-4">
-            {/* Professional Bio */}
             <div>
               <label 
                 htmlFor="bio" 
@@ -128,7 +119,6 @@ export default function CompleteProfilePage() {
               </div>
             </div>
 
-            {/* Expertise Selection */}
             <div>
               <label 
                 htmlFor="expertise" 
@@ -167,7 +157,6 @@ export default function CompleteProfilePage() {
               </div>
             </div>
 
-            {/* Location Input */}
             <div>
               <label 
                 htmlFor="location" 
@@ -188,7 +177,6 @@ export default function CompleteProfilePage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex space-x-4 mt-6">
             <button
               type="button"

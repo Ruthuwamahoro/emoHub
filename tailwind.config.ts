@@ -57,6 +57,13 @@ export default {
         josefin: ['Josefin Sans', 'sans-serif'],
         noto: ['Noto Serif', 'serif'],
       },
+      fontSize: {
+        'title-large': 'var(--font-size-title-large)',
+        'title-small': 'var(--font-size-title-small)',
+        'body-large': 'var(--font-size-body-large)',
+        'body-small': 'var(--font-size-body-small)',
+        'body-medium': 'var(--font-size-body-medium)'
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

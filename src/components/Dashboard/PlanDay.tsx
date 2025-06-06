@@ -22,7 +22,6 @@ const DailyMoodPlanner = () => {
   const [notes, setNotes] = useState('');
   const [activeTab, setActiveTab] = useState('plan');
 
-  // Format date for display
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -32,7 +31,6 @@ const DailyMoodPlanner = () => {
     });
   };
 
-  // Add new task
   const addTask = () => {
     if (newTask.trim() !== '') {
       setTasks([...tasks, { id: Date.now(), title: newTask, completed: false }]);
@@ -40,33 +38,28 @@ const DailyMoodPlanner = () => {
     }
   };
 
-  // Toggle task completion
   const toggleTask = (id) => {
     setTasks(tasks.map(task => 
       task.id === id ? { ...task, completed: !task.completed } : task
     ));
   };
 
-  // Delete task
   const deleteTask = (id) => {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
-  // Get mood color
   const getMoodColor = (value) => {
     if (value <= 3) return 'text-red-500';
     if (value <= 6) return 'text-yellow-500';
     return 'text-green-500';
   };
 
-  // Get mood text
   const getMoodText = (value) => {
     if (value <= 3) return 'Low';
     if (value <= 6) return 'Neutral';
     return 'High';
   };
 
-  // Calculate completion percentage
   const getCompletionPercentage = () => {
     if (tasks.length === 0) return 0;
     const completed = tasks.filter(task => task.completed).length;

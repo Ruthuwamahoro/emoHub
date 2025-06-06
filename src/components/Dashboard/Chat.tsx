@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EnhancedChat } from './Chat2';
 
-// TypeScript interfaces
 interface Message {
   id: string;
   senderId: string;
@@ -39,7 +38,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
   const [newMessage, setNewMessage] = useState('');
   const [showEmergencyAlert, setShowEmergencyAlert] = useState(false);
 
-  // Simulate message history
   const sampleMessages: Message[] = [
     {
       id: '1',
@@ -65,7 +63,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
     setMessages(sampleMessages);
   }, []);
 
-  // Sentiment analysis simulation
   const analyzeSentiment = (content: string): 'neutral' | 'distressed' | 'positive' => {
     const distressWords = ['anxiety', 'anxious', 'depressed', 'sad', 'suicidal', 'hopeless'];
     const positiveWords = ['happy', 'better', 'grateful', 'thankful', 'hopeful'];
@@ -86,7 +83,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
 
     const sentiment = analyzeSentiment(newMessage);
     
-    // Check for emergency triggers
     if (sentiment === 'distressed') {
       setShowEmergencyAlert(true);
     }
@@ -107,7 +103,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
-      {/* Header */}
       <Card className="mb-4">
         <CardContent className="flex items-center p-4">
           <User className="w-8 h-8 mr-2" />
@@ -121,7 +116,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
         </CardContent>
       </Card>
 
-      {/* Emergency Alert */}
       {showEmergencyAlert && (
         <Alert className="mb-4 bg-red-50">
           <AlertCircle className="w-4 h-4" />
@@ -139,7 +133,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
         </Alert>
       )}
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto mb-4 space-y-4">
         {messages.map((message) => (
           <div
@@ -194,7 +187,6 @@ export const MentalHealthChat: React.FC<Props> = ({ currentUser, recipient }) =>
   );
 };
 
-// Enhanced TypeScript interfaces
 interface Message {
   id: string;
   senderId: string;
@@ -242,7 +234,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <div className="w-80 border-r h-screen flex flex-col">
-      {/* Header */}
       <div className="p-4 border-b">
         <h2 className="text-xl font-semibold mb-4">Messages</h2>
         <div className="relative">
@@ -256,7 +247,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
         </div>
       </div>
 
-      {/* Conversation List */}
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.map((user) => (
           <div
@@ -304,7 +294,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div className="p-4 border-t">
         <Button variant="outline" className="w-full">
           <Bell className="w-4 h-4 mr-2" />
@@ -315,11 +304,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
   );
 };
 
-// Updated Chat Layout Component
 export const MentalHealthChatLayout: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   
-  // Sample data
   const currentUser: ChatUser = {
     id: '1',
     name: 'John Doe',
@@ -376,7 +363,6 @@ export const MentalHealthChatLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen">
-      {/* Conversation List */}
       <ConversationList
         conversations={sampleConversations}
         currentUser={currentUser}
@@ -384,7 +370,6 @@ export const MentalHealthChatLayout: React.FC = () => {
         selectedUserId={selectedUser?.id}
       />
 
-      {/* Chat Area */}
       {selectedUser ? (
         <div className="flex-1">
           <MentalHealthChat currentUser={currentUser} recipient={selectedUser} />
@@ -406,6 +391,5 @@ export const MentalHealthChatLayout: React.FC = () => {
   );
 };
 
-// Keep the existing MentalHealthChat component from the previous artifact
-// but export both components
+
 

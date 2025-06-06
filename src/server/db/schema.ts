@@ -66,7 +66,7 @@ const UserProfile = pgTable("user_profiles", {
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
   bio: text("bio"),
   expertise: text("expertise"),
-  anonymityPreference: varchar("anonymity_preference", { length: 50 }), // e.g., 'Anonymous', 'Public'
+  anonymityPreference: varchar("anonymity_preference", { length: 50 }), 
   badges: text("badges"),
   location: text("location"),
 });
@@ -167,16 +167,7 @@ const Event = pgTable("events", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// export const Appointment = pgTable('appointments', {
-//   id: uuid('id').primaryKey(),
-//   userId: uuid('user_id').references(() => User.id, { onDelete: 'CASCADE' }),
-//   specialistId: uuid('specialist_id').references(() => User.id, { onDelete: 'CASCADE' }), // Specialist
-//   appointmentTime: timestamp('appointment_time').notNull(),
-//   appointmentType: pgEnum('appointment_type', ['Online', 'In-person']),
-//   status: pgEnum('status', ['Scheduled', 'Completed', 'Cancelled']),
-//   createdAt: timestamp('created_at').defaultNow(),
-//   updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
-// });
+
 
 const VideoCallStatus = pgEnum("video_call_status", [
   "SCHEDULED",
@@ -185,19 +176,7 @@ const VideoCallStatus = pgEnum("video_call_status", [
   "CANCELLED",
 ]);
 
-// export const VideoCall = pgTable('video_calls', {
-//   id: uuid('id').primaryKey(),
-//   userId: uuid('user_id').references(() => User.id, { onDelete: 'cascade' }), // The user who booked the call
-//   specialistId: uuid('specialist_id').references(() => Specialist.id, { onDelete: 'cascade' }), // The specialist conducting the call
-//   startTime: timestamp('start_time').notNull(), // The scheduled start time
-//   endTime: timestamp('end_time').notNull(), // The end time, if the meeting has ended
-//   status: VideoCallStatus('status').default('SCHEDULED'), // Status of the video call
-//   roomId: varchar('room_id').notNull(), // The unique ID for the video call room
-//   meetingLink: varchar('meeting_link').notNull(), // The link to join the video call (optional, if using external service)
-//   notes: varchar('notes', { length: 500 }).notNull(), // Optional notes for the session
-//   createdAt: timestamp('created_at').defaultNow(),
-//   updatedAt: timestamp('updated_at').defaultNow(),
-// });
+
 
 const AIConversation = pgTable("ai_conversations", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -210,8 +189,8 @@ const AIConversation = pgTable("ai_conversations", {
 const Analytics = pgTable("analytics", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  action: varchar("action", { length: 100 }).notNull(), // Action taken (e.g., 'post_created', 'mood_logged')
-  data: text("data"), // Any additional data associated with the action
+  action: varchar("action", { length: 100 }).notNull(), 
+  data: text("data"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -234,14 +213,7 @@ const HealthTest = pgTable("health_tests", {
   question1: integer("question_1").notNull(),
   question2: integer("question_2").notNull(),
   testDate: timestamp("test_date").defaultNow(),
-  // } {
-  //   constraints: {
-  //       check: [
-  //           'mood_rating BETWEEN 1 AND 10',
-  //           'stress_level BETWEEN 1 AND 10',
-  //           'sleep_quality BETWEEN 1 AND 10'
-  //       ]
-  //   }
+
 });
 
 const GroupCategories = pgTable("GroupCategories", {
@@ -347,16 +319,6 @@ const AppointmentStatus = pgEnum("appointment_status", [
   "CANCELED",
 ]);
 
-// export const Appointment = pgTable('appointments', {
-// id: uuid('id').primaryKey(),
-// userId: uuid('user_id').references(() => User.id, { onDelete: 'cascade' }),
-// specialistId: uuid('specialist_id').references(() => Specialist.id, { onDelete: 'cascade' }),
-// dateTime: timestamp('date_time').notNull(),
-// status: AppointmentStatus('status').default('PENDING'),
-// notes: varchar('notes', { length: 500 }).notNull(),
-// createdAt: timestamp('created_at').defaultNow(),
-// updatedAt: timestamp('updated_at').defaultNow(),
-// });
 
 const sessions = pgTable("sessions", {
   sessionToken: varchar("session_token").primaryKey(),
@@ -509,108 +471,6 @@ const ResourceAssessmentScore = pgTable('resource_assessment_score', {
   totalQuestions: integer("total_questions").notNull(),
 });
 
-
-
-// // Personalized exercises based on assessment
-// export const personalizedExercises = pgTable('personalized_exercises', {
-//   id: uuid("id").defaultRandom().primaryKey(),
-//   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-//   title: text('title').notNull(),
-//   description: text('description').notNull(),
-//   category: emotionCategoryEnum('category').notNull(),
-//   content: text('content').notNull(),
-//   isCompleted: boolean('is_completed').default(false),
-//   completedAt: timestamp('completed_at'),
-//   createdAt: timestamp('created_at').defaultNow().notNull(),
-//   dueDate: timestamp('due_date'),
-// });
-
-// // Growth tracking entries
-// export const emotionalGrowthEntries = pgTable('emotional_growth_entries', {
-//   id: uuid("id").defaultRandom().primaryKey(),
-//   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-//   entryDate: timestamp('entry_date').defaultNow().notNull(),
-//   moodRating: integer('mood_rating').notNull(), // Scale 1-10
-//   notes: text('notes'),
-//   challenges: text('challenges'),
-//   victories: text('victories'),
-//   goals: text('goals'),
-// });
-
-
-
-
-
-
-
-
-
-
-// const ChallengeElementProgress = pgTable("challenge_element_progress", {
-//   id: uuid("id").defaultRandom().primaryKey(),
-//   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-//   element_id: uuid("element_id").references(() => ChallengeElements.id, { onDelete: "cascade" }),
-//   is_completed: boolean("is_completed").default(false),
-//   completion_date: timestamp("completion_date"),
-//   notes: text("notes"),
-//   created_at: timestamp("created_at").defaultNow(),
-//   updated_at: timestamp("updated_at").defaultNow()
-// });
-
-// const UserChallengeParticipation = pgTable("user_challenge_participation", {
-//   id: uuid("id").defaultRandom().primaryKey(),
-//   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-//   challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }),
-//   join_date: timestamp("join_date").defaultNow(),
-//   total_points_earned: integer("total_points_earned").default(0),
-//   streak_days: integer("streak_days").default(0),
-//   is_active: boolean("is_active").default(true),
-//   created_at: timestamp("created_at").defaultNow(),
-//   updated_at: timestamp("updated_at").defaultNow(),
-// });
-
-// export const challengesRelations = relations(Challenges, ({ many, one }) => ({
-//   group: one(Group, {
-//     fields: [Challenges.group_id],
-//     references: [Group.id]
-//   }),
-//   creator: one(User, {
-//     fields: [Challenges.user_id],
-//     references: [User.id]
-//   }),
-//   elements: many(ChallengeElements),
-//   participants: many(UserChallengeParticipation)
-// }));
-
-// export const challengeElementsRelations = relations(ChallengeElements, ({ many, one }) => ({
-//   challenge: one(Challenges, {
-//     fields: [ChallengeElements.challenge_id],
-//     references: [Challenges.id]
-//   }),
-//   progress: many(ChallengeElementProgress)
-// }));
-
-// export const challengeElementProgressRelations = relations(ChallengeElementProgress, ({ one }) => ({
-//   element: one(ChallengeElements, {
-//     fields: [ChallengeElementProgress.element_id],
-//     references: [ChallengeElements.id]
-//   }),
-//   user: one(User, {
-//     fields: [ChallengeElementProgress.user_id],
-//     references: [User.id]
-//   })
-// }));
-
-// export const userChallengeParticipationRelations = relations(UserChallengeParticipation, ({ one }) => ({
-//   challenge: one(Challenges, {
-//     fields: [UserChallengeParticipation.challenge_id],
-//     references: [Challenges.id]
-//   }),
-//   user: one(User, {
-//     fields: [UserChallengeParticipation.user_id],
-//     references: [User.id]
-//   })
-// }));
 
 const TodoPriorityEnum = pgEnum("todo_priority", ["LOW", "MEDIUM", "HIGH"]);
 const TodoStatusEnum = pgEnum("todo_status", [

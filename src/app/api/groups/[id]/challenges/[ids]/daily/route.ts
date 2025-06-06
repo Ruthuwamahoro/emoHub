@@ -18,7 +18,6 @@ export const GET = async(
     const params = await segmentedData.params;
     const { groupId, challengeId } = params;
     
-    // Get challenge details
     const challenge = await db.query.Challenges.findFirst({
       where: eq(Challenges.id, challengeId),
     });
@@ -27,12 +26,10 @@ export const GET = async(
       return sendResponse(404, null, "Challenge not found");
     }
     
-    // Calculate which day of the challenge is today
     const today = new Date();
     const startDate = new Date(challenge.start_date);
     const endDate = new Date(challenge.end_date);
     
-    // Check if challenge is active
     if (today < startDate) {
       return sendResponse(200, { 
         status: "pending",
@@ -49,10 +46,8 @@ export const GET = async(
       }, "Challenge completed");
     }
     
-    // Calculate current day number (1-indexed)
     const dayDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     
-    // Get questions for today
     const todayQuestions = await db.select()
       .from(ChallengeElements)
       .where(
@@ -63,7 +58,6 @@ export const GET = async(
       )
       .orderBy(ChallengeElements.order);
     
-    // Check if user has already submitted feedback for today
     const existingFeedback = await db.select()
       .from(ChallengeFeedback)
       .where(
@@ -76,7 +70,6 @@ export const GET = async(
     
     const hasSubmitted = existingFeedback.length > 0;
     
-    // Calculate total points earned so far
     const earnedPoints = await db.select({
       total: sql`SUM(points)`
     })

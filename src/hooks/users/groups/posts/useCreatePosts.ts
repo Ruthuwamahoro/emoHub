@@ -5,10 +5,9 @@ import showToast from "@/utils/showToast";
 import { createPostsService } from "@/services/user/groups/posts/createPosts";
 import { createPostsInterface } from "@/types/posts";
 
-// Make the initial form data match the createPostsInterface
 const initialData: createPostsInterface = {
   title: "",
-  contentType: "text", // default content type
+  contentType: "text", 
   textContent: "",
   mediaAlt: "",
   linkUrl: "",
@@ -54,7 +53,6 @@ export const useCreatePosts = (groupId: string) => {
     }
   };
 
-  // Function to update specific field
   const updateField = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     
@@ -70,7 +68,6 @@ export const useCreatePosts = (groupId: string) => {
   const validateForm = () => {
     const newErrors: FormErrors = {};
     
-    // Required fields validation
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
     }
@@ -96,7 +93,6 @@ export const useCreatePosts = (groupId: string) => {
       return mutation.mutateAsync(formDataObj);
     }
     
-    // This case would be for non-file submissions, but our implementation uses FormData for all cases
     const formDataObj2 = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {

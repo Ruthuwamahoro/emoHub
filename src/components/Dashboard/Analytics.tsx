@@ -8,7 +8,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ResponsiveContainer } from 'recharts';
 import { Trophy, Moon, Battery, Activity, Brain, Calendar, Sun, Cloud, CloudRain, Settings, Download, Share2, Filter } from 'lucide-react';
 
-// Extended sample data
 const moodData = [
   { date: 'Mon', mood: 8, sleep: 7, energy: 6, anxiety: 3, focus: 7, socialInteraction: 6 },
   { date: 'Tue', mood: 6, sleep: 6, energy: 5, anxiety: 5, focus: 5, socialInteraction: 4 },

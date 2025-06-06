@@ -22,9 +22,7 @@ export const EmoHubHero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40 flex items-center justify-center overflow-hidden">
-      {/* Enhanced Background Elements */}
       <div className="absolute inset-0">
-        {/* Interactive floating orbs that follow mouse */}
         <div 
           className="absolute top-20 left-1/4 w-64 h-64 bg-gradient-to-br from-rose-300/30 to-pink-400/30 rounded-full blur-3xl animate-pulse transition-transform duration-1000 ease-out"
           style={{
@@ -44,26 +42,21 @@ export const EmoHubHero: React.FC = () => {
           }}
         ></div>
         
-        {/* Enhanced geometric patterns */}
         <div className="absolute top-1/4 right-1/4 w-32 h-32 border border-rose-200/30 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
         <div className="absolute bottom-1/4 left-1/5 w-24 h-24 border border-amber-200/40 rounded-lg rotate-45 animate-pulse delay-500"></div>
         
-        {/* New decorative elements */}
         <div className="absolute top-1/3 left-1/6 w-16 h-16 border-2 border-emerald-200/40 rounded-full animate-ping delay-300"></div>
         <div className="absolute bottom-1/3 right-1/5 w-20 h-20 border border-rose-200/30 rotate-12 animate-bounce" style={{ animationDuration: '3s' }}></div>
       </div>
 
-      {/* Floating Illustration Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Floating Hearts */}
         <div className="absolute top-1/4 left-1/8 animate-float delay-100">
-          <Heart className="w-8 h-8 text-rose-300/60 animate-pulse" fill="currentColor" />
+          <Brain className="w-8 h-8 text-rose-300/60 animate-pulse" fill="currentColor" />
         </div>
         <div className="absolute top-2/3 right-1/8 animate-float delay-700">
-          <Heart className="w-6 h-6 text-rose-400/50 animate-pulse delay-500" fill="currentColor" />
+          <Brain className="w-6 h-6 text-rose-400/50 animate-pulse delay-500" fill="currentColor" />
         </div>
         
-        {/* Floating Stars */}
         <div className="absolute top-1/6 right-1/4 animate-float delay-300">
           <Star className="w-10 h-10 text-amber-300/50 animate-pulse delay-200" fill="currentColor" />
         </div>
@@ -71,7 +64,6 @@ export const EmoHubHero: React.FC = () => {
           <Star className="w-7 h-7 text-amber-400/60 animate-pulse delay-800" fill="currentColor" />
         </div>
         
-        {/* Floating Sparkles */}
         <div className="absolute top-1/3 right-1/6 animate-float delay-500">
           <Sparkles className="w-9 h-9 text-emerald-300/50 animate-pulse delay-300" />
         </div>
@@ -79,7 +71,6 @@ export const EmoHubHero: React.FC = () => {
           <Sparkles className="w-6 h-6 text-emerald-400/60 animate-pulse delay-600" />
         </div>
         
-        {/* Floating Zap Icons */}
         <div className="absolute top-3/4 right-1/3 animate-float delay-400">
           <Zap className="w-8 h-8 text-amber-300/50 animate-pulse delay-400" fill="currentColor" />
         </div>
@@ -87,7 +78,6 @@ export const EmoHubHero: React.FC = () => {
           <Zap className="w-5 h-5 text-rose-300/60 animate-pulse delay-700" fill="currentColor" />
         </div>
         
-        {/* Connection Lines */}
         <svg className="absolute inset-0 w-full h-full opacity-20">
           <defs>
             <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -115,21 +105,18 @@ export const EmoHubHero: React.FC = () => {
         </svg>
       </div>
 
-      {/* Main Content */}
       <div className={`relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${
         isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}>
-        {/* Logo/Brand Badge with enhanced animation */}
         <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-white/50 mb-8 transition-all duration-700 hover:shadow-xl hover:scale-105 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
         }`}>
           <div className="w-8 h-8 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full flex items-center justify-center animate-pulse">
-            <Heart className="w-4 h-4 text-white" fill="currentColor" />
+            <Brain className="w-4 h-4 text-white" fill="currentColor" />
           </div>
           <span className="text-slate-700 font-semibold text-lg">emoHub</span>
         </div>
 
-        {/* Main Headline with staggered animation */}
         <h1 className={`text-4xl sm:text-6xl lg:text-7xl font-bold text-slate-800 mb-6 leading-tight transition-all duration-1000 delay-200 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
@@ -139,7 +126,6 @@ export const EmoHubHero: React.FC = () => {
               Emotional Freedom
             </span>
             <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-rose-500/50 via-amber-500/50 to-emerald-500/50 rounded-full animate-pulse"></div>
-            {/* Sparkle effect on the text */}
             <div className="absolute -top-2 -right-2 animate-ping delay-1000">
               <Sparkles className="w-4 h-4 text-amber-500/60" />
             </div>
@@ -147,30 +133,25 @@ export const EmoHubHero: React.FC = () => {
           {' '}Starts Here
         </h1>
 
-        {/* Subheadline with delayed animation */}
-        <p className={`text-xl sm:text-2xl text-slate-600 mb-12 max-w-4xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${
+        <p className={`text-body-medium sm:text-2xl text-slate-600 mb-12 max-w-4xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           Transform isolation into connection. Build emotional resilience that lasts. 
           Join a community where your feelings matter and your growth is celebrated.
         </p>
 
-        {/* Enhanced CTA Button with more animations */}
         <div className={`mb-16 transition-all duration-1000 delay-600 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <button className="group relative bg-gradient-to-r from-rose-500 to-amber-500 text-white px-12 py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-rose-500/30 hover:shadow-rose-500/50 transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto overflow-hidden hover:animate-pulse">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            {/* Shimmer effect */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
             <span className="relative z-10">Get Started</span>
             <ArrowRight className="relative z-10 h-6 w-6 group-hover:translate-x-1 transition-transform duration-300" />
-            {/* Button glow effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-amber-400 rounded-2xl blur opacity-0 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
           </button>
         </div>
 
-        {/* Feature highlights with icons */}
         <div className={`flex flex-wrap justify-center gap-6 sm:gap-8 transition-all duration-1000 delay-800 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
@@ -189,7 +170,6 @@ export const EmoHubHero: React.FC = () => {
         </div>
       </div>
 
-      {/* Enhanced floating particles effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(12)].map((_, i) => (
           <div
@@ -217,7 +197,6 @@ export const EmoHubHero: React.FC = () => {
         ))}
       </div>
 
-      {/* Custom CSS animations */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }

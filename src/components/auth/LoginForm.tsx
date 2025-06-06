@@ -19,7 +19,6 @@ export default function EmoHubSignIn() {
     isLoading,
   } = useLogin();
 
-  // OAuth login handler
   const handleOAuthLogin = async (provider: string) => {
     setLoading(true);
     await signIn(provider, { callbackUrl: "/onboarding" });
@@ -31,7 +30,6 @@ export default function EmoHubSignIn() {
       <LeftAuthPage />
 
       <div className="flex-1 bg-white flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-0">
-        {/* Mobile logo - only show on mobile */}
         <div className="flex lg:hidden items-center justify-center space-x-3 mb-8">
           <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
             <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
@@ -44,7 +42,6 @@ export default function EmoHubSignIn() {
             Happy to have you back
           </h2>
 
-          {/* Google Sign In Button */}
           <button 
             className="w-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded-lg py-3 px-4 flex items-center justify-center space-x-3 mb-6 mt-6 sm:mt-8"
             onClick={() => handleOAuthLogin("google")}
@@ -65,20 +62,17 @@ export default function EmoHubSignIn() {
             </span>
           </button>
 
-          {/* Divider */}
           <div className="flex items-center justify-center space-x-4 mb-12 sm:mb-16">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="text-gray-500 text-sm">or</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 
-          {/* Login Form */}
           <form onSubmit={(e) => {
             e.preventDefault();
             handleSubmission();
           }}>
             <div className="space-y-4 sm:space-y-5">
-              {/* Email Field */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Email</label>
                 <input
@@ -94,7 +88,6 @@ export default function EmoHubSignIn() {
                 )}
               </div>
 
-              {/* Password Field */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Password</label>
                 <div className="relative">
@@ -120,7 +113,6 @@ export default function EmoHubSignIn() {
               </div>
             </div>
 
-            {/* Forgot Password Link */}
             <div className="flex justify-end mt-6">
               <Link 
                 href="/forgot-password" 
@@ -130,7 +122,6 @@ export default function EmoHubSignIn() {
               </Link>
             </div>
 
-            {/* Login Button */}
             <button 
               type="submit"
               disabled={isLoading}
@@ -147,7 +138,6 @@ export default function EmoHubSignIn() {
             </button>
           </form>
 
-          {/* Sign Up Link */}
           <div className="text-center mt-6">
             <span className="text-sm text-gray-500">No Account Yet? </span>
             <Link 

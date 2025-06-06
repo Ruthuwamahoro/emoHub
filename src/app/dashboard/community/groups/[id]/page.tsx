@@ -23,7 +23,6 @@ import { useGetAllChallengesElements } from '@/hooks/users/groups/challenges/ele
 import CreatePostModal from '@/components/Dashboard/CreatePostModal';
 import PostsList from '@/components/Dashboard/Posts/PostsList';
 
-// API hook to fetch single group data
 export const useGetSingleGroup = (groupId: string) => {
   const { data, isPending } = useQuery({
     queryKey: ["group", groupId],
@@ -35,7 +34,6 @@ export const useGetSingleGroup = (groupId: string) => {
   return { data, isPending };
 };
 
-// Challenge Interfaces
 interface ChallengeElement {
   id: string;
   challenge_id: string;
@@ -46,7 +44,7 @@ interface ChallengeElement {
   notes: string;
   created_at: string;
   updated_at: string;
-  completed?: boolean; // For tracking completion status in UI
+  completed?: boolean; 
 }
 
 interface Participation {
@@ -90,12 +88,10 @@ function ChallengeView({ challenge, groupId }: { challenge: Challenge; groupId: 
 
   console.log("challenges elemeents", elements);
   
-  // Get start and end dates
   const startDate = new Date(challenge.start_date);
   const endDate = new Date(challenge.end_date);
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  // Group elements by day
   const elementsByDay = Array.from({ length: totalDays }, (_, dayIndex) => {
     const dayDate = new Date(startDate);
     dayDate.setDate(startDate.getDate() + dayIndex);
@@ -172,19 +168,15 @@ export function GroupDetailPage() {
   const [activeTab, setActiveTab] = useState<'challenges' | 'discussions' | 'members'>('challenges');
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
-  console.log("group data=========================", data?.data?.group.name);
   
-  // State to track element completion
   const [challengeProgress, setChallengeProgress] = useState<Record<string, Record<string, boolean>>>({});
 
-  // Helper function to format dates
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const handleElementComplete = (challengeId: string, elementId: string, completed: boolean) => {
-    // Update local state
     setChallengeProgress(prev => ({
       ...prev,
       [challengeId]: {
@@ -193,8 +185,6 @@ export function GroupDetailPage() {
       }
     }));
     
-    // In a real app, you would make an API call here to update the completion status
-    console.log(`Element ${elementId} in challenge ${challengeId} marked as ${completed ? 'completed' : 'incomplete'}`);
   };
 
   const { data: allChallenges, isPending: challengeIsPending } = useGetChallenges(id)
@@ -308,9 +298,8 @@ export function GroupDetailPage() {
       return <div className="text-center py-10">No data available</div>;
     }
 
-    // In a real app, you would have a members API endpoint
-    // This is just placeholder functionality
-    const memberCount = 10; // This would come from API
+
+    const memberCount = 10; 
 
     return (
       <div className="space-y-4">
@@ -344,7 +333,6 @@ export function GroupDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Group Header */}
       <div className="relative mb-8">
         <div className="h-64 overflow-hidden rounded-xl relative">
           <Image 
@@ -365,7 +353,6 @@ export function GroupDetailPage() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
       <div className="flex border-b mb-6">
         {[
           { key: 'challenges', label: 'Challenges', icon: Award },
@@ -387,7 +374,6 @@ export function GroupDetailPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
       {activeTab === 'challenges' && renderChallengesTab()}
       {activeTab === 'discussions' && renderDiscussionsTab()}
       {activeTab === 'members' && renderMembersTab()}

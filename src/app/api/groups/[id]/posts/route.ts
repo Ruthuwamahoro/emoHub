@@ -201,7 +201,6 @@ export const GET = async (
           .groupBy(Comment.id, User.id)
           .orderBy(desc(Comment.createdAt));
 
-        // Get replies for each comment
         const commentsWithReplies = await Promise.all(
           comments.map(async (comment) => {
             const replies = await db

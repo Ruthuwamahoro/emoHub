@@ -28,7 +28,6 @@ export function analyzeMentalHealthData(data: {
   const suggestions: string[] = [];
   let followUpNeeded = false;
 
-  // Analyze mood and stress
   if (data.moodRating <= 4) {
     insights.push("Your mood seems lower than optimal.");
     suggestions.push(
@@ -37,7 +36,6 @@ export function analyzeMentalHealthData(data: {
     followUpNeeded = true;
   }
 
-  // Sleep analysis
   if (data.sleepQuality < 5) {
     insights.push("Your sleep quality could be improved.");
     suggestions.push(
@@ -47,7 +45,6 @@ export function analyzeMentalHealthData(data: {
     );
   }
 
-  // Activity and exercise
   if (!data.moodFactors.activities.exercise?.done) {
     suggestions.push(
       "Regular physical activity can help improve mood",
@@ -55,7 +52,6 @@ export function analyzeMentalHealthData(data: {
     );
   }
 
-  // Social connection
   if (!data.moodFactors.socialConnection.connected) {
     insights.push("Limited social interaction noted.");
     suggestions.push(
@@ -64,7 +60,6 @@ export function analyzeMentalHealthData(data: {
     );
   }
 
-  // Determine overall status
   const overallStatus = determineOverallStatus(data);
 
   return {

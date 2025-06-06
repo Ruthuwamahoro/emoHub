@@ -5,7 +5,6 @@ import { Calendar, Clock, MessageSquare, Users } from 'lucide-react';
 const MentalWellbeingPlatform = () => {
   const [activeTab, setActiveTab] = useState('specialists');
   
-  // Sample data for specialists
   const specialists = [
     { id: 1, name: 'Dr. Sarah Johnson', specialty: 'Clinical Psychologist', experience: '12 years', availability: 'Mon, Wed, Fri', avatar: '/api/placeholder/80/80' },
     { id: 2, name: 'Dr. Michael Chen', specialty: 'Therapist', experience: '8 years', availability: 'Tue, Thu', avatar: '/api/placeholder/80/80' },
@@ -13,25 +12,21 @@ const MentalWellbeingPlatform = () => {
     { id: 4, name: 'Dr. James Wilson', specialty: 'Psychiatrist', experience: '15 years', availability: 'Thu, Fri', avatar: '/api/placeholder/80/80' }
   ];
 
-  // Sample data for scheduled meetings
   const scheduledMeetings = [
     { id: 101, specialist: 'Dr. Sarah Johnson', date: 'March 10, 2025', time: '10:00 AM', duration: '50 minutes', status: 'confirmed' },
     { id: 102, specialist: 'Dr. Michael Chen', date: 'March 15, 2025', time: '2:30 PM', duration: '50 minutes', status: 'pending' }
   ];
 
-  // Sample messages for chat
   const messages = [
     { id: 1, sender: 'Dr. Sarah Johnson', content: 'Hello! How are you feeling today?', time: '10:30 AM', isUser: false },
     { id: 2, sender: 'You', content: 'I\'m feeling a bit anxious about my upcoming exams.', time: '10:32 AM', isUser: true },
     { id: 3, sender: 'Dr. Sarah Johnson', content: 'That\'s understandable. Let\'s talk about some strategies that might help you manage that anxiety.', time: '10:35 AM', isUser: false }
   ];
 
-  // Chat state for the active conversation
   const [newMessage, setNewMessage] = useState('');
   const [activeChat, setActiveChat] = useState(specialists[0]);
   const [chatMessages, setChatMessages] = useState(messages);
   
-  // Function to handle sending a new message
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim()) {
@@ -47,7 +42,6 @@ const MentalWellbeingPlatform = () => {
     }
   };
 
-  // Function to render the appropriate content based on the active tab
   const renderContent = () => {
     switch (activeTab) {
       case 'specialists':
@@ -201,7 +195,6 @@ const MentalWellbeingPlatform = () => {
       case 'chat':
         return (
           <div className="flex h-full">
-            {/* Sidebar with chat contacts */}
             <div className="w-1/4 border-r border-gray-200 p-3">
               <h3 className="font-semibold text-md mb-3">Messages</h3>
               <div className="space-y-2">
@@ -221,9 +214,7 @@ const MentalWellbeingPlatform = () => {
               </div>
             </div>
             
-            {/* Chat main area */}
             <div className="w-3/4 flex flex-col h-full">
-              {/* Chat header */}
               <div className="border-b border-gray-200 p-3 flex items-center">
                 <img src={activeChat.avatar} alt={activeChat.name} className="w-10 h-10 rounded-full mr-3" />
                 <div>
@@ -232,7 +223,6 @@ const MentalWellbeingPlatform = () => {
                 </div>
               </div>
               
-              {/* Messages area */}
               <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-gray-50">
                 {chatMessages.map(message => (
                   <div 
@@ -255,7 +245,6 @@ const MentalWellbeingPlatform = () => {
                 ))}
               </div>
               
-              {/* Message input */}
               <form onSubmit={handleSendMessage} className="border-t border-gray-200 p-3 flex items-center">
                 <input
                   type="text"
@@ -284,7 +273,6 @@ const MentalWellbeingPlatform = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -298,10 +286,8 @@ const MentalWellbeingPlatform = () => {
         </div>
       </header>
       
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {/* Tabs */}
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('specialists')}
@@ -349,7 +335,6 @@ const MentalWellbeingPlatform = () => {
             </button>
           </div>
           
-          {/* Tab Content */}
           <div className="min-h-[500px]">
             {renderContent()}
           </div>

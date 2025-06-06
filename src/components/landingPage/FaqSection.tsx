@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus, Mail, Phone, MapPin, Send, Sparkles, HelpCircle } from 'lucide-react';
 
 export const FAQContactSection = () => {
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
   const faqs = [
     {
@@ -40,9 +40,7 @@ export const FAQContactSection = () => {
 
   return (
     <div className="bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40">
-      {/* FAQ Section */}
       <section className="py-24 relative overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 right-1/4 w-64 h-64 bg-gradient-to-br from-rose-300/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-gradient-to-br from-emerald-300/15 to-teal-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -55,12 +53,12 @@ export const FAQContactSection = () => {
               <span className="text-slate-700 font-semibold">FAQ</span>
             </div>
             
-            <h2 className="text-5xl md:text-7xl font-bold text-slate-800 mb-8 leading-tight">
+            <h3 className="text-5xl md:text-6xl font-bold text-slate-800 mb-8 leading-tight">
               Frequently Asked{' '}
               <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 bg-clip-text text-transparent">
                 Questions
               </span>
-            </h2>
+            </h3>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
               Everything you need to know about starting your emotional growth journey with emoHub.
             </p>
@@ -80,7 +78,7 @@ export const FAQContactSection = () => {
                     <div className="w-12 h-12 bg-gradient-to-br from-rose-400 to-amber-400 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                       {faq.icon}
                     </div>
-                    <span className="text-xl font-bold text-slate-900 pr-4">
+                    <span className="text-xl text-slate-900 pr-4">
                       {faq.question}
                     </span>
                   </div>

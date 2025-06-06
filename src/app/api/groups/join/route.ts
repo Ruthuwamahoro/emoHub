@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
 
     const { group_id } = await req.json();
 
-    // Check if already a member
     const existingMember = await db.query.GroupMember.findFirst({
       where: (member) => {
         return and(eq(member.user_id, userId), eq(member.group_id, group_id));
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Join group
     await db.insert(GroupMember).values({
       user_id: userId,
       group_id: group_id,

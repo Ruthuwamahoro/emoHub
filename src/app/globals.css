@@ -32,9 +32,13 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --font-size-base: 1.25rem;
-    --font-size-small: 0.875rem; /* 14px */
-    --font-size-large: 1.5rem; /* 24px */
-    --font-size-title: 2.25rem; /* 36px */
+    --font-size-small: 0.875rem; 
+    --font-size-large: 1.5rem;
+    --font-size-title-large: 3.75rem;
+    --font-size-title-small: 2.25rem; 
+    --font-size-body-large: 1.25rem;
+    --font-size-body-medium: 1.125rem;
+    --font-size-body-small: 1rem;
   }
 
   .dark {

@@ -66,7 +66,6 @@ const EmotionPatternRecognition = () => {
     setActiveTab('insights');
   };
   
-  // Analysis based on entries
   const getTopEmotion = () => {
     const emojiCounts = {};
     entries.forEach(entry => {

@@ -27,12 +27,10 @@ const THEME = {
 };
 
 export function UserProfile() {
-  // State management
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [editMode, setEditMode] = useState(false);
   
-  // Mock user data
   const [userData, setUserData] = useState({
     name: "Alex Thompson",
     anonymousId: "Serene_Butterfly_724",
@@ -73,13 +71,10 @@ export function UserProfile() {
     }
   });
 
-  // Profile Header Component
   const ProfileHeader = () => (
     <div className="relative mb-6">
-      {/* Cover Image */}
       <div className="h-48 bg-gradient-to-r from-purple-400 to-pink-500 rounded-t-xl" />
       
-      {/* Profile Information */}
       <div className="absolute -bottom-16 left-8 flex items-end space-x-6">
         <div className="relative">
           <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
@@ -111,7 +106,6 @@ export function UserProfile() {
         </div>
       </div>
       
-      {/* Action Buttons */}
       <div className="absolute top-4 right-4 flex space-x-2">
         <button
           onClick={() => setEditMode(!editMode)}
@@ -133,7 +127,6 @@ export function UserProfile() {
     </div>
   );
 
-  // Privacy Settings Component
   const PrivacySettings = () => (
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -170,7 +163,6 @@ export function UserProfile() {
     </Card>
   );
 
-  // Mental Health Goals Component
   const MentalHealthGoals = () => (
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -198,7 +190,6 @@ export function UserProfile() {
     </Card>
   );
 
-  // Self-Care Tracker Component
   const SelfCareTracker = () => (
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -231,7 +222,6 @@ export function UserProfile() {
     </Card>
   );
 
-  // Journey Timeline Component
   const JourneyTimeline = () => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -242,7 +232,6 @@ export function UserProfile() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Current Treatment */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-medium mb-2">Current Treatment</h3>
             <div className="space-y-2">
@@ -261,7 +250,6 @@ export function UserProfile() {
             </div>
           </div>
 
-          {/* Milestones */}
           <div className="space-y-4">
             <h3 className="font-medium">Milestones</h3>
             <div className="relative">
@@ -291,15 +279,12 @@ export function UserProfile() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader />
         
-        {/* Main Content */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Sidebar */}
           <div className="space-y-6">
             <PrivacySettings />
             <MentalHealthGoals />
           </div>
           
-          {/* Main Content Area */}
           <div className="md:col-span-2 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full">

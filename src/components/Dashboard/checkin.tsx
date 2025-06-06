@@ -72,7 +72,6 @@ export const MentalHealthTest = () => {
   const [timeLeft, setTimeLeft] = useState(null);
   const [dailyStreak, setDailyStreak] = useState(5); // Mock streak
 
-  // Mock data for the charts
   const moodData = [
     { day: "Mon", mood: 4, energy: 3 },
     { day: "Tue", mood: 3, energy: 4 },

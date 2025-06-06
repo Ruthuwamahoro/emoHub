@@ -26,8 +26,7 @@ const PostForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted: ", formValues);
-    setIsFormOpen(false); // Close the form after submission
-    // Replace the console.log with an API call if needed
+    setIsFormOpen(false); 
   };
 
   const handleClose = () => {

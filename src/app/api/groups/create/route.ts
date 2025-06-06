@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
 
     const { name, description, categoryId, image } = await req.json();
 
-    // Create group
     const [newGroup] = await db
       .insert(Group)
       .values({
@@ -28,7 +27,6 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    // Add creator as member
     await db.insert(GroupMember).values({
       user_id: userId,
       group_id: newGroup.id,

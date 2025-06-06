@@ -1,17 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Github, Fingerprint, User } from "lucide-react"
 import { BsGoogle } from "react-icons/bs"
-// import { signIn } from "next-auth/react"
 
 export function AuthProviders() {
-//   const handleOAuthSignIn = (provider: string) => {
-//     signIn(provider, { callbackUrl: '/dashboard' })
-//   }
+
 
   return (
     <div className="space-y-4 w-full max-w-md">
       <Button 
-        // onClick={() => handleOAuthSignIn('github')} 
         className="w-full"
         variant="outline"
       >
@@ -19,7 +15,6 @@ export function AuthProviders() {
       </Button>
       
       <Button 
-        // onClick={() => handleOAuthSignIn('google')} 
         className="w-full"
         variant="outline"
       >
@@ -38,7 +33,6 @@ export function AuthProviders() {
       </div>
 
       <Button 
-        // onClick={() => handleOAuthSignIn('credentials')} 
         className="w-full"
         variant="secondary"
       >

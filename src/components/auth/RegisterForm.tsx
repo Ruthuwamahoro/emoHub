@@ -8,6 +8,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useAddUsers } from "@/hooks/users/useRegister";
 import { VerificationPopup } from '@/components/auth/VerificationPopUp';
+import { Brain } from 'lucide-react';
 
 export function LeftAuthPage() {
   return (
@@ -19,8 +20,12 @@ export function LeftAuthPage() {
         className='absolute z-0'
       />
       <div className="absolute top-8 flex items-center justify-center space-x-3 mt-10">
-        <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center">
-          <div className="w-6 h-6 bg-slate-400 rounded-full"></div>
+      <div className="relative">
+        <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+                <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full animate-pulse delay-500"></div>
         </div>
         <span className="text-white text-xl font-medium">emoHub</span>
       </div>
@@ -50,13 +55,10 @@ export function LeftAuthPage() {
   );
 }
 
-// Main registration form component
 export function RegisterForm() {
-  // Local state for UI interactions
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Use the existing hook with all the working logic
   const {
     formData,
     errors,
@@ -67,7 +69,6 @@ export function RegisterForm() {
     handleClosePopup
   } = useAddUsers();
 
-  // OAuth login handler from original form
   const handleOAuthLogin = async (provider: string) => {
     setLoading(true);
     await signIn(provider, { callbackUrl: "/dashboard" });

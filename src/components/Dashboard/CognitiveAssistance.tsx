@@ -1,7 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 
-// Types for our component
 type CognitiveDistortion = {
   id: string;
   name: string;
@@ -18,7 +17,6 @@ type UserThought = {
 };
 
 const CognitiveReframingAssistant: React.FC = () => {
-  // Common cognitive distortions
   const cognitiveDistortions: CognitiveDistortion[] = [
     {
       id: 'all-or-nothing',
@@ -82,7 +80,6 @@ const CognitiveReframingAssistant: React.FC = () => {
     }
   ];
 
-  // State for user input and history
   const [currentThought, setCurrentThought] = useState<string>('');
   const [selectedDistortions, setSelectedDistortions] = useState<string[]>([]);
   const [thoughtHistory, setThoughtHistory] = useState<UserThought[]>([]);
@@ -94,7 +91,6 @@ const CognitiveReframingAssistant: React.FC = () => {
     'Personal growth', 'Connection', 'Health', 'Creativity', 'Learning'
   ]);
   
-  // Toggle distortion selection
   const toggleDistortion = (distortionId: string) => {
     setSelectedDistortions(prev => 
       prev.includes(distortionId) 
@@ -103,19 +99,16 @@ const CognitiveReframingAssistant: React.FC = () => {
     );
   };
 
-  // Generate a reframed thought
   const generateReframe = () => {
     if (!currentThought.trim() || selectedDistortions.length === 0) return;
     
     setIsAnalyzing(true);
     
-    // Simulate API call for reframing (in a real app, you'd call an AI service)
     setTimeout(() => {
       const distortionNames = selectedDistortions.map(id => 
         cognitiveDistortions.find(d => d.id === id)?.name || ''
       );
       
-      // Create a personalized reframe based on the distortions and values
       const randomValue = userValues[Math.floor(Math.random() * userValues.length)];
       
       let reframeText = `I notice I'm engaging in ${distortionNames.join(' and ')}. `;
@@ -146,7 +139,6 @@ const CognitiveReframingAssistant: React.FC = () => {
       
       setReframedThought(reframeText);
       
-      // Save to history
       const newThought: UserThought = {
         id: Date.now().toString(),
         content: currentThought,
@@ -160,33 +152,27 @@ const CognitiveReframingAssistant: React.FC = () => {
     }, 1500);
   };
   
-  // Save user values
   const saveValue = (value: string) => {
     if (value.trim() && !userValues.includes(value.trim())) {
       setUserValues(prev => [...prev, value.trim()]);
     }
   };
   
-  // Remove user value
   const removeValue = (value: string) => {
     setUserValues(prev => prev.filter(v => v !== value));
   };
   
-  // Reset the form
   const resetForm = () => {
     setCurrentThought('');
     setSelectedDistortions([]);
     setReframedThought('');
   };
   
-  // View history item
   const viewHistoryItem = (item: UserThought) => {
     setSelectedHistoryItem(item);
   };
   
-  // Load mock history on component mount
   useEffect(() => {
-    // In a real app, you would load this from localStorage or a backend
     const mockHistory: UserThought[] = [
       {
         id: '1',
@@ -204,7 +190,6 @@ const CognitiveReframingAssistant: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-6">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
             <h1 className="text-2xl font-bold text-white">Cognitive Reframing Assistant</h1>
             <p className="text-blue-100">
@@ -212,7 +197,6 @@ const CognitiveReframingAssistant: React.FC = () => {
             </p>
           </div>
           
-          {/* Tabs */}
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('input')}
@@ -239,11 +223,9 @@ const CognitiveReframingAssistant: React.FC = () => {
             </button>
           </div>
           
-          {/* Main Content */}
           <div className="p-6">
             {activeTab === 'input' ? (
               <div className="space-y-6">
-                {/* Step 1: Record thought */}
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 mb-2">
                     Step 1: What's on your mind?
@@ -256,7 +238,6 @@ const CognitiveReframingAssistant: React.FC = () => {
                   />
                 </div>
                 
-                {/* Step 2: Identify distortions */}
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 mb-2">
                     Step 2: Do you notice any thinking patterns?
@@ -289,7 +270,6 @@ const CognitiveReframingAssistant: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Analyze button */}
                 <div className="flex justify-center">
                   <button
                     onClick={generateReframe}
@@ -304,7 +284,6 @@ const CognitiveReframingAssistant: React.FC = () => {
                   </button>
                 </div>
                 
-                {/* Result */}
                 {reframedThought && (
                   <div className="mt-6 bg-green-50 border border-green-200 rounded-md p-4">
                     <h3 className="text-lg font-medium text-green-800 mb-2">
@@ -322,7 +301,6 @@ const CognitiveReframingAssistant: React.FC = () => {
                   </div>
                 )}
                 
-                {/* My Values Section */}
                 <div className="mt-8 border-t border-gray-200 pt-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     My Values

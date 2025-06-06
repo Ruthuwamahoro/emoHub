@@ -36,9 +36,8 @@ export function CommunityGroups() {
   console.log("sesionnsss", session)
   
   const groups = data?.data as Group[] | undefined;
-  const isAdmin = session?.user?.role === 'admin'; // Assuming role is available in session
+  const isAdmin = session?.user?.role === 'admin'; 
 
-  // Filter groups based on search term
   const filteredGroups = groups?.filter(group => 
     group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.description.toLowerCase().includes(searchTerm.toLowerCase())

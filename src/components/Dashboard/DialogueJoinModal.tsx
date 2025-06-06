@@ -1,4 +1,3 @@
-// components/DialogueJoinModal.tsx
 "use client";
 import React, { useState } from 'react';
 import { X, MessageCircle, Users, Clock, AlertCircle } from 'lucide-react';
@@ -43,7 +42,6 @@ const DialogueJoinModal: React.FC<DialogueJoinModalProps> = ({
     }
   };
 
-  // Extended description and guidelines if not provided in props
   const fullDialogue: DialogueSession = {
     ...dialogue,
     description: dialogue.description || 

@@ -56,7 +56,6 @@ const DialogueSession = () => {
       setMessages([...messages, newMessage]);
       setMessage('');
       
-      // Simulate facilitator response after a short delay
       if (messages.length === 3) {
         setTimeout(() => {
           const facilitatorResponse = {
@@ -73,7 +72,6 @@ const DialogueSession = () => {
     }
   };
   
-  // Simulate time countdown
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeRemaining(prev => Math.max(0, prev - 1/60));
@@ -115,11 +113,8 @@ const DialogueSession = () => {
         </div>
       </div>
       
-      {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Messages area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div className="bg-indigo-50 p-3 rounded-lg mb-6 text-center text-sm text-indigo-700">
               Dialogue started at 2:00 PM. Please follow the dialogue guidelines to create a supportive space.

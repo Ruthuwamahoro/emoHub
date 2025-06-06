@@ -1,4 +1,3 @@
-// lib/getYoutubeData.ts
 import { Innertube } from 'youtubei.js';
 
 export async function getYoutubeData(videoUrl: string) {
