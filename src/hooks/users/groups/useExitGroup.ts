@@ -19,7 +19,7 @@ export const useExitGroup = () => {
     });
   
     return {
-      exitGroup: mutation.mutate, // Properly typed mutation method
+      exitGroup: mutation.mutate, 
       isPending: mutation.isPending,
       error: mutation.error
     };
