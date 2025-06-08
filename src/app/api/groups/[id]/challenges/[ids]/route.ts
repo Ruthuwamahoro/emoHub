@@ -1,10 +1,9 @@
 import db from "@/server/db";
 import { Challenges } from "@/server/db/schema";
-import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
 import { userIsGroupMember } from "@/utils/userIsGroupMember";
 import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function GET (
     req: NextRequest,

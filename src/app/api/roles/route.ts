@@ -1,3 +1,4 @@
+//API andpoints for roles management
 import { Role } from '@/server/db/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';

@@ -1,3 +1,5 @@
+//API endpoints for Group categories
+
 import { NextResponse, NextRequest } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db/index";

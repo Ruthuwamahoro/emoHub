@@ -1,3 +1,5 @@
+// API routes for allusers in group
+
 import { NextResponse, NextRequest } from "next/server";
 import { Group, User, GroupMember } from "@/server/db/schema";
 import db from "@/server/db";

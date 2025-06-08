@@ -1,3 +1,4 @@
+//API endpoints for onboarding questions
 import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import { checkIfIsRegularUser, checkIfUserIsModerator, getUserIdFromSession} from "@/utils/getUserIdFromSession";

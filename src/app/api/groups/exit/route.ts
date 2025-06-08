@@ -1,3 +1,5 @@
+// API routes for exiting the group
+
 import { NextRequest, NextResponse } from "next/server";
 import { HttpStatusCode } from "axios";
 import db from "@/server/db";

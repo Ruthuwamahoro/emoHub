@@ -1,3 +1,4 @@
+// API endpoints for joining the group
 import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db";

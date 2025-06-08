@@ -1,3 +1,5 @@
+// API routes for daily challenges
+
 import { getUserIdFromSession } from '@/utils/getUserIdFromSession';
 import { sendResponse } from '@/utils/Responses';
 import { NextRequest } from 'next/server';

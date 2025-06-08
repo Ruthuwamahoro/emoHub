@@ -1,3 +1,4 @@
+//API endpoints for saved resources
 import db from "@/server/db";
 import { userSavedResources } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";

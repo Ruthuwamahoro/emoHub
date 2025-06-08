@@ -1,3 +1,5 @@
+// API routes for challenges elements
+
 import { checkIfUserIsAdmin } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
 import { NextResponse, NextRequest } from "next/server";
