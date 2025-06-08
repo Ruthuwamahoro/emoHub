@@ -76,6 +76,10 @@ Before setting up the project, ensure that there is the following installed:
    CLOUDINARY_CLOUD_NAME=my-cloud-NAME
    CLOUDINARY_API_KEY=yourcloudinary-PI-KEY
    CLOUDINARY_API_SECRET=your-cloudinary-secret
+   SECRET_KEY=your-secret
+    EMAIL_USER=your-email
+    EMAIL_PASS=your-email-password
+    NEXT_PUBLIC_APP_URL=next-url-password
    ```
 
 4. **Database Setup**
@@ -91,10 +95,17 @@ Before setting up the project, ensure that there is the following installed:
    # or
    npm run db:migrate
    ```
+
+   Run database demigrate:
+   ```bash
+   npm run demigrate
+   # or
+   npm run demigrate
+   ```
    
    Seed the database (optional):
    ```bash
-   npm run db:seed
+   npm run seed
    ```
 
 5. **Development Server**
@@ -104,7 +115,7 @@ Before setting up the project, ensure that there is the following installed:
    yarn dev
    ```
    
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+   Open [http://localhost:3000](http://localhost:3000) in browser.
 
 ### Database Schema Management
 
@@ -125,30 +136,21 @@ Before setting up the project, ensure that there is the following installed:
 - **User Interface Mockups**: [Insert Figma link to UI mockups]
 - **User Flow Diagrams**: [Insert Figma link to user flows]
 
-### Architecture Diagrams
-- **System Architecture**: [Insert link to system architecture diagram]
-- **Database Schema**: [Insert link to database ERD]
-- **API Structure**: [Insert link to API documentation]
 
 ### Screenshots
 
-#### Dashboard Interface
-![Dashboard Screenshot](./docs/images/dashboard-screenshot.png)
-*Main user dashboard showing emotional intelligence metrics and community activity*
+![Screenshot](./images/design/design1.png)
+![Screenshot](./images/design/design2.png)
+![Screenshot](./images/design/design3.png)
+![Screenshot](./images/design/design4.png)
+![Screenshot](./images/design/design5.png)
+![Screenshot](./images/design/design6.png)
+![Screenshot](./images/design/design7.png)
+![Screenshot](./images/design/design8.png)
+![Screenshot](./images/design/design9.png)
 
-#### Assessment Module
-![Assessment Screenshot](./docs/images/assessment-screenshot.png)
-*Interactive emotional intelligence assessment interface*
 
-#### Community Forum
-![Community Screenshot](./docs/images/community-screenshot.png)
-*Community discussion and support group interface*
 
-#### Mobile Responsive Design
-![Mobile Screenshots](./docs/images/mobile-screenshots.png)
-*Mobile-optimized interface across different screen sizes*
-
-> **Note**: Add actual screenshots to the `docs/images/` directory and update the paths accordingly.
 
 ## Deployment Plan
 
@@ -158,19 +160,16 @@ Before setting up the project, ensure that there is the following installed:
 - **URL**: `http://localhost:3000`
 
 ### Staging Environment
-- **Platform**: Vercel/Netlify Preview
-- **Database**: Hosted PostgreSQL (Supabase/PlanetScale)
-- **URL**: `https://staging-community-ei.vercel.app`
-- **Purpose**: Testing and QA before production
+- **Platform**: Vercel Preview
+- **Database**: Hosted PostgreSQL (neon)
+- **Purpose**: Testing before production
 
 ### Production Environment
 
-#### Recommended Deployment Stack
-- **Frontend & Backend**: **Vercel** (recommended for Next.js)
-- **Database**: **Supabase** or **PlanetScale**
-- **File Storage**: **Cloudinary** or **AWS S3**
-- **Monitoring**: **Sentry** for error tracking
-- **Analytics**: **Vercel Analytics** or **Google Analytics**
+- **Frontend & Backend**: **Vercel**
+- **Database**: **neon**
+- **File Storage**: **Cloudinary**
+- **Analytics**: **Vercel Analytics**
 
 #### Deployment Steps
 
@@ -185,7 +184,6 @@ Before setting up the project, ensure that there is the following installed:
    ```bash
    # Configure production environment variables
    # Set up authentication secrets
-   # Configure external API keys
    ```
 
 3. **Deploy to Vercel**
@@ -194,24 +192,7 @@ Before setting up the project, ensure that there is the following installed:
    vercel --prod
    ```
 
-4. **Domain Configuration**
-   - Set up custom domain
-   - Configure SSL certificates
-   - Set up redirects if needed
 
-#### Alternative Deployment Options
-
-- **Docker**: Containerized deployment
-- **AWS**: EC2 with RDS PostgreSQL
-- **Railway**: Full-stack deployment platform
-- **DigitalOcean**: App Platform deployment
-
-### Monitoring & Maintenance
-
-- **Performance Monitoring**: Vercel Analytics
-- **Error Tracking**: Sentry integration
-- **Database Monitoring**: Built-in database metrics
-- **Uptime Monitoring**: StatusPage or similar service
 
 ### Security Considerations
 
@@ -221,14 +202,6 @@ Before setting up the project, ensure that there is the following installed:
 - Authentication tokens properly managed
 - Regular security updates and patches
 
-## Contributing
+## Contributor
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-For questions or support, please open an issue on GitHub or contact the development team.
+Ruth Uwamahoro
