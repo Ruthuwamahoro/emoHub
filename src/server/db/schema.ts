@@ -100,14 +100,14 @@ const Post = pgTable("Post", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-const MentalHealthTracker = pgTable("mental_health_tracker", {
+const EmotionHealthTracker = pgTable("mental_health_tracker", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  moodRating: integer("mood_rating").notNull(),
+  emotionRating: integer("emotion_rating").notNull(),
   stressLevel: integer("stress_level").notNull(),
   sleepQuality: integer("sleep_quality").notNull(),
   comments: text("comments"),
-  moodFactors: jsonb("mood_factors")
+  emotionFactors: jsonb("emotion_factors")
     .$type<{
       energy: number;
       anxiety: number;
@@ -509,7 +509,7 @@ const ActivityTypeEnum = pgEnum("activity_type", [
   "TODO_UPDATED",
   "TODO_COMPLETED",
   "TODO_DELETED",
-  "MOOD_TRACKED",
+  "EMOTION_TRACKED",
   "RESOURCE_ACCESSED",
   "GROUP_JOINED",
   "CHALLENGE_STARTED",
@@ -550,7 +550,7 @@ export {
   User,
   UserProfile,
   Post,
-  MentalHealthTracker,
+  EmotionHealthTracker,
   Event,
   AIConversation,
   Analytics,
