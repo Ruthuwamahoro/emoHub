@@ -10,8 +10,8 @@ import { getServerSession } from "next-auth";
 import { options } from "@/auth";
 
 export const metadata: Metadata = {
-  title: "HealthMind Dashboard",
-  description: "Mental health support platform dashboard",
+  title: "emoHub Dashboard",
+  description: "emotional support platform dashboard",
 };
 
 
