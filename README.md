@@ -204,4 +204,4 @@ Before setting up the project, ensure that there is the following installed:
 
 ## Contributor
 
-Ruth Uwamahoro
+[Ruth Uwamahoro](https://github.com/Ruthuwamahoro)
