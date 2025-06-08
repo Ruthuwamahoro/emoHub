@@ -1,3 +1,5 @@
+// API routes for registration
+
 import bcrypt from "bcryptjs";
 import { eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";

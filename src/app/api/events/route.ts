@@ -1,3 +1,5 @@
+// API routes for emotional intelligence events management
+
 import db from "@/server/db";
 import { Event } from "@/server/db/schema";
 import { checkIfUserIsAdmin } from "@/utils/getUserIdFromSession";

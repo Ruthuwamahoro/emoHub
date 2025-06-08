@@ -1,3 +1,5 @@
+// API routes verify email
+
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { verifyToken } from "@/utils/jwtToken";

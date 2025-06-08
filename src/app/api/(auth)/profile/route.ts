@@ -1,3 +1,5 @@
+// API routes for user profile
+
 import cloudinary from "cloudinary";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";

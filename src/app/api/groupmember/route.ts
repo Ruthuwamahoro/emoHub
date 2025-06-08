@@ -1,3 +1,5 @@
+// API routes for group members
+
 import db from "@/server/db";
 import { Group,GroupMember } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";

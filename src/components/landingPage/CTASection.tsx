@@ -1,10 +1,9 @@
 "use client"
-import React, { useState } from 'react';
-import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus } from 'lucide-react';
+import React from 'react';
+import { ArrowRight} from 'lucide-react';
 export const FinalCTASection = () => {
     return (
       <section className=" max-w-7xl mx-auto py-24 bg-slate-900 relative overflow-hidden mb-20">
-        {/* Background Elements */}
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>

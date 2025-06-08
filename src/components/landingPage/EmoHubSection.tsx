@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus } from 'lucide-react';
+import {Users, Brain, MessageCircle, Shield} from 'lucide-react';
 
 export const WhyEmoHubSection = () => {
   const benefits = [

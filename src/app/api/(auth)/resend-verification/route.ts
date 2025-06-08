@@ -1,3 +1,5 @@
+// API routes for email verification
+
 import db from "@/server/db";
 import { verificationTokens } from "@/server/db/schema";
 import { signToken } from "@/utils/jwtToken";

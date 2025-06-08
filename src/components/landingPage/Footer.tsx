@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from 'react';
-import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus } from 'lucide-react';
+import React from 'react';
+import { Heart, Brain} from 'lucide-react';
 export const Footer = () => {
     return (
       <footer className="bg-slate-900 text-white py-16">
@@ -41,7 +41,6 @@ export const Footer = () => {
             </div>
           </div>
   
-          {/* Bottom Bar */}
           <div className="border-t border-slate-700 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-slate-400 text-sm mb-4 md:mb-0">
               © 2025 emoHub. All rights reserved.

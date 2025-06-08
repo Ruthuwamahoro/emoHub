@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus, Mail, Phone, MapPin, Send, Sparkles, HelpCircle } from 'lucide-react';
+import { Heart, Users, Brain,  Shield, Calendar, GraduationCap, Plus, Minus, HelpCircle } from 'lucide-react';
 
 export const FAQContactSection = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
