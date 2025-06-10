@@ -1,8 +1,8 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import HeaderDashboard from "@/components/Dashboard/TopNav";
 import { SidebarDemo } from "@/components/Dashboard/SideBar";
-import { RightSidebar } from "@/components/Dashboard/RightSideBar";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { SessionProvider } from "@/utils/providers/sessionProvider";
 import { Toaster } from "react-hot-toast";
@@ -14,14 +14,13 @@ export const metadata: Metadata = {
   description: "emotional support platform dashboard",
 };
 
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getServerSession(options);
-
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-50 dark:bg-gray-950 overflow-hidden">

@@ -389,7 +389,7 @@ const ChallengeFeedback = pgTable("challenge_feedback", {
   submitted_at: timestamp("submitted_at").defaultNow(),
 });
 
-export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "text", "image"]);
+export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "article", "image"]);
 
 
 export const emotionCategoryEnum = pgEnum("emotionCategory", [
@@ -400,6 +400,12 @@ export const emotionCategoryEnum = pgEnum("emotionCategory", [
   "social-skills",
   "relationship-management",
   "stress-management"
+]);
+
+export const difficultyLevelEnum = pgEnum("difficultyLevelEnum", [
+  "beginner",
+  "intermediate",
+  "advanced"
 ]);
 
 
@@ -418,6 +424,7 @@ const learningResources = pgTable('learning_resources', {
   category: emotionCategoryEnum('category').notNull(),
   tags: text('tags').array(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  difficultyLevel: difficultyLevelEnum('difficulty_level'),
   isSaved: boolean('is_saved').default(false),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
