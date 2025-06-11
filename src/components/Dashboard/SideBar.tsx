@@ -36,9 +36,9 @@ const roleBasedLinks = {
       icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {
-      label: "Appointments",
-      href: "/dashboard/appointments",
-      icon: <MdOutlineCalendarToday className="text-white h-5 w-5 flex-shrink-0" />,
+      label: "Weekly challenges",
+      href: "/dashboard/challenges",
+      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Resources",
@@ -118,13 +118,13 @@ const roleBasedLinks = {
     },
     {
       label: "User Management",
-      href: "/admin/users",
+      href: "/dashboard/admin/usermanagement",
       icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {
-      label: "Specialist Management",
-      href: "/admin/specialists",
-      icon: <FaUserMd className="text-white h-5 w-5 flex-shrink-0" />,
+      label: "Weekly challenges",
+      href: "/dashboard/challenges",
+      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Content Management",
@@ -138,7 +138,7 @@ const roleBasedLinks = {
     },
     {
       label: "Community Management",
-      href: "/admin/community",
+      href: "/dashboard/community",
       icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {

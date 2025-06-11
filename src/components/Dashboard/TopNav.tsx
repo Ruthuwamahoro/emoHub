@@ -18,11 +18,23 @@ import {
   Tooltip,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { useSession } from "next-auth/react";
 
 export default function HeaderDashboard() {
   const isLoading = false;
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(20);
+
+  const { data: session, status } = useSession();
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
 
   const notifications = [
     {
@@ -109,12 +121,24 @@ export default function HeaderDashboard() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-0 rounded-full hover:ring-2 hover:ring-blue-200 transition-all duration-200">
+
+                    {session ? (
                     <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                      <AvatarImage src="" />
+                      <AvatarImage 
+                        src={session.user.profilePicUrl || ""} 
+                        alt={session.user.fullName || "User"}
+                      />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-medium">
-                        U
+                        {getInitials(session.user.fullName)}
                       </AvatarFallback>
                     </Avatar>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        <CircleUser className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[320px] p-0 border-0 shadow-xl rounded-xl bg-white">
@@ -123,7 +147,7 @@ export default function HeaderDashboard() {
                       <Avatar className="h-16 w-16 border-4 border-white shadow-lg mb-3">
                         <AvatarImage src="" />
                         <AvatarFallback className="bg-white text-blue-600 text-xl font-bold">
-                          KG
+                        {getInitials(session?.user?.fullName)}
                         </AvatarFallback>
                       </Avatar>
                       <h3 className="text-lg font-bold">Ruth Uwamahoro</h3>

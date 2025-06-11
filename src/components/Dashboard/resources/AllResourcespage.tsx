@@ -3,34 +3,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Filter, Grid, List, BookOpen, Clock, User, Heart, ChevronDown, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { useGetAllResources } from '@/hooks/users/resources/usegetallresources';
 import { PaginationComponent } from '../PaginationPage';
-// import CreateResourceDialog from './createResources';
+import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreVertical } from 'lucide-react';
+import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import CreateResourceDialog from './createResources';
+import { LearningResource } from '@/types/resources';
 
-// Move the interface to match your API response
-interface LearningResource {
-  id: string;
-  title: string;
-  description: string;
-  coverImage?: string;
-  userId: string;
-  resourceType: "video" | "audio" | "article" | "image";
-  content: string;
-  url?: string;
-  thumbnailUrl?: string;
-  duration?: number;
-  category: 
-    | "self-regulation"
-    | "self-awareness" 
-    | "motivation"
-    | "empathy"
-    | "social-skills"
-    | "relationship-management"
-    | "stress-management";
-  tags?: string[];
-  createdAt: string;
-  isSaved: boolean;
-  updatedAt: string;
-  difficultyLevel: 'beginner' | 'intermediate' | 'advanced';
-}
+
 
 type UserRole = 'admin' | 'specialist' | 'superAdmin' | 'user';
 
@@ -46,7 +30,6 @@ const mockUser: User = {
   role: 'specialist'
 };
 
-// Updated category options to match your API enum
 const categoryOptions = [
   { value: 'self-regulation', label: 'Self Regulation' },
   { value: 'self-awareness', label: 'Self Awareness' },
@@ -63,7 +46,6 @@ const difficultyOptions = [
   { value: 'advanced', label: 'Advanced' }
 ];
 
-// Skeleton Component
 const ResourceSkeleton = () => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-100 animate-pulse">
     <div className="relative h-48 bg-gray-200"></div>
@@ -82,7 +64,6 @@ const ResourceSkeleton = () => (
   </div>
 );
 
-// Error Component
 const ErrorState = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
   <div className="flex flex-col items-center justify-center py-12">
     <AlertCircle size={48} className="text-red-400 mb-4" />
@@ -99,7 +80,6 @@ const ErrorState = ({ error, onRetry }: { error: Error; onRetry: () => void }) =
   </div>
 );
 
-// Fixed Pagination Skeleton Component
 export function PaginationComponentSkeleton() {
   return (
     <div className="flex items-center justify-center gap-4 opacity-50 pointer-events-none">
@@ -129,11 +109,12 @@ export default function LearningResourcesUI() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [open, setOpen] = useState(false);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
 
-  // Debounced search term to avoid too many API calls
+  const { data: session } = useSession();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   useEffect(() => {
@@ -144,22 +125,19 @@ export default function LearningResourcesUI() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchTerm, selectedCategory, selectedDifficulty, sortBy]);
 
-  // Prepare query parameters
   const queryParams = useMemo(() => ({
     search: debouncedSearchTerm,
-    page: currentPage, // Make sure this matches the component state
+    page: currentPage,
     pageSize: itemsPerPage,
     category: selectedCategory,
     difficultyLevel: selectedDifficulty,
     sortBy,
   }), [debouncedSearchTerm, currentPage, itemsPerPage, selectedCategory, selectedDifficulty, sortBy]);
 
-  // Use the hook with query parameters
   const { 
     resources, 
     pagination, 
@@ -171,22 +149,16 @@ export default function LearningResourcesUI() {
     refetch 
   } = useGetAllResources(queryParams);
 
-  const canCreateResources = ['admin', 'specialist', 'superAdmin'].includes(user.role);
+  const canCreateResources = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
 
-  // Filter saved resources on client side (since API doesn't have this filter)
-  // Add null check and default to empty array to prevent hydration errors
   const displayedResources = useMemo(() => {
     const resourcesArray = resources?.data || [];
     if (!showSavedOnly) return resourcesArray;
-    return resourcesArray.filter(resource => resource.isSaved);
+    return resourcesArray.filter((resource: LearningResource) => resource.isSaved);
   }, [resources, showSavedOnly]);
 
   const toggleSaveResource = (resourceId: string) => {
-    // This would typically make an API call to update the saved status
-    // For now, we'll just log it
     console.log('Toggle save for resource:', resourceId);
-    // After the API call, you would refetch the data or update the cache
-    // refetch();
   };
 
   const handleCategoryChange = (category: string) => {
@@ -197,32 +169,20 @@ export default function LearningResourcesUI() {
     setSelectedDifficulty(difficulty === selectedDifficulty ? '' : difficulty);
   };
 
-  const CreateResourceModal = () => {
-    const [formData, setFormData] = useState({
-      title: '',
-      description: '',
-      category: 'self-awareness',
-      resourceType: 'article',
-      difficultyLevel: 'beginner'
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      console.log('Creating resource:', formData);
-      setShowCreateModal(false);
-      setFormData({ title: '', description: '', category: 'self-awareness', resourceType: 'article', difficultyLevel: 'beginner' });
-      // After creating, refetch the data
-      refetch();
-    };
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        {/* <CreateResourceDialog/> */}
-      </div>
-    );
+  // Handler functions for the modal
+  const handleOpenCreateModal = () => {
+    setShowCreateModal(true);
   };
 
-  // Calculate saved resources count with null check
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+  };
+
+  const handleResourceCreated = () => {
+    // Refresh the resources list after successful creation
+    refetch();
+  };
+
   const savedResourcesCount = useMemo(() => {
     if (!resources?.data || !Array.isArray(resources.data)) return 0;
     return resources.data.filter(r => r.isSaved).length;
@@ -230,7 +190,6 @@ export default function LearningResourcesUI() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex justify-between items-start">
@@ -243,7 +202,7 @@ export default function LearningResourcesUI() {
             <div className="flex items-center gap-4">
               {canCreateResources && (
                 <button
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={handleOpenCreateModal}
                   className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Plus size={20} />
@@ -260,7 +219,6 @@ export default function LearningResourcesUI() {
               >
                 <span className="relative">
                     Saved Resources
-                    {/* Notification badge */}
                     {savedResourcesCount > 0 && (
                       <span className="absolute -top-4 -right-4 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {savedResourcesCount}
@@ -275,12 +233,10 @@ export default function LearningResourcesUI() {
 
       <div className="max-w-8xl mx-auto px-6 py-8">
         <div className="flex gap-8">
-          {/* Left Sidebar - Filters */}
           <div className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
               <h2 className="text-lg font-semibold mb-6">Filter Resources</h2>
               
-              {/* Search */}
               <div className="mb-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -299,7 +255,6 @@ export default function LearningResourcesUI() {
                 </div>
               </div>
 
-              {/* Category Filter */}
               <div className="mb-6">
                 <h3 className="font-medium text-gray-900 mb-4">Category</h3>
                 <div className="space-y-3">
@@ -326,7 +281,6 @@ export default function LearningResourcesUI() {
                 </div>
               </div>
 
-              {/* Difficulty Level Filter */}
               <div className="mb-6">
                 <h3 className="font-medium text-gray-900 mb-4 flex items-center">
                   Difficulty Level
@@ -356,7 +310,6 @@ export default function LearningResourcesUI() {
                 </div>
               </div>
 
-              {/* Sort By */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-4 flex items-center">
                   Sort By
@@ -391,7 +344,6 @@ export default function LearningResourcesUI() {
           </div>
 
           <div className="flex-1">
-            {/* Results Summary */}
             {!isLoading && pagination && (
               <div className="mb-6 text-sm text-gray-600">
                 Showing {displayedResources.length} of {pagination.totalResources} resources
@@ -399,12 +351,10 @@ export default function LearningResourcesUI() {
               </div>
             )}
 
-            {/* Error State */}
             {isError && error && (
               <ErrorState error={error} onRetry={() => refetch()} />
             )}
 
-            {/* Loading State */}
             {isLoading && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -417,11 +367,10 @@ export default function LearningResourcesUI() {
               </div>
             )}
 
-            {/* Resources Grid */}
             {!isLoading && !isError && displayedResources.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {displayedResources.map((resource: LearningResource) => (
-                  <div key={resource.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100">
+                  <div key={resource.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 flex flex-col h-full">
                     <div className="relative">
                       <img
                         src={resource.coverImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop'}
@@ -435,9 +384,15 @@ export default function LearningResourcesUI() {
                         <Heart size={16} fill={resource.isSaved ? 'white' : 'none'} />
                       </button>
                     </div>
-                    <div className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-3 text-lg leading-tight">{resource.title}</h3>
-                      <p className="text-gray-600 mb-4 leading-relaxed">{resource.description}</p>
+                    
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h3 className="font-semibold text-gray-900 mb-3 text-lg leading-tight line-clamp-2">
+                        {resource.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 flex-grow">
+                        {resource.description}
+                      </p>
+                      
                       <div className="flex items-center gap-3 mb-4">
                         <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
                           {categoryOptions.find(c => c.value === resource.category)?.label}
@@ -446,26 +401,56 @@ export default function LearningResourcesUI() {
                           {resource.difficultyLevel}
                         </span>
                       </div>
-                      <button className="text-red-500 hover:text-red-600 font-medium text-sm uppercase tracking-wide">
-                        READ MORE
-                      </button>
+                      
+                      <div className="flex items-center justify-between">
+                        <button className="text-orange-600 hover:text-blue-700 font-medium text-sm uppercase tracking-wide transition-colors">
+                          READ MORE
+                        </button>
+                        
+                        {canCreateResources && (
+                          <div className="flex items-center space-x-1">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem>
+                                  <X className="w-4 h-4 mr-2" />
+                                  Unpublish
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600">
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Pagination - Only show when not loading and has multiple pages */}
             {!isLoading && !isError && pagination && pagination.totalPages > 1 && (
               <PaginationComponent 
-                currentPages={pagination.currentPage} // Use pagination.currentPage from API
+                currentPages={pagination.currentPage}
                 totalPages={pagination.totalPages} 
-                onPageChange={(page) => setCurrentPage(page)} // This should update component state
+                onPageChange={(page) => setCurrentPage(page)}
                 disabled={isLoading || isFetching}
               />
             )}
 
-            {/* No data state */}
             {!isLoading && !isError && displayedResources.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12">
                 <BookOpen size={48} className="text-gray-400 mb-4" />
@@ -494,18 +479,13 @@ export default function LearningResourcesUI() {
           </div>
         </div>
       </div>
-      {!isLoading && (
-              <PaginationComponent
-              currentPages={currentPage}
-              totalPages={pagination?.totalPages ?? 1}
-              onPageChange={(page) => setCurrentPage(page)}
-              disabled={isFetching}
-            />
-      )}
 
-
-      {/* Create Resource Modal */}
-      {showCreateModal && <CreateResourceModal />}
+      {/* Render the Create Resource Modal */}
+      <CreateResourceDialog
+        isOpen={showCreateModal}
+        onClose={handleCloseCreateModal}
+        onSuccess={handleResourceCreated}
+      />
     </div>
   );
 }

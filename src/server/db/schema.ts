@@ -12,6 +12,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { number } from "zod";
 const Role = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).unique().notNull(),
@@ -344,17 +345,11 @@ const verificationTokens = pgTable(
 
 const Challenges = pgTable("Challenges", {
   id: uuid("id").defaultRandom().primaryKey(),
-  group_id: uuid("group_id").references(() => Group.id, {
-    onDelete: "cascade",
-  }),
+  weekNumber: integer("week_Number"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  theme: varchar("theme", { length: 255 }).notNull(),
   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description").notNull(),
-  image: text("image"),
-  total_points: integer("total_points").default(0),
-  start_date: timestamp("start_date").notNull(),
-  end_date: timestamp("end_date").notNull(),
-  isActive: boolean('is_active').default(true),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -364,30 +359,13 @@ const ChallengeElements = pgTable("challenge_elements", {
   challenge_id: uuid("challenge_id").references(() => Challenges.id, {
     onDelete: "cascade",
   }),
-  questions: varchar("questions", { length: 255 }).notNull(),
-  description: varchar("description", { length: 255 }).notNull(),
-  points: integer("points").default(0),
-  order: integer("order").default(0),
-  day_number: integer("day_number").default(0),
+  title: varchar("title", { length: 255}).notNull(),
+  description: varchar("description", { length: 255}).notNull(),
+  completed: boolean("is_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-const ChallengeFeedback = pgTable("challenge_feedback", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  challenge_id: uuid("challenge_id").references(() => Challenges.id, {
-    onDelete: "cascade",
-  }),
-  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  question_id: uuid("question_id").references(() => ChallengeElements.id, {
-    onDelete: "cascade",
-  }),
-  response: text("response"),
-  completed: boolean("completed").default(false),
-  points_earned: integer("points_earned").default(0),
-  day_number: integer("day_number").notNull(),
-  submitted_at: timestamp("submitted_at").defaultNow(),
-});
 
 export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "article", "image"]);
 
@@ -401,6 +379,8 @@ export const emotionCategoryEnum = pgEnum("emotionCategory", [
   "relationship-management",
   "stress-management"
 ]);
+
+
 
 export const difficultyLevelEnum = pgEnum("difficultyLevelEnum", [
   "beginner",
@@ -577,7 +557,6 @@ export {
   ResourceAssessmentOptions,
   ResourceAssessmentResults,
   ResourceAssessmentScore,
-  ChallengeFeedback,
   Challenges,
   ChallengeElements,
   learningResources,

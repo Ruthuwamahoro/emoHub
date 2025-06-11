@@ -12,9 +12,9 @@ export interface LearningResource {
   url?: string;
   thumbnailUrl?: string;
   duration?: number;
-  category: 
+  category:
     | "self-regulation"
-    | "self-awareness" 
+    | "self-awareness"
     | "motivation"
     | "empathy"
     | "social-skills"
@@ -62,35 +62,40 @@ export interface ResourcesQueryParams {
 // Service function to fetch resources with query parameters
 export const getResources = async (params: ResourcesQueryParams = {}): Promise<ApiResponse> => {
   try {
+    // Set default values for pagination
+    const {
+      search,
+      page = 1,        // Default to page 1
+      pageSize = 4,    // Default to pageSize 4
+      category,
+      difficultyLevel,
+      sortBy
+    } = params;
+
     // Build query string from parameters
     const queryParams = new URLSearchParams();
     
-    if (params.search && params.search.trim()) {
-      queryParams.append('search', params.search.trim());
+    if (search && search.trim()) {
+      queryParams.append('search', search.trim());
     }
     
-    if (params.page && params.page > 0) {
-      queryParams.append('page', params.page.toString());
+    // Always append page and pageSize (with defaults if not provided)
+    queryParams.append('page', page.toString());
+    queryParams.append('pageSize', pageSize.toString());
+    
+    if (category && category.trim()) {
+      queryParams.append('category', category.trim());
     }
     
-    if (params.pageSize && params.pageSize > 0) {
-      queryParams.append('pageSize', params.pageSize.toString());
+    if (difficultyLevel && difficultyLevel.trim()) {
+      queryParams.append('difficultyLevel', difficultyLevel.trim());
     }
     
-    if (params.category && params.category.trim()) {
-      queryParams.append('category', params.category.trim());
+    if (sortBy) {
+      queryParams.append('sortBy', sortBy);
     }
-    
-    if (params.difficultyLevel && params.difficultyLevel.trim()) {
-      queryParams.append('difficultyLevel', params.difficultyLevel.trim());
-    }
-    
-    if (params.sortBy) {
-      queryParams.append('sortBy', params.sortBy);
-    }
-    
-    // Build the URL with query parameters
-    const url = `/api/learning-resources${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    const url = `/api/learning-resources?${queryParams.toString()}`;
     
     console.log('Fetching resources from:', url);
     
@@ -99,10 +104,10 @@ export const getResources = async (params: ResourcesQueryParams = {}): Promise<A
     console.log('API Response:', response.data);
     
     return response.data;
+    
   } catch (error) {
     console.error('Error fetching resources:', error);
     
-    // Re-throw the error so React Query can handle it properly
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || error.message || 'Failed to fetch resources');
     }

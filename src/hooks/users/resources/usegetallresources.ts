@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { getResources, ResourcesQueryParams, ApiResponse } from "@/services/resources/getResources";
+import { useSession } from "next-auth/react";
 
-// Hook options interface
 interface UseResourcesOptions {
   enabled?: boolean;
   staleTime?: number;
@@ -9,7 +9,6 @@ interface UseResourcesOptions {
   refetchOnWindowFocus?: boolean;
 }
 
-// Custom hook for fetching learning resources
 export const useGetAllResources = (
   params: ResourcesQueryParams = {},
   options: UseResourcesOptions = {}
@@ -21,7 +20,7 @@ export const useGetAllResources = (
     refetchOnWindowFocus = false,
   } = options;
 
-  // Use the exact params passed from the component - no internal state
+
   const queryParams: ResourcesQueryParams = {
     search: params.search || "",
     page: params.page || 1,
@@ -32,7 +31,7 @@ export const useGetAllResources = (
   };
 
   const queryResult: UseQueryResult<ApiResponse, Error> = useQuery({
-    queryKey: ["resources", queryParams], // Use the actual query params
+    queryKey: ["resources", queryParams],
     queryFn: () => getResources(queryParams),
     enabled,
     staleTime,
