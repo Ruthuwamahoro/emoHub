@@ -58,7 +58,7 @@ export const ChallengeElementForm: React.FC<ChallengeElementFormProps> = ({
         <form onSubmit={onSubmit} className="space-y-4">
           {/* Title Field */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="title" className="text-smfont-medium text-gray-700">
               Challenge Title <span className="text-red-500">*</span>
             </Label>
             <Input

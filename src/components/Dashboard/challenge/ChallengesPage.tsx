@@ -6,9 +6,11 @@ import { useCreateChallenge } from '@/hooks/challenges/useCreateChallenges';
 import { ChallengeElementForm } from './CreateChallengeElement';
 import { useDeleteChallengeElement } from '@/hooks/challenges/elements/useDeleteChallengesElement';
 import { useDeleteChallenge } from '@/hooks/challenges/useDeleteChallenges';
+import { useUpdateChallenge } from '@/hooks/challenges/useUpdateChallenge';
+import { useUpdateElementChallenge } from '@/hooks/challenges/elements/useUpdateElement';
 
 
-interface Challenge {
+export interface Challenge {
   id: string;
   title: string;
   description: string;
@@ -44,6 +46,18 @@ const WeeklyChallengesCard: React.FC = () => {
   
   const [deletingWeek, setDeletingWeek] = useState<string | null>(null);
   const [deletingElement, setDeletingElement] = useState<string | null>(null);
+  const updateWeekMutation = useUpdateChallenge();
+  const [editingWeek, setEditingWeek] = useState<string | null>(null);
+  const [weekEditForm, setWeekEditForm] = useState({
+    weekNumber: '',
+    theme: '',
+    startDate: '',
+    endDate: ''
+  });
+  const [updatingWeek, setUpdatingWeek] = useState<string | null>(null);
+  const updateElementMutation = useUpdateElementChallenge();
+
+  const [updatingElement, setUpdatingElement] = useState<string | null>(null);
 
   const [weeklyCards, setWeeklyCards] = useState<WeeklyCard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,6 +140,253 @@ const WeeklyChallengesCard: React.FC = () => {
     return { completedCount, totalCount, progressPercentage, isCompleted };
   };
 
+
+  const startEditingWeek = (cardId: string) => {
+    const card = weeklyCards.find(c => c.id === cardId);
+    if (card) {
+      setEditingWeek(cardId);
+      setWeekEditForm({
+        weekNumber: card.weekNumber.toString(),
+        theme: card.theme,
+        startDate: card.startDate.split('T')[0],
+        endDate: card.endDate.split('T')[0]
+      });
+    }
+  };
+
+
+  const handleWeekEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setWeekEditForm(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const saveEditedWeek = async () => {
+    if (!editingWeek) return;
+    
+    setUpdatingWeek(editingWeek);
+    
+    try {
+      const updateData = {
+        weekNumber: parseInt(weekEditForm.weekNumber),
+        theme: weekEditForm.theme,
+        startDate: weekEditForm.startDate,
+        endDate: weekEditForm.endDate
+      };
+
+      await updateWeekMutation.mutate({
+        id: editingWeek,
+        data: updateData
+      });
+
+      // Update local state optimistically
+      setWeeklyCards(prev => 
+        prev.map(card => 
+          card.id === editingWeek 
+            ? { 
+                ...card, 
+                weekNumber: updateData.weekNumber,
+                theme: updateData.theme,
+                startDate: updateData.startDate,
+                endDate: updateData.endDate
+              }
+            : card
+        )
+      );
+      
+      setEditingWeek(null);
+      setWeekEditForm({
+        weekNumber: '',
+        theme: '',
+        startDate: '',
+        endDate: ''
+      });
+    } catch (error) {
+      console.error('Update week failed:', error);
+    } finally {
+      setUpdatingWeek(null);
+    }
+  };
+
+  const cancelEditingWeek = () => {
+    setEditingWeek(null);
+    setWeekEditForm({
+      weekNumber: '',
+      theme: '',
+      startDate: '',
+      endDate: ''
+    });
+  };
+
+
+
+
+  const renderCardHeader = (card: WeeklyCard) => {
+    const { completedCount, totalCount, progressPercentage, isCompleted } = getCardProgress(card.challenges);
+    const isExpanded = expandedCards.has(card.id);
+    const isEditingThisWeek = editingWeek === card.id;
+    
+    return (
+      <div className="p-6 border-b border-gray-200">
+        {isEditingThisWeek ? (
+          // Edit Mode for Week
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Week Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  id="weekNumber"
+                  value={weekEditForm.weekNumber}
+                  onChange={handleWeekEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Theme <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="theme"
+                  value={weekEditForm.theme}
+                  onChange={handleWeekEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={weekEditForm.startDate}
+                  onChange={handleWeekEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  End Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={weekEditForm.endDate}
+                  onChange={handleWeekEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={saveEditedWeek}
+                disabled={updatingWeek === card.id}
+                className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                {updatingWeek === card.id ? 'Updating...' : 'Save Changes'}
+              </button>
+              <button
+                onClick={cancelEditingWeek}
+                className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          // View Mode for Week
+          <div 
+            className="cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => toggleCardExpansion(card.id)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-xl font-bold text-gray-800">Week {card.weekNumber}</h2>
+                  {isCompleted && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Completed
+                    </div>
+                  )}
+                  {canCreateResources && (
+                    <div className="flex gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditingWeek(card.id);
+                        }}
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Edit week"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteWeek(card.id);
+                        }}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete entire week"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <p className="text-gray-600 font-medium mb-2">{card.theme}</p>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Calendar className="w-4 h-4" />
+                  <span>{formatDate(card.startDate)} - {formatDate(card.endDate)}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-600 mb-1">
+                    {completedCount}/{totalCount} completed
+                  </div>
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        isCompleted 
+                          ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                          : 'bg-gradient-to-r from-blue-500 to-purple-600'
+                      }`}
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+
   const toggleChallenge = (cardId: string, challengeId: string) => {
     setWeeklyCards(prev => 
       prev.map(card => 
@@ -164,26 +425,44 @@ const WeeklyChallengesCard: React.FC = () => {
     }
   };
 
-  const saveEditedChallenge = () => {
+  const saveEditedChallenge = async () => {
     if (!editingChallenge) return;
     
-    setWeeklyCards(prev => 
-      prev.map(card => 
-        card.id === editingChallenge.cardId 
-          ? {
-              ...card,
-              challenges: card.challenges.map(challenge =>
-                challenge.id === editingChallenge.challengeId
-                  ? { ...challenge, title: editForm.title, description: editForm.description }
-                  : challenge
-              )
-            }
-          : card
-      )
-    );
+    setUpdatingElement(editingChallenge.challengeId);
     
-    setEditingChallenge(null);
-    setEditForm({ title: '', description: '' });
+    try {
+      await updateElementMutation.mutate({
+        id: editingChallenge.cardId,
+        ids: editingChallenge.challengeId,
+        data: {
+          title: editForm.title,
+          description: editForm.description
+        }
+      });
+      
+      // Only update local state if the API call succeeds
+      setWeeklyCards(prev => 
+        prev.map(card => 
+          card.id === editingChallenge.cardId 
+            ? {
+                ...card,
+                challenges: card.challenges.map(challenge =>
+                  challenge.id === editingChallenge.challengeId
+                    ? { ...challenge, title: editForm.title, description: editForm.description }
+                    : challenge
+                )
+              }
+            : card
+        )
+      );
+      
+      setEditingChallenge(null);
+      setEditForm({ title: '', description: '' });
+    } catch (error) {
+      console.error('Update challenge failed:', error);
+    } finally {
+      setUpdatingElement(null);
+    }
   };
 
   const cancelEditing = () => {
@@ -454,6 +733,8 @@ const WeeklyChallengesCard: React.FC = () => {
         
         return (
           <div key={card.id} className="bg-white rounded-xl shadow-lg border border-gray-200">
+             {renderCardHeader(card)}
+             {/* {expandedCards.has(card.id) && (
             <div 
               className="p-6 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => toggleCardExpansion(card.id)}
@@ -469,6 +750,18 @@ const WeeklyChallengesCard: React.FC = () => {
                       </div>
                     )}
                     {canCreateResources && (
+                      <>
+                      
+                      <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditingWeek(card.id);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Edit week"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -479,6 +772,7 @@ const WeeklyChallengesCard: React.FC = () => {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                      </>
                     )}
                   </div>
                   <p className="text-gray-600 font-medium mb-2">{card.theme}</p>
@@ -511,6 +805,8 @@ const WeeklyChallengesCard: React.FC = () => {
                 </div>
               </div>
             </div>
+          )} */}
+
 
             {/* Card Content */}
             {isExpanded && (
@@ -547,11 +843,13 @@ const WeeklyChallengesCard: React.FC = () => {
                               <div className="flex gap-2">
                                 <button
                                   onClick={saveEditedChallenge}
+                                  disabled={updatingElement === challenge.id}
+
                                   className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                                 >
                                   <Save className="w-4 h-4" />
-                                  Save
-                                </button>
+                                  {updatingElement === challenge.id ? 'Updating...' : 'Save'}
+                                  </button>
                                 <button
                                   onClick={cancelEditing}
                                   className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
