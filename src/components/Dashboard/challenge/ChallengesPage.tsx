@@ -4,6 +4,9 @@ import { useSession } from 'next-auth/react';
 import { usegetChallenges } from '@/hooks/challenges/useGetChallenges';
 import { useCreateChallenge } from '@/hooks/challenges/useCreateChallenges';
 import { ChallengeElementForm } from './CreateChallengeElement';
+import { useDeleteChallengeElement } from '@/hooks/challenges/elements/useDeleteChallengesElement';
+import { useDeleteChallenge } from '@/hooks/challenges/useDeleteChallenges';
+
 
 interface Challenge {
   id: string;
@@ -21,16 +24,13 @@ export interface WeeklyCard {
   challenges: Challenge[];
 }
 
-// Mock session - replace with your actual session logic
 interface User {
   id: string;
   name: string;
   role: 'User' | 'Admin' | 'Specialist' | 'SuperAdmin';
 }
 
-interface Session {
-  user: User;
-}
+
 
 type FilterType = 'all' | 'completed' | 'incomplete';
 
@@ -39,7 +39,12 @@ const WeeklyChallengesCard: React.FC = () => {
   const { data: session } = useSession();
   const { isPendingCreateChallenge, formData, setFormData, handleChange, handleSubmit } = useCreateChallenge();
 
-  // Initialize with empty array to prevent undefined errors
+  const deleteElementMutation = useDeleteChallengeElement();
+  const deleteChallengeMutation = useDeleteChallenge();
+  
+  const [deletingWeek, setDeletingWeek] = useState<string | null>(null);
+  const [deletingElement, setDeletingElement] = useState<string | null>(null);
+
   const [weeklyCards, setWeeklyCards] = useState<WeeklyCard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
@@ -47,10 +52,37 @@ const WeeklyChallengesCard: React.FC = () => {
   const [editingChallenge, setEditingChallenge] = useState<{cardId: string, challengeId: string} | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   
-  // Updated state for challenge element form
   const [isAddingChallenge, setIsAddingChallenge] = useState<string | null>(null);
   
   const [isAddingWeek, setIsAddingWeek] = useState(false);
+
+
+
+  const deleteChallenge = async (cardId: string, challengeId: string) => {
+    if (confirm('Are you sure you want to delete this challenge?')) {
+      setDeletingElement(challengeId);
+      try {
+        await deleteElementMutation.mutate({ challengeId: cardId, elementId: challengeId });
+      } catch (error) {
+        console.error('Delete failed:', error);
+      } finally {
+        setDeletingElement(null);
+      }
+    }
+  };
+  
+  const deleteWeek = async (cardId: string) => {
+    if (confirm('Are you sure you want to delete this entire week? This will remove all challenges in this week.')) {
+      setDeletingWeek(cardId);
+      try {
+        await deleteChallengeMutation.mutate({ id: cardId });
+      } catch (error) {
+        console.error('Delete failed:', error);
+      } finally {
+        setDeletingWeek(null);
+      }
+    }
+  };
 
   useEffect(() => {
     if (data?.data) {
@@ -159,20 +191,6 @@ const WeeklyChallengesCard: React.FC = () => {
     setEditForm({ title: '', description: '' });
   };
 
-  const deleteChallenge = (cardId: string, challengeId: string) => {
-    if (confirm('Are you sure you want to delete this challenge?')) {
-      setWeeklyCards(prev => 
-        prev.map(card => 
-          card.id === cardId 
-            ? {
-                ...card,
-                challenges: card.challenges.filter(challenge => challenge.id !== challengeId)
-              }
-            : card
-        )
-      );
-    }
-  };
 
   const startAddingChallenge = (cardId: string) => {
     setIsAddingChallenge(cardId);
@@ -210,20 +228,8 @@ const WeeklyChallengesCard: React.FC = () => {
     });
   };
 
-  const deleteWeek = (cardId: string) => {
-    if (confirm('Are you sure you want to delete this entire week? This will remove all challenges in this week.')) {
-      setWeeklyCards(prev => prev.filter(card => card.id !== cardId));
-      setExpandedCards(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(cardId);
-        return newSet;
-      });
-    }
-  };
 
-  // Filter cards based on search and filter criteria
   const filteredCards = useMemo(() => {
-    // Ensure weeklyCards is always an array
     if (!weeklyCards || !Array.isArray(weeklyCards)) {
       return [];
     }
@@ -231,7 +237,6 @@ const WeeklyChallengesCard: React.FC = () => {
     return weeklyCards.map(card => {
       let filteredChallenges = card.challenges || [];
 
-      // Apply search filter
       if (searchQuery.trim()) {
         filteredChallenges = filteredChallenges.filter(challenge =>
           challenge.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -240,7 +245,6 @@ const WeeklyChallengesCard: React.FC = () => {
         );
       }
 
-      // Apply status filter
       if (filter === 'completed') {
         filteredChallenges = filteredChallenges.filter(challenge => challenge.completed);
       } else if (filter === 'incomplete') {
@@ -254,9 +258,7 @@ const WeeklyChallengesCard: React.FC = () => {
     }).filter(card => card.challenges.length > 0 || searchQuery.trim() === '');
   }, [weeklyCards, searchQuery, filter]);
 
-  // Overall progress across all weeks
   const overallProgress = useMemo(() => {
-    // Ensure weeklyCards is always an array
     if (!weeklyCards || !Array.isArray(weeklyCards)) {
       return { completedCount: 0, totalCount: 0, progressPercentage: 0 };
     }
@@ -269,7 +271,6 @@ const WeeklyChallengesCard: React.FC = () => {
     return { completedCount, totalCount, progressPercentage };
   }, [weeklyCards]);
 
-  // Show loading state
   if (isPending) {
     return (
       <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -297,7 +298,6 @@ const WeeklyChallengesCard: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header with Overall Progress */}
       <div className="rounded-xl shadow-lg border border-gray-200 p-6">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-3xl font-bold text-gray-800">Emotional Intelligence Journey</h1>
@@ -307,7 +307,6 @@ const WeeklyChallengesCard: React.FC = () => {
           </div>
         </div>
         
-        {/* Overall Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-600">Overall Progress</span>
@@ -324,7 +323,6 @@ const WeeklyChallengesCard: React.FC = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -336,7 +334,6 @@ const WeeklyChallengesCard: React.FC = () => {
           />
         </div>
 
-        {/* Filter Buttons */}
         <div className="flex gap-2 justify-between items-center">
           <div className="flex gap-2">
             {(['all', 'completed', 'incomplete'] as FilterType[]).map((filterType) => (
@@ -354,7 +351,6 @@ const WeeklyChallengesCard: React.FC = () => {
             ))}
           </div>
           
-          {/* Add New Week Button */}
           {canCreateResources && (
             <button
               onClick={startAddingWeek}
@@ -367,7 +363,6 @@ const WeeklyChallengesCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Add New Week Form */}
       {canCreateResources && isAddingWeek && (
         <form onSubmit={handleWeekFormSubmit}>
           <div className="bg-white rounded-xl shadow-lg border-2 border-dashed border-green-300 p-6">
@@ -453,14 +448,12 @@ const WeeklyChallengesCard: React.FC = () => {
         </form>
       )}
 
-      {/* Weekly Cards */}
       {filteredCards.map((card) => {
         const { completedCount, totalCount, progressPercentage, isCompleted } = getCardProgress(card.challenges);
         const isExpanded = expandedCards.has(card.id);
         
         return (
           <div key={card.id} className="bg-white rounded-xl shadow-lg border border-gray-200">
-            {/* Card Header */}
             <div 
               className="p-6 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => toggleCardExpansion(card.id)}
