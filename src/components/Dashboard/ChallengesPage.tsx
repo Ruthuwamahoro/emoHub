@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp, Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { usegetChallenges } from '@/hooks/users/groups/challenges/useGetChallenges';
+import { usegetChallenges } from '@/hooks/challenges/useGetChallenges';
+import { useCreateChallenge } from '@/hooks/challenges/useCreateChallenges';
 
 interface Challenge {
   id: string;
@@ -10,7 +11,7 @@ interface Challenge {
   completed: boolean;
 }
 
-interface WeeklyCard {
+export interface WeeklyCard {
   id: string;
   weekNumber: number;
   startDate: string;
@@ -40,6 +41,7 @@ type FilterType = 'all' | 'completed' | 'incomplete';
 const WeeklyChallengesCard: React.FC = () => {
   const { data, isPending } = usegetChallenges();
   const { data: session } = useSession();
+  const { isPendingCreateChallenge, formData, setFormData,handleChange, handleSubmit } = useCreateChallenge();
 
   // Initialize with empty array to prevent undefined errors
   const [weeklyCards, setWeeklyCards] = useState<WeeklyCard[]>([]);
@@ -73,6 +75,26 @@ const WeeklyChallengesCard: React.FC = () => {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+
+
+  const handleWeekFormSubmit = async(e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await handleSubmit(e);
+    setTimeout(() => {
+      if(result?.success){
+
+        setIsAddingWeek(false);
+        setFormData({
+          weekNumber: '',
+          theme: '',
+          startDate: '',
+          endDate: ''
+        })
+      }
+    }, 5000)
+
   };
 
   const getCardProgress = (challenges: Challenge[]) => {
@@ -304,7 +326,7 @@ const WeeklyChallengesCard: React.FC = () => {
           </div>
         </div>
         <div className="space-y-4">
-          {[1, 2, 3].map(i => (
+          {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
               <div className="animate-pulse">
                 <div className="h-6 bg-gray-200 rounded w-1/4 mb-2"></div>
@@ -391,70 +413,89 @@ const WeeklyChallengesCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Add New Week Form */}
       {canCreateResources && isAddingWeek && (
-        <div className="bg-white rounded-xl shadow-lg border-2 border-dashed border-green-300 p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Create New Weekly Challenge</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Week Theme <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={newWeekForm.theme}
-                onChange={(e) => setNewWeekForm({ ...newWeekForm, theme: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                placeholder="e.g., Self-Awareness Foundation"
-                autoFocus
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleWeekFormSubmit}>
+          <div className="bg-white rounded-xl shadow-lg border-2 border-dashed border-green-300 p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Create New Weekly Challenge</h2>
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date <span className="text-red-500">*</span>
+                  Week Number <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
-                  value={newWeekForm.startDate}
-                  onChange={(e) => setNewWeekForm({ ...newWeekForm, startDate: e.target.value })}
+                  type="number"
+                  id="weekNumber"
+                  value={formData.weekNumber}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  placeholder="e.g., 1"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Week Theme <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="theme"
+                  value={formData.theme}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  placeholder="e.g., Self-Awareness Foundation"
+                  autoFocus
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={newWeekForm.endDate}
-                  onChange={(e) => setNewWeekForm({ ...newWeekForm, endDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    value={formData.startDate}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    value={formData.endDate}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={isPendingCreateChallenge}
+                  className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  {isPendingCreateChallenge ? 'Creating...' : 'Create Week'}
+                </button>
+                <button
+                  onClick={cancelAddingWeek}
+                  className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
               </div>
             </div>
-            
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={saveNewWeek}
-                disabled={!newWeekForm.theme.trim() || !newWeekForm.startDate || !newWeekForm.endDate}
-                className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                <Save className="w-4 h-4" />
-                Create Week
-              </button>
-              <button
-                onClick={cancelAddingWeek}
-                className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cancel
-              </button>
-            </div>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Weekly Cards */}

@@ -18,8 +18,8 @@ import Image from 'next/image';
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useParams } from 'next/navigation';
-import { useGetChallenges } from '@/hooks/users/groups/challenges/useGetChallenges';
-import { useGetAllChallengesElements } from '@/hooks/users/groups/challenges/elements/useGetAllChallengesElements';
+import { useGetChallenges } from '@/hooks/challenges/useGetChallenges';
+import { useGetAllChallengesElements } from '@/hooks/challenges/elements/useGetAllChallengesElements';
 import CreatePostModal from '@/components/Dashboard/CreatePostModal';
 import PostsList from '@/components/Dashboard/Posts/PostsList';
 

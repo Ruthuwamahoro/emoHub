@@ -1,48 +1,67 @@
 import db from "@/server/db";
 import { ChallengeElements, Challenges } from "@/server/db/schema";
-import { checkIfUserIsAdmin, checkIfUserIsSpecialists, checkIfUserIsSuperAdmin, getUserIdFromSession } from "@/utils/getUserIdFromSession";
+import { 
+  checkIfUserIsAdmin, 
+  checkIfUserIsSpecialists, 
+  checkIfUserIsSuperAdmin, 
+  getUserIdFromSession 
+} from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
-import { eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { NextRequest } from "next/server";
-import { WeekNumber } from "react-day-picker";
-import { BsGooglePlay } from "react-icons/bs";
 
-export async function POST(req:NextRequest){
-    try {
-        const [isAdmin, isSpecialists, isSuperAdmin] = await Promise.all([
-            checkIfUserIsAdmin(),
-            checkIfUserIsSpecialists(),
-            checkIfUserIsSuperAdmin()
-          ])
-      
-          const isAuthorized = isAdmin || isSpecialists || isSuperAdmin;
-          const userId = await getUserIdFromSession();
-      
-          if(!isAuthorized || !userId){
-            return sendResponse(401, null, "Unauthorized");
-          }
+export async function POST(req: NextRequest) {
+  try {
+    console.log('API: POST request received');
+    
+    const [isAdmin, isSpecialists, isSuperAdmin] = await Promise.all([
+      checkIfUserIsAdmin(),
+      checkIfUserIsSpecialists(),
+      checkIfUserIsSuperAdmin()
+    ]);
 
-        const body  = await req.json();
-        const now = new Date();
-        const insertedData = {
-            ...body,
-            user_id: userId,
-            startDate: new Date(body.startDate),
-            endDate: new Date(body.endDate),
-            created_at: now,
-            updated_at: now,
-        }
-        await db.insert(Challenges).values(
-          insertedData
-        )
+    const isAuthorized = isAdmin || isSpecialists || isSuperAdmin;
+    const userId = await getUserIdFromSession();
 
-        return sendResponse(200, null, 'Challenge created successful')
-
-    } catch (error) {
-        const err = error instanceof Error ? error?.message : 'An expected error occured';
-        return sendResponse(500, null, err);
+    if (!isAuthorized || !userId) {
+      console.log('API: Unauthorized access attempt');
+      return sendResponse(401, null, "Unauthorized");
     }
+
+    const body = await req.json();
+    console.log('API: Request body:', body);
+
+    // Validate required fields
+    if (!body.weekNumber || !body.startDate || !body.endDate || !body.theme) {
+      console.log('API: Missing required fields');
+      return sendResponse(400, null, "Missing required fields");
+    }
+
+    const now = new Date();
+    const insertedData = {
+      weekNumber: parseInt(body.weekNumber) || 0, // Convert to number if needed
+      theme: body.theme,
+      startDate: new Date(body.startDate),
+      endDate: new Date(body.endDate),
+      user_id: userId,
+      created_at: now,
+      updated_at: now,
+    };
+
+    console.log('API: Data to insert:', insertedData);
+
+    const result = await db.insert(Challenges).values(insertedData);
+    console.log('API: Insert result:', result);
+
+    return sendResponse(200, insertedData, 'Challenge created successfully');
+    
+  } catch (error) {
+    console.error('API: Error in POST:', error);
+    const err = error instanceof Error ? error.message : 'An unexpected error occurred';
+    return sendResponse(500, null, err);
+  }
 }
+
 
 
 export async function GET(req: NextRequest) {
@@ -53,7 +72,7 @@ export async function GET(req: NextRequest) {
       startDate: Challenges.startDate,
       endDate: Challenges.endDate,
       theme: Challenges.theme,
-    }).from(Challenges);
+    }).from(Challenges).orderBy(desc(Challenges.created_at));
 
     const challengeElements = await db.select({
       id: ChallengeElements.id,
