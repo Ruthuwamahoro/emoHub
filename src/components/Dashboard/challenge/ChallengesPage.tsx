@@ -3,6 +3,7 @@ import { Search, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp, Plus, E
 import { useSession } from 'next-auth/react';
 import { usegetChallenges } from '@/hooks/challenges/useGetChallenges';
 import { useCreateChallenge } from '@/hooks/challenges/useCreateChallenges';
+import { ChallengeElementForm } from './CreateChallengeElement';
 
 interface Challenge {
   id: string;
@@ -31,17 +32,12 @@ interface Session {
   user: User;
 }
 
-
-
-
-
-
 type FilterType = 'all' | 'completed' | 'incomplete';
 
 const WeeklyChallengesCard: React.FC = () => {
   const { data, isPending } = usegetChallenges();
   const { data: session } = useSession();
-  const { isPendingCreateChallenge, formData, setFormData,handleChange, handleSubmit } = useCreateChallenge();
+  const { isPendingCreateChallenge, formData, setFormData, handleChange, handleSubmit } = useCreateChallenge();
 
   // Initialize with empty array to prevent undefined errors
   const [weeklyCards, setWeeklyCards] = useState<WeeklyCard[]>([]);
@@ -50,21 +46,17 @@ const WeeklyChallengesCard: React.FC = () => {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set(['week-1']));
   const [editingChallenge, setEditingChallenge] = useState<{cardId: string, challengeId: string} | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '' });
+  
+  // Updated state for challenge element form
   const [isAddingChallenge, setIsAddingChallenge] = useState<string | null>(null);
-  const [newChallengeForm, setNewChallengeForm] = useState({ title: '', description: '' });
+  
   const [isAddingWeek, setIsAddingWeek] = useState(false);
-  const [newWeekForm, setNewWeekForm] = useState({
-    theme: '',
-    startDate: '',
-    endDate: ''
-  });
 
   useEffect(() => {
     if (data?.data) {
       setWeeklyCards(data.data);
     }
   }, [data]);
-
 
   const canCreateResources = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
 
@@ -77,14 +69,11 @@ const WeeklyChallengesCard: React.FC = () => {
     });
   };
 
-
-
   const handleWeekFormSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     const result = await handleSubmit(e);
     setTimeout(() => {
       if(result?.success){
-
         setIsAddingWeek(false);
         setFormData({
           weekNumber: '',
@@ -94,7 +83,6 @@ const WeeklyChallengesCard: React.FC = () => {
         })
       }
     }, 5000)
-
   };
 
   const getCardProgress = (challenges: Challenge[]) => {
@@ -188,34 +176,15 @@ const WeeklyChallengesCard: React.FC = () => {
 
   const startAddingChallenge = (cardId: string) => {
     setIsAddingChallenge(cardId);
-    setNewChallengeForm({ title: '', description: '' });
   };
 
-  const saveNewChallenge = () => {
-    if (!isAddingChallenge || !newChallengeForm.title.trim()) return;
-    
-    const newChallenge: Challenge = {
-      id: `${isAddingChallenge}-${Date.now()}`,
-      title: newChallengeForm.title,
-      description: newChallengeForm.description,
-      completed: false
-    };
-
-    setWeeklyCards(prev => 
-      prev.map(card => 
-        card.id === isAddingChallenge 
-          ? { ...card, challenges: [...card.challenges, newChallenge] }
-          : card
-      )
-    );
-    
+  const handleChallengeElementSuccess = () => {
     setIsAddingChallenge(null);
-    setNewChallengeForm({ title: '', description: '' });
+    // The form will automatically refresh the data via query invalidation
   };
 
   const cancelAddingChallenge = () => {
     setIsAddingChallenge(null);
-    setNewChallengeForm({ title: '', description: '' });
   };
 
   const startAddingWeek = () => {
@@ -223,36 +192,22 @@ const WeeklyChallengesCard: React.FC = () => {
     const today = new Date();
     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
     
-    setNewWeekForm({
+    setFormData({
+      weekNumber: '',
       theme: '',
       startDate: today.toISOString().split('T')[0],
       endDate: nextWeek.toISOString().split('T')[0]
     });
   };
 
-  const saveNewWeek = () => {
-    if (!newWeekForm.theme.trim()) return;
-    if (weeklyCards.length === 0) return;
-    
-    const nextWeekNumber = Math.max(...weeklyCards.map(card => card.weekNumber)) + 1;
-    const newWeek: WeeklyCard = {
-      id: `week-${nextWeekNumber}`,
-      weekNumber: nextWeekNumber,
-      startDate: newWeekForm.startDate,
-      endDate: newWeekForm.endDate,
-      theme: newWeekForm.theme,
-      challenges: []
-    };
-
-    setWeeklyCards(prev => [...prev, newWeek]);
-    setExpandedCards(prev => new Set([...prev, newWeek.id]));
-    setIsAddingWeek(false);
-    setNewWeekForm({ theme: '', startDate: '', endDate: '' });
-  };
-
   const cancelAddingWeek = () => {
     setIsAddingWeek(false);
-    setNewWeekForm({ theme: '', startDate: '', endDate: '' });
+    setFormData({
+      weekNumber: '',
+      theme: '',
+      startDate: '',
+      endDate: ''
+    });
   };
 
   const deleteWeek = (cardId: string) => {
@@ -340,7 +295,6 @@ const WeeklyChallengesCard: React.FC = () => {
     );
   }
 
-
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header with Overall Progress */}
@@ -413,6 +367,7 @@ const WeeklyChallengesCard: React.FC = () => {
         </div>
       </div>
 
+      {/* Add New Week Form */}
       {canCreateResources && isAddingWeek && (
         <form onSubmit={handleWeekFormSubmit}>
           <div className="bg-white rounded-xl shadow-lg border-2 border-dashed border-green-300 p-6">
@@ -444,7 +399,6 @@ const WeeklyChallengesCard: React.FC = () => {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   placeholder="e.g., Self-Awareness Foundation"
-                  autoFocus
                 />
               </div>
               
@@ -486,6 +440,7 @@ const WeeklyChallengesCard: React.FC = () => {
                   {isPendingCreateChallenge ? 'Creating...' : 'Create Week'}
                 </button>
                 <button
+                  type="button"
                   onClick={cancelAddingWeek}
                   className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
@@ -665,44 +620,15 @@ const WeeklyChallengesCard: React.FC = () => {
                         </div>
                       ))}
                       
-                      {/* Add New Challenge Form */}
+                      {/* Add New Challenge Element Form */}
                       {canCreateResources && isAddingChallenge === card.id && (
-                        <div className="p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
-                          <div className="space-y-3">
-                            <input
-                              type="text"
-                              value={newChallengeForm.title}
-                              onChange={(e) => setNewChallengeForm({ ...newChallengeForm, title: e.target.value })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                              placeholder="Challenge title"
-                              autoFocus
-                            />
-                            <textarea
-                              value={newChallengeForm.description}
-                              onChange={(e) => setNewChallengeForm({ ...newChallengeForm, description: e.target.value })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-                              rows={3}
-                              placeholder="Challenge description"
-                            />
-                            <div className="flex gap-2">
-                              <button
-                                onClick={saveNewChallenge}
-                                disabled={!newChallengeForm.title.trim()}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
-                              >
-                                <Save className="w-4 h-4" />
-                                Add Challenge
-                              </button>
-                              <button
-                                onClick={cancelAddingChallenge}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                              >
-                                <X className="w-4 h-4" />
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                        <ChallengeElementForm
+                          challengeId={card.id}
+                          onSuccess={handleChallengeElementSuccess}
+                          onCancel={cancelAddingChallenge}
+                          isFirstChallenge={card.challenges.length === 0}
+                          className="mt-4"
+                        />
                       )}
 
                       {/* Add Challenge Button */}
@@ -720,13 +646,12 @@ const WeeklyChallengesCard: React.FC = () => {
                     <div className="text-center py-8 text-gray-500">
                       <p>No challenges found matching your criteria for this week.</p>
                       {canCreateResources && (
-                        <button
-                          onClick={() => startAddingChallenge(card.id)}
-                          className="mt-3 flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Add First Challenge
-                        </button>
+                        <ChallengeElementForm
+                          challengeId={card.id}
+                          onSuccess={handleChallengeElementSuccess}
+                          isFirstChallenge={true}
+                          className="mt-4"
+                        />
                       )}
                     </div>
                   )}

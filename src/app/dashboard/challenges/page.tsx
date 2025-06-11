@@ -1,5 +1,5 @@
 "use client"
-import WeeklyChallengesCard from "@/components/Dashboard/ChallengesPage";
+import WeeklyChallengesCard from "@/components/Dashboard/challenge/ChallengesPage";
 
 
 
