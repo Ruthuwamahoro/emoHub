@@ -458,7 +458,7 @@ export default function LearningResourcesUI() {
                 <p className="text-gray-600 text-center">
                   {showSavedOnly 
                     ? "You haven't saved any resources yet." 
-                    : "No learning resources match your current filters. Try adjusting your search criteria."
+                    : " "
                   }
                 </p>
                 {(debouncedSearchTerm || selectedCategory || selectedDifficulty) && (

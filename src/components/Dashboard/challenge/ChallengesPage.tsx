@@ -996,7 +996,7 @@ useEffect(() => {
 
       {filteredCards.length === 0 && (
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
-          <p className="text-gray-500 text-lg">No weekly challenges found matching your search criteria.</p>
+          <p className="text-gray-500 text-lg">No weekly challenges found</p>
         </div>
       )}
     </div>
