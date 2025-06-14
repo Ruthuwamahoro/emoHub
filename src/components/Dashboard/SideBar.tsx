@@ -1,221 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  IconArrowLeft,
-  IconSettings,
-  IconUsers,
-  IconShieldCheck,
-  IconReport,
-  IconDatabase,
-} from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { FaHome, FaRobot, FaUserMd, FaChartLine } from "react-icons/fa";
-import { TiGroup } from "react-icons/ti";
-import { MdEventRepeat, MdHelpOutline, MdOutlineCalendarToday, MdAdminPanelSettings } from "react-icons/md";
-import { SiGoogleanalytics } from "react-icons/si";
 import { Button } from "../ui/button";
-import { RiMentalHealthFill } from "react-icons/ri";
-import { GrResources } from "react-icons/gr";
-import { useSession } from "next-auth/react";
+import { useSession , signOut} from "next-auth/react";
 import { Brain } from "lucide-react";
+import { getInitials } from "./TopNav";
+import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
+import { AvatarImage } from "../ui/avatar";
+import { CircleUser } from "lucide-react";
+import { COMMON_LINKS, ROLE_BASED_LINKS } from "@/constants/roles";
+import { useRouter } from "next/navigation";
 
-const roleBasedLinks = {
-  user: [
-    {
-      label: "Home",
-      href: "/dashboard",
-      icon: <FaHome className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Plan/Daily Health",
-      href: "/dashboard/dayplan",
-      icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Weekly challenges",
-      href: "/dashboard/challenges",
-      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Resources",
-      href: "/dashboard/resources",
-      icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Groups/Community",
-      href: "/dashboard/community",
-      icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Events",
-      href: "/dashboard/events",
-      icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Emotions Insights",
-      href: "/dashboard/emotions",
-      icon: <SiGoogleanalytics className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Ask AI",
-      href: "/dashboard/askus",
-      icon: <FaRobot className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-  ],
 
-  specialist: [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: <FaHome className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "My Patients",
-      href: "/dashboard/patients",
-      icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Appointments",
-      href: "/dashboard/appointments",
-      icon: <MdOutlineCalendarToday className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Treatment Plans",
-      href: "/dashboard/treatment-plans",
-      icon: <FaUserMd className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Patient Analytics",
-      href: "/dashboard/patient-analytics",
-      icon: <FaChartLine className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Resources",
-      href: "/dashboard/resources",
-      icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Professional Groups",
-      href: "/dashboard/pro-community",
-      icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Events & Training",
-      href: "/dashboard/events",
-      icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-  ],
 
-  admin: [
-    {
-      label: "Admin Dashboard",
-      href: "/admin/dashboard",
-      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "User Management",
-      href: "/dashboard/admin/usermanagement",
-      icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Weekly challenges",
-      href: "/dashboard/challenges",
-      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Content Management",
-      href: "/dashboard/resources",
-      icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Analytics & Reports",
-      href: "/admin/analytics",
-      icon: <IconReport className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Community Management",
-      href: "/dashboard/community",
-      icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Events Management",
-      href: "/admin/events",
-      icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "System Settings",
-      href: "/admin/settings",
-      icon: <IconSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-  ],
 
-  superadmin: [
-    {
-      label: "Super Admin Panel",
-      href: "/superadmin/dashboard",
-      icon: <IconShieldCheck className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "System Overview",
-      href: "/superadmin/overview",
-      icon: <IconDatabase className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Admin Management",
-      href: "/superadmin/admins",
-      icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "All Users",
-      href: "/superadmin/all-users",
-      icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Platform Analytics",
-      href: "/superadmin/platform-analytics",
-      icon: <IconReport className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "System Configuration",
-      href: "/superadmin/config",
-      icon: <IconSettings className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Security Logs",
-      href: "/superadmin/security",
-      icon: <IconShieldCheck className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Database Management",
-      href: "/superadmin/database",
-      icon: <IconDatabase className="text-white h-5 w-5 flex-shrink-0" />,
-    },
-  ],
-};
 
-const commonLinks = [
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: <IconSettings className="text-white h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Help & Support",
-    href: "/help",
-    icon: <MdHelpOutline className="text-white h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Logout",
-    href: "/auth/logout",
-    icon: <IconArrowLeft className="text-white h-5 w-5 flex-shrink-0" />,
-  },
-];
 
-// Loading skeleton component
+
 const SidebarSkeleton = ({ open }: { open: boolean }) => (
   <div className={cn("h-screen")}>
     <Sidebar open={open} setOpen={() => {}}>
@@ -244,43 +48,71 @@ const SidebarSkeleton = ({ open }: { open: boolean }) => (
   </div>
 );
 
+
+export const CustomSiderbarLink = ({link}: {link:any}) => {
+  const router = useRouter();
+  const handleClick = async(e: React.MouseEvent)=> {
+    if(link.href === '/auth/logout'){
+      e.preventDefault();
+      try {
+        await signOut({
+          redirect: false,
+          callbackUrl:"/login"
+        })
+        router.push("/login")
+        
+      } catch (error) {
+        return error
+      }
+    }
+  }
+  if(link.href === '/auth/logout'){
+    return (
+      <button onClick={handleClick} className="flex items-center justify-start gap-2 group/sidebar py-2 rounded-md hover:bg-slate-800 transition-colors w-full text-left">
+
+
+        {link.icon}
+        <span className="text-white text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
+          {link.label}
+        </span>
+      </button>
+    )
+  }
+  return <SidebarLink link={link} />;
+
+}
+
 export function SidebarDemo() {
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
-  const [allLinks, setAllLinks] = useState(roleBasedLinks.user);
+  const [allLinks, setAllLinks] = useState(ROLE_BASED_LINKS.user);
 
-  // Ensure component is mounted on client side
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Update role and links when session changes
   useEffect(() => {
     if (session?.user?.role) {
       const role = session.user.role.toLowerCase();
       setUserRole(role);
       
-      const roleLinks = roleBasedLinks[role as keyof typeof roleBasedLinks] || roleBasedLinks.user;
-      setAllLinks([...roleLinks, ...commonLinks]);
+      const roleLinks = ROLE_BASED_LINKS[role as keyof typeof ROLE_BASED_LINKS] || ROLE_BASED_LINKS.user;
+      setAllLinks([...roleLinks, ...COMMON_LINKS]);
     } else if (mounted) {
-      // Default to user role if no session but component is mounted
-      setAllLinks([...roleBasedLinks.user, ...commonLinks]);
+      setAllLinks([...ROLE_BASED_LINKS.user, ...COMMON_LINKS]);
     }
   }, [session, mounted]);
 
-  // Don't render anything until mounted (prevents hydration mismatch)
   if (!mounted) {
     return null;
   }
 
-  // Show loading state
   if (status === "loading") {
     return <SidebarSkeleton open={open} />;
   }
 
-  // Show login prompt if no session
   if (!session) {
     return (
       <div className={cn("h-screen")}>
@@ -306,7 +138,6 @@ export function SidebarDemo() {
   }
 
   const userName = session.user?.fullName || session.user?.username || "User";
-  const userImage = session.user?.profilePicUrl || "https://assets.aceternity.com/manu.png";
 
   return (
     <div className={cn("h-screen")}>
@@ -317,7 +148,7 @@ export function SidebarDemo() {
             
             <div className="mt-8 flex flex-col gap-2 text-white">
               {allLinks.map((link, idx) => (
-                <SidebarLink key={`${link.href}-${idx}`} link={link} />
+                <CustomSiderbarLink key={`${link.href}-${idx}`} link={link} />
               ))}
             </div>
           </div>
@@ -325,36 +156,48 @@ export function SidebarDemo() {
           <div className="relative">
             {open ? (
               <Button className="p-[3px] relative w-full bg-transparent hover:bg-transparent">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg border-none" />
+                <div className="absolute inset-0 bg-gray-400 rounded-lg border-none" />
                 <div className="px-8 py-2 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent border-none w-full">
-                  <SidebarLink
-                    link={{
-                      label: userName,
-                      href: "/profile",
-                      icon: (
-                        <Image
-                          src={userImage}
-                          className="h-7 w-7 flex-shrink-0 rounded-full"
-                          width={50}
-                          height={50}
-                          alt={`${userName} avatar`}
-                        />
-                      ),
-                    }}
-                  />
+                  {session ? (
+                    <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
+                      <AvatarImage>
+                        src={session?.user?.profilePicUrl || ""}
+                        alt={session?.user?.fullName || ""}
+                      </AvatarImage>
+                      <AvatarFallback className="text-white test-sm font-medium">
+                        {getInitials(session?.user?.fullName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        <CircleUser className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <span className="pl-5">{userName}</span>
                 </div>
               </Button>
             ) : (
               <Link href="/profile" className="flex justify-center">
-                <div className="p-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105">
-                  <Image
-                    src={userImage}
-                    className="h-8 w-8 rounded-full"
-                    width={32}
-                    height={32}
-                    alt={`${userName} avatar`}
-                    title={userName}
-                  />
+                <div className="p-10 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105">
+                {session ? (
+                    <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
+                      <AvatarImage>
+                        src={session?.user?.profilePicUrl || ""}
+                        alt={session?.user?.fullName || ""}
+                      </AvatarImage>
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-2 rounded-full text-sm font-medium">
+                        {getInitials(session.user.fullName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        <CircleUser className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                 </div>
               </Link>
             )}

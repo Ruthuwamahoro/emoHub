@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  decimal,
   integer,
   json,
   jsonb,
@@ -350,6 +351,10 @@ const Challenges = pgTable("Challenges", {
   endDate: timestamp("end_date").notNull(),
   theme: varchar("theme", { length: 255 }).notNull(),
   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  total_elements: integer("total_elements").default(0),
+  completed_elements: integer("completed_elements").default(0),
+  completed_percentage: decimal("completion_percentage", { precision: 5, scale: 2}).default("0"),
+  is_week_completed: boolean("is_week_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -362,8 +367,25 @@ const ChallengeElements = pgTable("challenge_elements", {
   title: varchar("title", { length: 255}).notNull(),
   description: varchar("description", { length: 255}).notNull(),
   completed: boolean("is_completed").default(false),
+  completed_at: timestamp("completed_at"),
+  completed_by: uuid("completed_by").references(() => User.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const UserProgress = pgTable('user_progress', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  user_id: varchar('user_id', { length: 255 }).notNull(),
+  total_weeks: integer('total_weeks').default(0),
+  completed_weeks: integer('completed_weeks').default(0),
+  total_challenges: integer('total_challenges').default(0),
+  completed_challenges: integer('completed_challenges').default(0), 
+  overall_completion_percentage: varchar('overall_completion_percentage', { length: 10 }).default('0.00'),
+  current_streak: integer('current_streak').default(0),
+  longest_streak: integer('longest_streak').default(0),
+  last_activity_date: timestamp('last_activity_date').defaultNow(),
+  created_at: timestamp('created_at').defaultNow(),
+  updated_at: timestamp('updated_at').defaultNow(),
 });
 
 

@@ -7,6 +7,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Zap } from 'lucide-react';
 import { Brain } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 const EmoHubDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState('March 2020');
@@ -30,6 +31,9 @@ const EmoHubDashboard = () => {
     { name: 'Comments', value: 32, color: '#F59E0B' },
     { name: 'Likes', value: 28, color: '#8B5CF6' }
   ];
+  const {data: session} = useSession();
+
+  const fullName = session?.user?.fullName?.split(" ")[0] || '';
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -39,7 +43,7 @@ const EmoHubDashboard = () => {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome <span className="text-orange-500">Alex</span>!
+              Welcome <span className="text-orange-500">{fullName}</span>!
             </h1>
             <p className="text-gray-600">
               Your personal space for emotional growth and meaningful conversations

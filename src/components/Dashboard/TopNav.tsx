@@ -9,16 +9,23 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
 import { useSession } from "next-auth/react";
+
+
+
+
+export const getInitials = (name?: string) => {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+};
 
 export default function HeaderDashboard() {
   const isLoading = false;
@@ -27,14 +34,7 @@ export default function HeaderDashboard() {
 
   const { data: session, status } = useSession();
 
-  const getInitials = (name?: string) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
+
 
   const notifications = [
     {
