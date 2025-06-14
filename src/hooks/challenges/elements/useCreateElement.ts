@@ -35,9 +35,9 @@ export const useCreateChallengeElement = (challengeId: string) => {
       setErrors({});
       showToast(response.message || "Challenge element created successfully", "success");
       
-      // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["Challenges"] });
       queryClient.invalidateQueries({ queryKey: ["Challenge", challengeId] });
+      queryClient.invalidateQueries({ queryKey: ['user-progress'] });
     },
     onError: (err: unknown) => {
       const error = err as Error;
@@ -54,7 +54,6 @@ export const useCreateChallengeElement = (challengeId: string) => {
       [id]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
 
-    // Clear error for this field when user starts typing
     if (errors[id]) {
       setErrors(prev => {
         const { [id]: _, ...rest } = prev;

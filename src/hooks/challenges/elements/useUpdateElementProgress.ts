@@ -1,7 +1,6 @@
 import { updateElementProgress, UpdateElementProgressRequest, UpdateElementProgressResponse } from '@/services/challenges/challengeProgressService';
 import showToast from '@/utils/showToast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
 
 interface UpdateElementProgressMutationParams {
   challengeId: string;
@@ -18,7 +17,7 @@ export const useUpdateElementProgress = () => {
   >({
     mutationFn: ({ challengeId, data }) => updateElementProgress(challengeId, data),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['challenges'] });
+      queryClient.invalidateQueries({ queryKey: ['Challenges'] });
       queryClient.invalidateQueries({ queryKey: ['user-progress'] });
       
       const message = data.completed 

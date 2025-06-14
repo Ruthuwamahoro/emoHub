@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       challenge_id: ChallengeElements.challenge_id,
       title: ChallengeElements.title,
       description: ChallengeElements.description,
-      completed: ChallengeElements.completed,
+      completed: ChallengeElements.is_completed,
     }).from(ChallengeElements);
 
     const elementsMap = challengeElements.reduce((acc, element) => {
