@@ -171,13 +171,6 @@ const Event = pgTable("events", {
 
 
 
-const VideoCallStatus = pgEnum("video_call_status", [
-  "SCHEDULED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "CANCELLED",
-]);
-
 
 
 const AIConversation = pgTable("ai_conversations", {
@@ -225,6 +218,14 @@ const GroupCategories = pgTable("GroupCategories", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// const GroupRoles = pgTable("GroupRoles", {
+//   id: uuid("id").primaryKey().defaultRandom(),
+//   user_id: uuid("user_id").references(() => User.id, { onDelete: 'cascade'}),
+//   group_id: uuid("group_id").references(() => Group.id, { onDelete: "cascade"}),
+//   role: varchar("role", { length: 50 }).notNull(), // 'owner' | 'member' | 'pending' | 'moderator'
+//   assigned_at: timestamp("assigned_at").defaultNow(),
+// })
 
 const Group = pgTable("groups", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -418,7 +419,7 @@ const learningResources = pgTable('learning_resources', {
   description: text('description').notNull(),
   coverImage: text('cover_image'),
   userId: uuid('user_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
-  resourceType: resourceTypeEnum('resource_type').notNull(),
+  resourceType: resourceTypeEnum('resourceType').notNull(),
   content: text('content').notNull(),
   url: text('url'),
   thumbnailUrl: text('thumbnail_url'),
@@ -426,8 +427,11 @@ const learningResources = pgTable('learning_resources', {
   category: emotionCategoryEnum('category').notNull(),
   tags: text('tags').array(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  isPublished: boolean('is_published').default(false),
   difficultyLevel: difficultyLevelEnum('difficulty_level'),
+  hasQuiz: boolean('has_quiz').default(false),
   isSaved: boolean('is_saved').default(false),
+  publishedAt: timestamp('published_at'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
@@ -583,6 +587,7 @@ export {
   ChallengeElements,
   learningResources,
   Todo,
+  // GroupRoles,
   TodoPriorityEnum,
   TodoStatusEnum,
   ActivityHistory,

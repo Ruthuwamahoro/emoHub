@@ -1,4 +1,3 @@
-// API endpoints for joining the group
 import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db";
@@ -38,6 +37,7 @@ export const POST = async (req: NextRequest) => {
     return sendResponse(500, error, "Internal Server Error");
   }
 };
+
 export async function GET(req: Request) {
     try {
       const { searchParams } = new URL(req.url);
