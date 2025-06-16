@@ -393,6 +393,7 @@ export const UserProgress = pgTable('user_progress', {
 export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "article", "image"]);
 
 
+
 export const emotionCategoryEnum = pgEnum("emotionCategory", [
   "self-regulation",
   "self-awareness",
@@ -444,45 +445,147 @@ export const userSavedResources = pgTable('user_saved_resources', {
   notes: text('notes'),
 });
 
-
-const ResourceAssessmentQuestions = pgTable('resource_assessment_questions', {
-  id: uuid("id").defaultRandom().primaryKey(),
-  question: text('question').notNull(),
+const questionTypeEnum = pgEnum('question_type', ['multiple_choice', 'true_false', 'short_answer']);
+const quizStatusEnum = pgEnum('quiz_status', ['draft', 'published']);
+const quizzes = pgTable('quizzes', {
+  id: uuid('id').defaultRandom().primaryKey(),
   resourceId: uuid('resource_id').notNull().references(() => learningResources.id, { onDelete: 'cascade' }),
-  score: integer('score').notNull(),
+  creatorId: uuid('creator_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description'),
+  passingScore: integer('passing_score').notNull().default(70),
+  maxAttempts: integer('max_attempts'), // Percentage
+  status: quizStatusEnum('status').notNull().default('draft'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  publishedAt: timestamp('published_at'),
+});
+
+const quizQuestions = pgTable('quiz_questions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  quizId: uuid('quiz_id').notNull().references(() => quizzes.id, { onDelete: 'cascade' }),
+  questionText: text('question_text').notNull(),
+  questionType: questionTypeEnum('question_type').notNull().default('multiple_choice'),
+  points: integer('points').notNull().default(1), // Points for this question
+  orderIndex: integer('order_index').notNull(), // Order of questions in quiz
+  explanation: text('explanation'), // Optional explanation for the answer
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-const ResourceAssessmentOptions = pgTable('resource_assessment_options', {
-  id: uuid("id").defaultRandom().primaryKey(),
-  questionId: uuid('question_id').notNull().references(() => ResourceAssessmentQuestions.id, { onDelete: 'cascade' }),
-  option: text('option').notNull(),
+const questionOptions = pgTable('question_options', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  questionId: uuid('question_id').notNull().references(() => quizQuestions.id, { onDelete: 'cascade' }),
+  optionText: text('option_text').notNull(),
+  isCorrect: boolean('is_correct').notNull().default(false),
+  orderIndex: integer('order_index').notNull(), // Order of options
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  isCorrect: boolean("is_correct").default(false).notNull()
 });
 
+const quizAttempts = pgTable('quiz_attempts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  quizId: uuid('quiz_id').notNull().references(() => quizzes.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+  score: integer('score'), // Total points earned
+  maxScore: integer('max_score'), // Total possible points
+  percentage: integer('percentage'), // Score as percentage
+  passed: boolean('passed'), // Whether user passed based on passing score
+  timeSpent: integer('time_spent'), // Time spent in seconds
+  attemptNumber: integer('attempt_number').notNull(), // Which attempt this is for the user
+});
 
-const ResourceAssessmentResults = pgTable('resource_assessment_results', {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() =>   User.id, { onDelete: 'cascade' }),
-  questionId: uuid('question_id')
-    .notNull()
-    .references(() => ResourceAssessmentQuestions.id, { onDelete: 'cascade' }),
-  choiceId: uuid('choice_id').notNull().references(() => ResourceAssessmentOptions.id, { onDelete: 'cascade' }),
+const quizResponses = pgTable('quiz_responses', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  attemptId: uuid('attempt_id').notNull().references(() => quizAttempts.id, { onDelete: 'cascade' }),
+  questionId: uuid('question_id').notNull().references(() => quizQuestions.id, { onDelete: 'cascade' }),
+  selectedOptionId: uuid('selected_option_id').references(() => questionOptions.id, { onDelete: 'cascade' }),
+  isCorrect: boolean('is_correct').notNull(),
+  pointsEarned: integer('points_earned').notNull().default(0),
   answeredAt: timestamp('answered_at').defaultNow().notNull(),
 });
 
-const ResourceAssessmentScore = pgTable('resource_assessment_score', {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() =>   User.id, { onDelete: 'cascade' }),
-  questionId: uuid("question_id").notNull(),
-  score: integer("score").notNull(),
-  totalQuestions: integer("total_questions").notNull(),
-});
+const quizzesRelations = {
+  resource: {
+    fields: [quizzes.resourceId],
+    references: [learningResources.id],
+  },
+  creator: {
+    fields: [quizzes.creatorId],
+    references: [User.id],
+  },
+  questions: {
+    fields: [quizzes.id],
+    references: [quizQuestions.quizId],
+    many: true,
+  },
+  attempts: {
+    fields: [quizzes.id],
+    references: [quizAttempts.quizId],
+    many: true,
+  },
+};
+
+const quizQuestionsRelations = {
+  quiz: {
+    fields: [quizQuestions.quizId],
+    references: [quizzes.id],
+  },
+  options: {
+    fields: [quizQuestions.id],
+    references: [questionOptions.questionId],
+    many: true,
+  },
+  responses: {
+    fields: [quizQuestions.id],
+    references: [quizResponses.questionId],
+    many: true,
+  },
+};
+
+const questionOptionsRelations = {
+  question: {
+    fields: [questionOptions.questionId],
+    references: [quizQuestions.id],
+  },
+  responses: {
+    fields: [questionOptions.id],
+    references: [quizResponses.selectedOptionId],
+    many: true,
+  },
+};
+
+const quizAttemptsRelations = {
+  quiz: {
+    fields: [quizAttempts.quizId],
+    references: [quizzes.id],
+  },
+  user: {
+    fields: [quizAttempts.userId],
+    references: [User.id],
+  },
+  responses: {
+    fields: [quizAttempts.id],
+    references: [quizResponses.attemptId],
+    many: true,
+  },
+};
+
+const quizResponsesRelations = {
+  attempt: {
+    fields: [quizResponses.attemptId],
+    references: [quizAttempts.id],
+  },
+  question: {
+    fields: [quizResponses.questionId],
+    references: [quizQuestions.id],
+  },
+  selectedOption: {
+    fields: [quizResponses.selectedOptionId],
+    references: [questionOptions.id],
+  },
+};
+
 
 
 const TodoPriorityEnum = pgEnum("todo_priority", ["LOW", "MEDIUM", "HIGH"]);
@@ -579,18 +682,25 @@ export {
   sessions,
   verificationTokens,
   Role,
-  ResourceAssessmentQuestions,
-  ResourceAssessmentOptions,
-  ResourceAssessmentResults,
-  ResourceAssessmentScore,
   Challenges,
   ChallengeElements,
   learningResources,
   Todo,
-  // GroupRoles,
+  questionTypeEnum,
   TodoPriorityEnum,
   TodoStatusEnum,
+  quizStatusEnum ,
   ActivityHistory,
+  quizResponsesRelations,
+  quizAttemptsRelations,
+  questionOptionsRelations,
+  quizQuestionsRelations,
+  quizzesRelations,
+  quizResponses,
+  quizAttempts,
+  quizQuestions,
+  questionOptions,
+  quizzes,
   ActivityTypeEnum,
   userOnBoardingProfile,
   purposeEnum

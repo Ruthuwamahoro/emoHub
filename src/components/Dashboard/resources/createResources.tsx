@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X,  FileText, Video, Image, Plus, Loader2, AlertCircle, CheckCircle2, Trash2, Edit, Link, Type, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,13 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { CATEGORY_OPTIONS, DIFFICULTY_LEVEL, DIFFICULTY_OPTIONS, EMOTION_CATEGORY, QUESTION_TYPE, RESOURCE_TYPE } from '@/constants/resources';
 import { CreateResourceDialogProps, QuizQuestion } from '@/types/resources';
 import { useCreateResource } from '@/hooks/users/resources/useCreateResource';
 import { useCreateAssessment } from '@/hooks/users/resources/assessment/useCreateAssessment';
+import { uploadImageToCloudinary } from '@/services/user/profile';
+import { Upload } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { UploadCloud } from 'lucide-react';
 
 
 const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({ 
@@ -34,22 +37,33 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
     mutate: mutateAssessment,
     isPending: isAssessmentPending 
   } = useCreateAssessment();
+
   
   const [currentTag, setCurrentTag] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState('basic');
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const coverImageRef = useRef<HTMLInputElement>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+
   
-  // Extended form data for UI-specific fields
   const [extendedFormData, setExtendedFormData] = useState({
-    videoDescription: '',
     hasQuiz: false,
     quizTitle: '',
     quizDescription: '',
     passingScore: 70,
     questions: [] as QuizQuestion[]
   });
+
+
+
+
+
+  
 
   const [currentQuestion, setCurrentQuestion] = useState<Partial<QuizQuestion>>({
     question: '',
@@ -86,36 +100,79 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
     { value: 'short-answer', label: 'Short Answer' }
   ];
 
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isCoverImage: boolean) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError('Image size must be less than 5MB');
+      return;
+    }
+  
+    if (!file.type.startsWith('image/')) {
+      setImageError('Please upload a valid image file');
+      return;
+    }
+  
+    try {
+      setIsUploading(true);
+      setImageError(null);
+  
+      const cloudinaryUrl = await uploadImageToCloudinary(file);
+  
+      if (isCoverImage) {
+        // ✅ Use handleInputChange instead of calling hookFormData as function
+        handleInputChange('coverImage', cloudinaryUrl);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setImageError('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      if (isCoverImage && coverImageRef.current) {
+        coverImageRef.current.value = '';
+      }
+    }
+  };
+
+  const removeCoverImage = () => {
+    handleInputChange('coverImage', '');
+    if(coverImageRef.current){
+      coverImageRef.current.value = ""
+    }
+  }
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
+  
     if (!hookFormData.title.trim()) {
       newErrors.title = 'Title is required';
     }
-
+  
     if (!hookFormData.description.trim()) {
       newErrors.description = 'Description is required';
     }
-
-    if (hookFormData.resourceType === 'article' && !hookFormData.content.trim()) {
-      newErrors.content = 'Content is required for articles';
+  
+    if (!hookFormData.content.trim()) {
+      newErrors.content = hookFormData.resourceType === 'article' ? 'Content is required for articles' : 'Video description is required';
     }
-
-    if (hookFormData.resourceType === 'video') {
-      if (!hookFormData.url.trim()) {
-        newErrors.url = 'Video URL is required';
-      } else {
-        try {
-          new URL(hookFormData.url);
-        } catch {
-          newErrors.url = 'Please enter a valid URL';
-        }
-      }
-      if (!extendedFormData.videoDescription.trim()) {
-        newErrors.videoDescription = 'Video description is required';
+  
+    if (hookFormData.resourceType === 'video' && !hookFormData.url?.trim()) {
+      newErrors.url = 'Video URL is required';
+    }
+  
+    if (hookFormData.resourceType === 'video' && hookFormData.url?.trim()) {
+      try {
+        new URL(hookFormData.url);
+      } catch {
+        newErrors.url = 'Please enter a valid URL';
       }
     }
-
+    if (hookFormData.coverImage && !hookFormData.coverImage.startsWith('http')) {
+      newErrors.coverImage = 'Invalid image URL';
+    }
+  
     if (extendedFormData.hasQuiz) {
       if (!extendedFormData.quizTitle.trim()) {
         newErrors.quizTitle = 'Quiz title is required';
@@ -124,14 +181,14 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
         newErrors.questions = 'At least one question is required for the quiz';
       }
     }
-
+  
     setLocalErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (field: string, value: any) => {
     // Handle hook form data fields
-    if (['title', 'description', 'resourceType', 'content', 'url', 'category', 'difficultyLevel', 'tags', 'hasQuiz'].includes(field)) {
+    if (['title', 'description', 'resourceType', 'content', 'url', 'category', 'difficultyLevel', 'tags', 'hasQuiz', 'coverImage'].includes(field)) {
 
       // Create a synthetic event for the hook
       const syntheticEvent = {
@@ -165,38 +222,55 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
 
   const addTag = () => {
     const trimmedTag = currentTag.trim().toLowerCase();
-    if (trimmedTag && !hookFormData.tags.includes(trimmedTag)) {
-      const newTags = [...hookFormData.tags, trimmedTag];
+    if(!trimmedTag) return; // Don't add empty tags
+    if(!hookFormData?.tags) return ;
+    if (trimmedTag && !hookFormData?.tags.includes(trimmedTag)) {
+      const newTags = [...hookFormData?.tags, trimmedTag];
       handleInputChange('tags', newTags);
       setCurrentTag('');
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    const newTags = hookFormData.tags.filter(tag => tag !== tagToRemove);
+    if(!hookFormData?.tags) return ;
+    const newTags = hookFormData?.tags.filter(tag => tag !== tagToRemove);
     handleInputChange('tags', newTags);
   };
 
   const addQuestion = () => {
     if (!currentQuestion.question?.trim()) return;
-
+  
+    // Convert UI question format to backend format
     const newQuestion: QuizQuestion = {
       id: Date.now().toString(),
-      question: currentQuestion.question,
-      type: currentQuestion.type as QUESTION_TYPE,
-      marks: currentQuestion.marks || 1,
+      questionText: currentQuestion.question, // Map question -> questionText
+      questionType: currentQuestion.type as QUESTION_TYPE, // Map type -> questionType
+      points: currentQuestion.marks || 1, // Map marks -> points
       explanation: currentQuestion.explanation || '',
       correctAnswer: currentQuestion.correctAnswer || 0,
-      ...(currentQuestion.type === 'multiple-choice' && {
-        options: currentQuestion.options?.filter(opt => opt.trim()) || []
-      })
     };
-
+  
+    // Handle options based on question type
+    if (currentQuestion.type === 'multiple-choice' && currentQuestion.options) {
+      newQuestion.options = currentQuestion.options
+        .filter(opt => opt.trim())
+        .map((optionText, index) => ({
+          optionText,
+          isCorrect: index === currentQuestion.correctAnswer
+        }));
+    } else if (currentQuestion.type === 'true-false') {
+      newQuestion.options = [
+        { optionText: 'True', isCorrect: currentQuestion.correctAnswer === 0 },
+        { optionText: 'False', isCorrect: currentQuestion.correctAnswer === 1 }
+      ];
+    }
+  
     setExtendedFormData(prev => ({
       ...prev,
       questions: [...prev.questions, newQuestion]
     }));
-
+  
+    // Reset current question
     setCurrentQuestion({
       question: '',
       type: 'multiple-choice',
@@ -221,31 +295,15 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
     }));
   };
 
-  const getTotalMarks = () => {
-    return extendedFormData.questions.reduce((total, question) => total + question.marks, 0);
-  };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        setLocalErrors(prev => ({ ...prev, file: 'File size must be less than 10MB' }));
-        return;
-      }
-      setUploadedFile(file);
-      setLocalErrors(prev => ({ ...prev, file: '' }));
-    }
-  };
 
   const resetForm = () => {
-    // Reset hook form data will be handled by the hook itself
     setCurrentTag('');
     setLocalErrors({});
     setUploadedFile(null);
     setSubmitStatus('idle');
     setActiveTab('basic');
     setExtendedFormData({
-      videoDescription: '',
       hasQuiz: false,
       quizTitle: '',
       quizDescription: '',
@@ -254,31 +312,58 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
     });
   };
 
+
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
-
+  
     setSubmitStatus('idle');
     
     try {
-      // Convert duration from string to number
-      const durationNumber = parseInt(hookFormData.duration.toString()) || 0;
+      const resourceData = {
+        title: hookFormData.title,
+        description: hookFormData.description,
+        resourceType: hookFormData.resourceType,
+        content: hookFormData.resourceType === 'video' ? hookFormData.content : hookFormData.content, // Use content field for both
+        url: hookFormData.resourceType === 'video' ? hookFormData.url : null,
+        category: hookFormData.category,
+        difficultyLevel: hookFormData.difficultyLevel,
+        duration: parseInt(hookFormData.duration.toString()) || 0,
+        tags: hookFormData.tags,
+        hasQuiz: extendedFormData.hasQuiz,
+        coverImage: hookFormData.coverImage || null// Handle file upload properly
+      };
+  
+      const resourceResult = await handleSubmit();
+    
+    // If resource creation is successful and has quiz, create the quiz
+    if (extendedFormData.hasQuiz && extendedFormData.questions.length > 0) {
+      // You'll need to get the resource ID from the response
+      // This depends on how your handleSubmit returns the created resource
+      // For now, assuming you need to modify handleSubmit to return the resource ID
       
-      // Update the hook form data with duration as number
-      const syntheticEvent = {
-        target: {
-          id: 'duration',
-          value: durationNumber.toString()
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      
-      handleChange(syntheticEvent);
-      
-      // Call the hook's handleSubmit
-      await handleSubmit();
+      const quizData = {
+        title: extendedFormData.quizTitle,
+        description: extendedFormData.quizDescription,
+        passingScore: extendedFormData.passingScore,
+        maxAttempts: 3, // You can add this to your form if needed
+        questions: extendedFormData.questions.map(q => ({
+          questionText: q.questionText,
+          questionType: q.questionType,
+          points: q.points,
+          explanation: q.explanation,
+          options: q.options
+        }))
+      };
+
+      // Create the quiz - you'll need the resource ID here
+      // await handleSubmitAssessment(resourceId);
+    }
+    
       
       setSubmitStatus('success');
       
@@ -293,14 +378,16 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
     }
   };
 
+  const getTotalMarks = () => {
+    return extendedFormData.questions.reduce((total, question) => total + (question.points || 0), 0);
+  };
+
   const isVideoDetected = (url: string) => {
     return /(?:youtube|youtu\.be|vimeo|dailymotion|twitch)/i.test(url);
   };
 
-  // Handle successful submission
   useEffect(() => {
     if (!isPending && submitStatus === 'idle' && Object.keys(hookErrors).length === 0) {
-      // Check if form was just submitted successfully
       const hasData = hookFormData.title || hookFormData.description;
       if (!hasData) {
         setSubmitStatus('success');
@@ -319,24 +406,6 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
             Build engaging educational content for your learners
           </p>
         </DialogHeader>
-
-        {submitStatus === 'success' && (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              Resource created successfully! 🎉
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {submitStatus === 'error' && allErrors.submit && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              {allErrors.submit}
-            </AlertDescription>
-          </Alert>
-        )}
 
 
         <form onSubmit={handleFormSubmit}>
@@ -360,7 +429,6 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
             </TabsList>
 
             <TabsContent value="basic" className="space-y-8">
-              {/* Resource Type Selection */}
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Choose Resource Type</h3>
@@ -540,13 +608,13 @@ const CreateResourceDialog: React.FC<CreateResourceDialogProps> = ({
                         className={`min-h-[300px] ${hookErrors.content ? 'border-red-300 focus-visible:ring-red-200' : ''}`}
                         placeholder="Start writing your article content here...
 
-You can use:
-• Bullet points for key concepts
-• **Bold text** for emphasis
-• Headers for organization
-• Code blocks for examples
+                        You can use:
+                        • Bullet points for key concepts
+                        • **Bold text** for emphasis
+                        • Headers for organization
+                        • Code blocks for examples
 
-Make it engaging and educational!"
+                        Make it engaging and educational!"
                       />
                       {hookErrors.content && (
                         <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
@@ -600,22 +668,22 @@ Make it engaging and educational!"
                       <div>
                         <Label htmlFor="video-description" className="text-base font-medium">Video Description *</Label>
                         <Textarea
-                          id="content"
-                          value={hookFormData.content}
+                          id="video-description"
+                          value={hookFormData.content} // Use content field, not videoDescription
                           onChange={(e) => handleInputChange('content', e.target.value)}
                           className={`mt-2 ${hookErrors.content ? 'border-red-300 focus-visible:ring-red-200' : ''}`}
                           placeholder="Describe what viewers will learn from this video...
 
-• What topics are covered?
-• What will they achieve after watching?
-• Any prerequisites or requirements?
-• Key takeaways or insights"
+                      - What topics are covered?
+                      - What will they achieve after watching?
+                      - Any prerequisites or requirements?
+                      - Key takeaways or insights"
                           rows={8}
                         />
-                        {hookErrors.videoDescription && (
+                        {hookErrors.content && (
                           <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" />
-                            {hookErrors.videoDescription}
+                            {hookErrors.content}
                           </p>
                         )}
                       </div>
@@ -645,12 +713,12 @@ Make it engaging and educational!"
                             <p className="text-sm text-green-700 font-medium">Cover image uploaded!</p>
                             <p className="text-xs text-green-600 truncate max-w-full">
                               {uploadedFile.name}
+                              {hookFormData.coverImage}
                             </p>
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => setUploadedFile(null)}
                               className="mt-2"
                             >
                               Remove
@@ -665,16 +733,59 @@ Make it engaging and educational!"
                             <p className="text-xs text-gray-500 mb-3">PNG, JPG up to 10MB</p>
                           </div>
                         )}
-                        
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileUpload}
-                          className="cursor-pointer"
-                        />
-                        
-                        {hookErrors.file && (
-                          <p className="text-sm text-red-600 mt-2">{hookErrors.file}</p>
+
+                        <div className="flex items-center gap-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => coverImageRef.current?.click()}
+                            disabled={isUploading}
+                            className={cn(
+                              imageError && "border-red-500"
+                            )}
+                          >
+                            {isUploading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Uploading...
+                              </div>
+                            ) : (
+                              <>
+                                <UploadCloud className="h-4 w-4 mr-2" />
+                                Upload Cover Image
+                                                    </>
+                            )}
+                          </Button>
+                          <input
+                            type="file"
+                            ref={coverImageRef}
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, true)}
+                            className="hidden"
+                          />
+                        </div>
+                        {(imageError || hookErrors.coverImage) && (
+                            <p className="text-red-500 text-sm">
+                              {imageError ||hookErrors.coverImage}
+                            </p>
+                        )}
+                        {hookFormData.coverImage && (
+                          <div className="relative">
+                            <img
+                              src={hookFormData.coverImage }
+                              alt="Cover"
+                              className="mt-2 h-20 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-0 left-[50px] bg-purple-500 hover:bg-purple-700 w-6 h-6 rounded-full"
+                              onClick={removeCoverImage}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </CardContent>
@@ -707,254 +818,14 @@ Make it engaging and educational!"
               </div>
             </TabsContent>
 
-            <TabsContent value="quiz" className="space-y-6">
-              <div className="flex items-center space-x-2 p-4 bg-gray-50 rounded-lg">
-              <Switch
-                id="has-quiz"
-                checked={extendedFormData.hasQuiz}
-                onCheckedChange={(checked) => setExtendedFormData(prev => ({ ...prev, hasQuiz: checked }))}
-              />
-                <Label htmlFor="has-quiz" className="text-base font-medium">Include Assessment Quiz</Label>
-                <p className="text-sm text-gray-600 ml-2">Help learners test their understanding</p>
-              </div>
+                        
 
-              
-              {extendedFormData.hasQuiz && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="quiz-title">Quiz Title *</Label>
-                      <Input
-                        id="quiz-title"
-                        value={extendedFormData.quizTitle}
-                        onChange={(e) => setExtendedFormData(prev => ({ ...prev, quizTitle: e.target.value }))}
-                        className={allErrors.quizTitle ? 'border-red-300' : ''}
-                        placeholder="Enter quiz title"
-                      />
-                      {allErrors.quizTitle && (
-                        <p className="text-sm text-red-600 mt-1">{allErrors.quizTitle}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="passing-score">Passing Score (%)</Label>
-                      <Input
-                          id="passing-score"
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={extendedFormData.passingScore}
-                          onChange={(e) => setExtendedFormData(prev => ({ ...prev, passingScore: parseInt(e.target.value) }))}
-                          placeholder="70"
-                        />
-                    </div>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Add Question</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label htmlFor="question">Question *</Label>
-                        <Textarea
-                          id="question"
-                          value={currentQuestion.question || ''}
-                          onChange={(e) => setCurrentQuestion(prev => ({ ...prev, question: e.target.value }))}
-                          placeholder="Enter your question"
-                          rows={2}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Question Type</Label>
-                          <Select 
-                            value={currentQuestion.type} 
-                            onValueChange={(value) => setCurrentQuestion(prev => ({ 
-                              ...prev, 
-                              type: value as QUESTION_TYPE,
-                              ...(value === 'true-false' && { options: ['True', 'False'] }),
-                              ...(value === 'multiple-choice' && { options: ['', '', '', ''] })
-                            }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {questionTypes.map((type) => (
-                                <SelectItem key={type.value} value={type.value}>
-                                  {type.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="marks">Marks</Label>
-                          <Input
-                            id="marks"
-                            type="number"
-                            min="1"
-                            value={currentQuestion.marks || 1}
-                            onChange={(e) => setCurrentQuestion(prev => ({ ...prev, marks: parseInt(e.target.value) }))}
-                          />
-                        </div>
-                      </div>
-
-                      {currentQuestion.type === 'multiple-choice' && (
-                        <div>
-                          <Label>Options</Label>
-                          <div className="space-y-2">
-                            {currentQuestion.options?.map((option, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <Input
-                                  value={option}
-                                  onChange={(e) => updateQuestionOption(index, e.target.value)}
-                                  placeholder={`Option ${index + 1}`}
-                                />
-                                <input
-                                  type="radio"
-                                  name="correct-answer"
-                                  checked={currentQuestion.correctAnswer === index}
-                                  onChange={() => setCurrentQuestion(prev => ({ ...prev, correctAnswer: index }))}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {currentQuestion.type === 'true-false' && (
-                        <div>
-                          <Label>Correct Answer</Label>
-                          <Select 
-                            value={currentQuestion.correctAnswer?.toString()} 
-                            onValueChange={(value) => setCurrentQuestion(prev => ({ ...prev, correctAnswer: parseInt(value) }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0">True</SelectItem>
-                              <SelectItem value="1">False</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {currentQuestion.type === 'short-answer' && (
-                        <div>
-                          <Label htmlFor="correct-answer">Correct Answer</Label>
-                          <Input
-                            id="correct-answer"
-                            value={currentQuestion.correctAnswer?.toString() || ''}
-                            onChange={(e) => setCurrentQuestion(prev => ({ ...prev, correctAnswer: e.target.value }))}
-                            placeholder="Enter the correct answer"
-                          />
-                        </div>
-                      )}
-
-                      <div>
-                        <Label htmlFor="explanation">Explanation (Optional)</Label>
-                        <Textarea
-                          id="explanation"
-                          value={currentQuestion.explanation || ''}
-                          onChange={(e) => setCurrentQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-                          placeholder="Explain why this is the correct answer"
-                          rows={2}
-                        />
-                      </div>
-
-                      <Button type="button" onClick={addQuestion} className="w-full">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Question
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {extendedFormData.questions.length > 0 && (                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          Quiz Questions ({extendedFormData.questions.length})
-                          <Badge variant="outline">Total: {getTotalMarks()} marks</Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {extendedFormData.questions.map((question, index) => (
-                            <Card key={question.id} className="p-4">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <p className="font-medium">Q{index + 1}: {question.question}</p>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    Type: {question.type} | Marks: {question.marks}
-                                  </p>
-                                  {question.options && (
-                                    <div className="mt-2 text-sm">
-                                      {question.options.map((option, optIndex) => (
-                                        <p key={optIndex} className={optIndex === question.correctAnswer ? 'text-green-600 font-medium' : 'text-gray-600'}>
-                                          {optIndex + 1}. {option} {optIndex === question.correctAnswer && '✓'}
-                                        </p>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => removeQuestion(question.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                        {errors.questions && (
-                          <p className="text-sm text-red-600 mt-2">{errors.questions}</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              )}
-          <div className="flex gap-4 mt-6 pt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="flex-1"
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Resource...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Resource
-                </>
-              )}
-            </Button>
-        </div>
-          </TabsContent>
-        </Tabs>
+          </Tabs>
         </form>
       </DialogContent>
     </Dialog>
   );
+
 };
 
 export default CreateResourceDialog;

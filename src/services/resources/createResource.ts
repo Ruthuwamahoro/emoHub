@@ -9,6 +9,6 @@ export const createResources = async(data: LearningResource) => {
         
     } catch (error) {
         console.log(error);
-        return error;
+        throw error;
     }
 }
