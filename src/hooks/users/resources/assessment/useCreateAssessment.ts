@@ -4,23 +4,41 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 
+// Updated interface to match backend expectations
 export interface QuestionInput {
-  question: string;
-  score: number;
+  questionText: string;
+  questionType: 'multiple-choice' | 'true-false' | 'short-answer';
+  points: number;
+  explanation?: string;
+  options?: {
+    optionText: string;
+    isCorrect: boolean;
+  }[];
 }
 
-const initialData: QuestionInput = {
-  question: "",
-  score: 1,
+export interface AssessmentData {
+  title: string;
+  description?: string;
+  passingScore: number;
+  maxAttempts?: number;
+  questions: QuestionInput[];
+}
+
+const initialData: AssessmentData = {
+  title: "",
+  description: "",
+  passingScore: 70,
+  maxAttempts: 3,
+  questions: []
 };
 
 export const useCreateAssessment = () => {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState(initialData);
+  const [formData, setFormData] = useState<AssessmentData>(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: QuestionInput }) => 
+    mutationFn: ({ id, data }: { id: string; data: AssessmentData }) =>
       createAssessment(id, data),
     onSuccess: (response) => {
       console.log('Assessment created successfully:', response);
@@ -37,13 +55,13 @@ export const useCreateAssessment = () => {
     }
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [id]: id === 'score' ? Number(value) : value 
+    setFormData(prev => ({
+      ...prev,
+      [id]: id === 'passingScore' || id === 'maxAttempts' ? Number(value) : value
     }));
-    
+        
     if (errors[id]) {
       setErrors(prev => {
         const { [id]: _, ...rest } = prev;
@@ -52,18 +70,22 @@ export const useCreateAssessment = () => {
     }
   };
 
-  const handleSubmit = async (id: string, e?: React.FormEvent) => {
+  // Updated handleSubmit to return a Promise
+  const handleSubmit = async (id: string, e?: React.FormEvent): Promise<{ success: boolean; error?: string; data?: any }> => {
     if (e) {
       e.preventDefault();
     }
 
     // Basic validation
     const newErrors: Record<string, string> = {};
-    if (!formData.question.trim()) {
-      newErrors.question = "Question is required";
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
     }
-    if (formData.score <= 0) {
-      newErrors.score = "Score must be greater than 0";
+    if (formData.passingScore <= 0 || formData.passingScore > 100) {
+      newErrors.passingScore = "Passing score must be between 1 and 100";
+    }
+    if (formData.questions.length === 0) {
+      newErrors.questions = "At least one question is required";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -71,27 +93,32 @@ export const useCreateAssessment = () => {
       return { success: false, error: "Validation failed" };
     }
 
-    try {
-      await mutate({ id, data: formData });
-      return { success: true };
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.errors.reduce(
-          (acc, curr) => {
-            acc[curr.path[0]] = curr.message;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
-        setErrors(fieldErrors);
-        return { success: false, error: "Validation failed" };
-      }
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      return { success: false, error: errorMessage };
-    }
+    return new Promise((resolve) => {
+      mutate({ id, data: formData }, {
+        onSuccess: (data) => {
+          resolve({ success: true, data });
+        },
+        onError: (error) => {
+          if (error instanceof z.ZodError) {
+            const fieldErrors = error.errors.reduce(
+              (acc, curr) => {
+                acc[curr.path[0]] = curr.message;
+                return acc;
+              },
+              {} as Record<string, string>
+            );
+            setErrors(fieldErrors);
+            resolve({ success: false, error: "Validation failed" });
+          } else {
+            const errorMessage = error instanceof Error ? error.message : "An error occurred";
+            resolve({ success: false, error: errorMessage });
+          }
+        }
+      });
+    });
   };
 
-  return { 
+  return {
     formData,
     setFormData,
     errors,
@@ -99,6 +126,6 @@ export const useCreateAssessment = () => {
     handleChange,
     handleSubmit,
     mutate,
-    isPending 
+    isPending
   };
 };
