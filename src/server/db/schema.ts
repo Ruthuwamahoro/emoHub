@@ -1,3 +1,4 @@
+import { create } from "domain";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -587,6 +588,26 @@ const quizResponsesRelations = {
 };
 
 
+const EmotionLevel = pgEnum("emotion_level", ["VERY_LOW", "LOW", "MODERATE", "HIGH", "VERY_HIGH"]);
+const UserEmotion = pgTable("user_emotions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  feelings: varchar("feelings", { length: 255 }).notNull(),
+  emotionIntensity: integer("emotionIntensity").notNull().default(0),
+  activities: text("activities").array().notNull(),
+  notes: text("notes"),
+  aiAnalysis: varchar("ai_analysis", { length: 1000 }),
+  aiInsights: text("ai_insights").array(),
+  aiRecommendations: text("ai_recommendations").array(),
+  aiDailyTips: text("ai_daily_tips").array(),
+  aiMotivationalMessage: text("ai_motivational_message"),
+  aiWarningFlags: text("ai_warning_flags").array(),
+  aiPositiveAspects: text("ai_positive_aspects").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+})
+
+
 
 const TodoPriorityEnum = pgEnum("todo_priority", ["LOW", "MEDIUM", "HIGH"]);
 const TodoStatusEnum = pgEnum("todo_status", [
@@ -696,10 +717,12 @@ export {
   questionOptionsRelations,
   quizQuestionsRelations,
   quizzesRelations,
+  UserEmotion,
   quizResponses,
   quizAttempts,
   quizQuestions,
   questionOptions,
+  EmotionLevel,
   quizzes,
   ActivityTypeEnum,
   userOnBoardingProfile,

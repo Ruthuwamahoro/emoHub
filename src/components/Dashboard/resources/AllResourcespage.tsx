@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreVertical } from 'lucide-react';
 import { X } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
-import CreateResourceDialog from './createResources';
+// import CreateResourceDialog from './createResources';
 import { LearningResource, SingleResource } from '@/types/resources';
 import { LearningResourcesPageSkeleton, PaginationComponentSkeleton, ResourceSkeleton } from './resourcesSkeleton';
 import { CATEGORY_OPTIONS, DIFFICULTY_OPTIONS } from '@/constants/resources';
@@ -443,11 +443,11 @@ export default function LearningResourcesUI() {
         </div>
       </div>
 
-      <CreateResourceDialog
+      {/* <CreateResourceDialog
         isOpen={showCreateModal}
         onClose={handleCloseCreateModal}
         onSuccess={handleResourceCreated}
-      />
+      /> */}
     </div>
   );
 }

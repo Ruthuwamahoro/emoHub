@@ -33,8 +33,8 @@ export const ROLE_BASED_LINKS = {
         icon: <FaHome className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "Plan/Daily Health",
-        href: "/dashboard/dayplan",
+        label: "Emotion Checkins",
+        href: "/dashboard/emotioncheckins",
         icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {

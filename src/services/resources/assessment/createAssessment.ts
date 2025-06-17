@@ -14,12 +14,13 @@ export const createAssessment = async(id: string, quizData: {
       options?: {
         optionText: string;
         isCorrect: boolean;
+        orderIndex?: number;
       }[];
     }[];
   }) => {
     try {
         const response = await axios.post(`/api/learning-resources/${id}/assessment`, quizData)
-        console.log(response.data);
+        console.log("ppspspspypypypypypypypypypypypypyp",response.data);
         return response.data
         
     } catch (error) {
