@@ -15,9 +15,10 @@ export async function POST(request: NextRequest,     {params}: {params: Promise<
     }
 
     const body = await request.json();
+    console.log('Creating quiz with body:', body);
     const { title, description, passingScore, maxAttempts, questions } = body;
 
-    // Validate input
+
     if (!resourceId || !title || !questions || questions.length === 0) {
       return sendResponse(400, null, 'Missing required fields');
     }

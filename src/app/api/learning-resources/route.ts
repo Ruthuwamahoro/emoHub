@@ -23,7 +23,6 @@ export const POST = async (req: NextRequest) => {
       return sendResponse(401, null, "Unauthorized");
     }
     const body = await req.json();
-    console.log('Resource created successfully:', body);
 
     let coverImage = null;
     if(body.coverImage){

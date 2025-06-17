@@ -13,6 +13,7 @@ export interface QuestionInput {
   options?: {
     optionText: string;
     isCorrect: boolean;
+    orderIndex: number
   }[];
 }
 
@@ -29,8 +30,18 @@ const initialData: AssessmentData = {
   description: "",
   passingScore: 70,
   maxAttempts: 3,
-  questions: []
-};
+  questions: [{
+    questionText: "",
+    questionType: 'multiple-choice',
+    points: 1,
+    explanation: "",
+    options: [{
+      optionText: "",
+      isCorrect: false,
+      orderIndex: 0
+    }]
+  }]
+}
 
 export const useCreateAssessment = () => {
   const queryClient = useQueryClient();
