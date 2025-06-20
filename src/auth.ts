@@ -18,7 +18,9 @@ declare module "next-auth" {
       profilePicUrl?: string;
       expertise?: string;
       isActive: boolean;
-    }
+      isOnboardingCompleted?: boolean;
+    },
+    loginTime?: number;
   }
 }
 
@@ -32,6 +34,7 @@ declare module "next-auth/jwt" {
     profilePicUrl?: string;
     expertise?: string;
     isActive: boolean;
+    loginTime?: number;
   }
 }
 
@@ -68,6 +71,7 @@ export const options: NextAuthOptions = {
               isActive: User.isActive,
               isVerified: User.isVerified,
               roleName: Role.name,
+              isOnboardingCompleted: User.onboardingCompleted,
             })
             .from(User)
             .innerJoin(Role, eq(User.role, Role.id)) 
@@ -101,6 +105,7 @@ export const options: NextAuthOptions = {
               profilePicUrl: user.profilePicUrl,
               expertise: user.expertise,
               isActive: user.isActive,
+              isOnboardingCompleted: user.isOnboardingCompleted,
             };
           }
 
@@ -151,7 +156,10 @@ export const options: NextAuthOptions = {
       
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        token.loginTime = Date.now();
+      }
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -160,6 +168,7 @@ export const options: NextAuthOptions = {
         token.role = user.role; 
         token.profilePicUrl = user.profilePicUrl;
         token.expertise = user.expertise;
+        token.onboardingCompleted = user.isOnboardingCompleted ?? false;
       } else if (token.email) {
         try {
           const userData = await db
@@ -172,6 +181,7 @@ export const options: NextAuthOptions = {
               expertise: User.expertise,
               isActive: User.isActive,
               roleName: Role.name,
+              isOnboardingCompleted: User.onboardingCompleted,
             })
             .from(User)
             .innerJoin(Role, eq(User.role, Role.id))
@@ -187,6 +197,7 @@ export const options: NextAuthOptions = {
             token.profilePicUrl = user.profilePicUrl ?? undefined;
             token.expertise = user.expertise ?? undefined;
             token.isActive = user.isActive ?? false;
+            token.onboardingCompleted = user.isOnboardingCompleted ?? false;
           }
         } catch (error) {
           console.error("Error refreshing user data:", error);
@@ -205,6 +216,8 @@ export const options: NextAuthOptions = {
         session.user.profilePicUrl = token.profilePicUrl as string | undefined;
         session.user.expertise = token.expertise as string | undefined;
         session.user.isActive = token.isActive as boolean;
+        session.user.isOnboardingCompleted = token.onboardingCompleted as boolean;
+        session.loginTime = token.loginTime;
       }
       return session;
     },
@@ -217,3 +230,4 @@ export const options: NextAuthOptions = {
     secret: process.env.JWT_SECRET as string,
   },
 };
+

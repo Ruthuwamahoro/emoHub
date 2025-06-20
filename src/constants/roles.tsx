@@ -129,6 +129,11 @@ export const ROLE_BASED_LINKS = {
         icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
+        label: "Daily Reflection",
+        href: "/dashboard/reflection",
+        icon: <MdOutlineCalendarToday className="text-white h-5 w-5 flex-shrink-0" />,
+      },
+      {
         label: "Content Management",
         href: "/dashboard/resources",
         icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
@@ -198,3 +203,47 @@ export const ROLE_BASED_LINKS = {
       },
     ],
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Optional: Export tour step configurations for different roles
+// export const TOUR_PRIORITIES = {
+//   user: [
+//     '/dashboard',
+//     '/dashboard/emotioncheckins',
+//     '/dashboard/challenges',
+//     '/dashboard/resources'
+//   ],
+//   specialist: [
+//     '/dashboard',
+//     '/dashboard/patients',
+//     '/dashboard/appointments',
+//     '/dashboard/patient-analytics'
+//   ],
+//   admin: [
+//     '/admin/dashboard',
+//     '/dashboard/admin/usermanagement',
+//     '/admin/analytics',
+//     '/dashboard/resources'
+//   ],
+//   superadmin: [
+//     '/superadmin/dashboard',
+//     '/superadmin/overview',
+//     '/superadmin/all-users',
+//     '/superadmin/platform-analytics'
+//   ]
+// };

@@ -5,7 +5,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useMutation, useQueryClient} from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -23,6 +23,7 @@ export const useLogin = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLoginInputField = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -59,7 +60,12 @@ export const useLogin = () => {
         }
       } else {
         showToast("Successfully logged in", "success")
-        router.push("/onboarding");
+        if(session?.user.isOnboardingCompleted){
+
+          router.push("/dashboard");
+        } else {
+          router.push("/onboarding");
+        }
       }
     } catch (error) {
       setIsLoading(false);

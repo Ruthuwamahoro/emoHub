@@ -174,7 +174,6 @@ function parseGeminiResponse(text: string): any {
         console.log("Failed to parse JSON, creating structured response from text");
     }
     
-    // Fallback: create structured response from text
     return {
         emotion: "mixed emotions",
         emotionDescription: "Processing your emotional state",
@@ -194,7 +193,6 @@ function parseGeminiResponse(text: string): any {
     };
 }
 
-// Generate fallback comprehensive analysis
 function generateFallbackAnalysis(feelings: string, intensity: number, activities: string[], notes: string): any {
     const emotion = analyzeEmotionFallback(feelings, intensity);
     
@@ -204,7 +202,6 @@ function generateFallbackAnalysis(feelings: string, intensity: number, activitie
     const warningFlags = [];
     const positiveAspects = ["You're actively monitoring your emotional wellbeing, which shows great self-awareness and commitment to personal growth."];
     
-    // Customize based on emotion and intensity
     if (intensity >= 8) {
         recommendations.push("Consider reaching out to a trusted friend or professional for support");
         warningFlags.push("High emotional intensity detected. Please prioritize self-care and seek support if needed.");
@@ -277,10 +274,8 @@ export async function POST(req: NextRequest) {
             return sendResponse(400, null, "Feelings and Emotion Intensity are required.");
         }
         
-        // Ensure activities is an array
         const activities = ensureArray(body.activities);
         
-        // Get comprehensive AI analysis
         let analysis = await getComprehensiveAnalysis(
             body.feelings, 
             body.emotionIntensity, 
@@ -289,7 +284,6 @@ export async function POST(req: NextRequest) {
         );
         
         if (!analysis) {
-            // Use fallback analysis if Gemini fails
             analysis = generateFallbackAnalysis(
                 body.feelings, 
                 body.emotionIntensity, 
@@ -298,7 +292,6 @@ export async function POST(req: NextRequest) {
             );
         }
         
-        // Prepare data for database insertion with proper array handling
         const insertData = {
             userId,
             feelings: body.feelings,

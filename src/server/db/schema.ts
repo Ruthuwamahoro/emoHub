@@ -1,10 +1,8 @@
-import { create } from "domain";
 import { relations } from "drizzle-orm";
 import {
   boolean,
   decimal,
   integer,
-  json,
   jsonb,
   pgEnum,
   pgTable,
@@ -14,7 +12,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { number } from "zod";
 const Role = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).unique().notNull(),
@@ -34,11 +31,12 @@ const purposeEnum = pgEnum("user_purpose",[
 
 const userOnBoardingProfile = pgTable("user_onboarding_profile", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id).notNull(),
-  primaryPurpose: purposeEnum("primary_purpose"),
+  userId: uuid("user_id").references(() => User.id).notNull(),  
+  impression: text("impression"),
+  currentEmotions: text("current_emotions").notNull(),
+  expressFellings: text("express_feelings").notNull(),
   goals: text('goals').notNull(),
   experienceLevel: varchar("experience_level", { length: 500}),
-  preferences: json('preferences').$type<Record<string, any>>(),
   completedAt: timestamp('completed_at'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -62,6 +60,23 @@ const User = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   isActive: boolean("is_active").default(true),
+});
+
+const DailyReflections = pgTable("daily_reflections", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  reflectionQuestion: text("reflection_text").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+const DailyReflectionsResponse = pgTable("daily_reflections_response", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
+  reflectionId: uuid("reflection_id").references(() => DailyReflections.id, { onDelete: "cascade" }),
+  response: text("response").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 const UserProfile = pgTable("user_profiles", {
@@ -726,5 +741,7 @@ export {
   quizzes,
   ActivityTypeEnum,
   userOnBoardingProfile,
-  purposeEnum
+  purposeEnum,
+  DailyReflections,
+  DailyReflectionsResponse
 };

@@ -5,7 +5,7 @@ import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
 import { eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
-import { updateUserProgress } from "../completed/route"; // Import the function
+import { updateUserProgress } from "../completed/route";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
