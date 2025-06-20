@@ -19,6 +19,32 @@ interface EmotionEntry {
     aiPositiveAspects?: string[];
 }
 
+
+
+
+export const getDatesInSeconds = (date: string): string => {
+    const givenDate = new Date(date);
+    const now = new Date();
+  
+    const seconds = Math.floor((now.getTime() - givenDate.getTime()) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const days = Math.floor(seconds / 86400);
+  
+    if (seconds < 5) return "just now";
+    if (seconds < 60) return `${seconds} seconds ago`;
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+  
+    return givenDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+};
+
 export function EmotionsCheckIns() {
     const [newTag, setNewTag] = useState('');
     const [showAllEntries, setShowAllEntries] = useState(false);
@@ -101,28 +127,7 @@ export function EmotionsCheckIns() {
     // Filter emotions submitted today
     const todayEmotions = dataEmotions.filter(emotion => isToday(emotion.createdAt));
 
-    const getDatesInSeconds = (date: string): string => {
-        const givenDate = new Date(date);
-        const now = new Date();
-      
-        const seconds = Math.floor((now.getTime() - givenDate.getTime()) / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(seconds / 3600);
-        const days = Math.floor(seconds / 86400);
-      
-        if (seconds < 5) return "just now";
-        if (seconds < 60) return `${seconds} seconds ago`;
-        if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-        if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-        if (days === 1) return "yesterday";
-        if (days < 7) return `${days} days ago`;
-      
-        return givenDate.toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-        });
-    };
+    
 
     const handleEmojis = (feeling: string): string => {
         const emojiMap: { [key: string]: string } = {

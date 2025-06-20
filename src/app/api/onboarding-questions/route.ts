@@ -34,21 +34,15 @@ export async function POST(req: NextRequest){
       return sendResponse(409, null, "Onboarding profile already exists");
     }
 
-    const requiredFields = ['primaryPurpose', 'goals', 'experienceLevel'];
-    const missingFields = requiredFields.filter(field => !body[field]);
-    
-    if (missingFields.length > 0) {
-      return sendResponse(400, null, `Missing required fields: ${missingFields.join(', ')}`);
-    }
-
 
 
     await db.insert(userOnBoardingProfile).values({
         userId,
-        primaryPurpose: body.primaryPurpose,
+        impression: body.impression,
+        currentEmotions: body.currentEmotions,
+        expressFellings: body.expressFellings,
         goals: body.goals,
-        experienceLevel: body.experienceLevel,
-        preferences: body.preferences || {},
+        experienceLevel: body.experienceLevel
       });
 
     await db.update(User)
@@ -64,3 +58,28 @@ export async function POST(req: NextRequest){
     return sendResponse(500, null, err);
   }
 };
+
+// export async function PATCH(req: NextRequest) {
+//   try {
+//     const userId = await getUserIdFromSession();
+
+//     if (!userId) {
+//       return sendResponse(401, null, "User not authenticated");
+//     }
+
+//     // Update the user's tour completion status
+//     await db.update(User)
+//       .set({
+//         tourCompleted: true, // Fixed: Use correct field name
+//         tourCompletedAt: new Date() // Fixed: Use correct field name
+//       })
+//       .where(eq(User.id, userId));
+
+//     return sendResponse(200, null, "Tour completion status updated successfully");
+
+//   } catch (error) {
+//     const err = error instanceof Error ? error?.message : "Unexpected error occurred";
+//     return sendResponse(500, null, err);
+//   }
+// }
+

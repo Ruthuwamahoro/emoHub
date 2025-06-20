@@ -16,6 +16,7 @@ declare module "next-auth" {
       bio: string;
       role: string;
       location: string;
+      isActive: boolean;
       anonymityPreference: string;
       badges: string;
     };
@@ -35,5 +36,7 @@ declare module "next-auth" {
     anonymityPreference: string;
     badges: string;
     session_token?: string;
+    isOnboardingCompleted?: boolean;
+    tourCompleted?: boolean;
   }
 }

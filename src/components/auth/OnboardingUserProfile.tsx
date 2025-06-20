@@ -1,11 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Heart, ArrowRight, ArrowLeft, Check, Brain, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 interface OnboardingStep {
   id: number;
   question: string;
   subtitle?: string;
+  field: string;
   options: {
     id: string;
     label: string;
@@ -17,6 +20,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: 1,
     question: "What brings you to emoHub?",
     subtitle: "Help us understand your journey",
+    field: "impression",
     options: [
       { id: "manage_emotions", label: "Learn to manage my emotions" },
       { id: "relationships", label: "Build stronger relationships" },
@@ -29,6 +33,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: 2,
     question: "What best describes your current emotional state?",
     subtitle: "There's no right or wrong answer",
+    field: "currentEmotions",
     options: [
       { id: "overwhelmed", label: "Overwhelmed" },
       { id: "numb", label: "Numb" },
@@ -41,6 +46,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: 3,
     question: "How do you usually express your feelings?",
     subtitle: "Understanding your communication style",
+    field: "expressFellings",
     options: [
       { id: "journaling", label: "Journaling" },
       { id: "talking", label: "Talking to friends" },
@@ -53,6 +59,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: 4,
     question: "What do you hope to gain from this app?",
     subtitle: "Let's align with your goals",
+    field: "goals",
     options: [
       { id: "tools", label: "Practical emotional tools" },
       { id: "vent", label: "A place to vent" },
@@ -65,21 +72,96 @@ const onboardingSteps: OnboardingStep[] = [
     id: 5,
     question: "How much time do you want to spend daily on emoHub?",
     subtitle: "We'll personalize your experience accordingly",
+    field: "experienceLevel",
     options: [
-      { id: "quick", label: "Less than 5 minutes" },
-      { id: "brief", label: "5–15 minutes" },
-      { id: "moderate", label: "15–30 minutes" },
-      { id: "flexible", label: "As long as I need" }
+      { id: "beginner", label: "Less than 5 minutes" },
+      { id: "intermediate", label: "5–15 minutes" },
+      { id: "advanced", label: "15–30 minutes" },
+      { id: "expert", label: "As long as I need" }
     ]
   }
 ];
 
+// Custom hook for onboarding submission
+const useOnboardingSubmission = () => {
+  const [formData, setFormData] = useState({
+    impression: "",
+    currentEmotions: "",
+    expressFellings: "",
+    goals: "",
+    experienceLevel: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const updateFormField = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setSubmitError(null);
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      const response = await fetch('/api/onboarding-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit onboarding data');
+      }
+
+      const result = await response.json();
+      console.log('Onboarding completed successfully:', result);
+      return { success: true, data: result };
+      
+    } catch (error) {
+      console.error('Error submitting onboarding data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to complete onboarding';
+      setSubmitError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isFieldComplete = (field: string): boolean => {
+    return !!formData[field];
+  };
+
+  return {
+    formData,
+    updateFormField,
+    handleSubmit,
+    isSubmitting,
+    submitError,
+    isFieldComplete
+  };
+};
+
 export const EmoHubOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isVisible, setIsVisible] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  
+  const router = useRouter();
+  
+  const {
+    formData,
+    updateFormField,
+    handleSubmit,
+    isSubmitting,
+    submitError,
+    isFieldComplete
+  } = useOnboardingSubmission();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -99,15 +181,28 @@ export const EmoHubOnboarding = () => {
   const totalSteps = onboardingSteps.length;
 
   const handleOptionSelect = (optionId: string) => {
-    setAnswers(prev => ({ ...prev, [currentStep]: optionId }));
+    if (currentStepData) {
+      updateFormField(currentStepData.field, optionId);
+    }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
     } else {
-      console.log('Onboarding complete!', answers);
-      setIsVisible(false);
+      // Submit to backend
+      const result = await handleSubmit();
+      
+      if (result.success) {
+        // Show completion state briefly
+        setIsCompleted(true);
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      }
+      // Error handling is managed by the hook
     }
   };
 
@@ -116,6 +211,25 @@ export const EmoHubOnboarding = () => {
       setCurrentStep(prev => prev - 1);
     }
   };
+
+  const isCurrentStepCompleted = currentStepData && formData[currentStepData.field];
+
+  if (isCompleted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 flex items-center justify-center p-4">
+        <div className="text-center space-y-6">
+          <div className="w-24 h-24 bg-[#fb923c] rounded-full flex items-center justify-center mx-auto animate-bounce">
+            <Check className="w-12 h-12 text-white" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold text-slate-800">Welcome to emoHub!</h2>
+            <p className="text-lg text-slate-600">Your journey begins now. Redirecting to your dashboard...</p>
+          </div>
+          <div className="w-8 h-8 border-4 border-[#fb923c] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40 flex items-center justify-center p-4 relative overflow-hidden">
@@ -184,7 +298,7 @@ export const EmoHubOnboarding = () => {
                   step.id === currentStep 
                     ? 'bg-gradient-to-r from-rose-500 to-amber-500 border-transparent text-white transform scale-110' 
                     : step.id < currentStep
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 border-transparent text-white'
+                    ? 'bg-slate-600 border-transparent text-white'
                     : 'bg-white/80 backdrop-blur-sm border-slate-300 text-slate-600'
                 }`}>
                   {step.id < currentStep ? (
@@ -247,22 +361,22 @@ export const EmoHubOnboarding = () => {
                       type="radio"
                       name={`step-${currentStep}`}
                       value={option.id}
-                      checked={answers[currentStep] === option.id}
+                      checked={formData[currentStepData.field] === option.id}
                       onChange={() => handleOptionSelect(option.id)}
                       className="sr-only"
                     />
                     <div className={`w-6 h-6 rounded-full border-2 transition-all duration-300 ${
-                      answers[currentStep] === option.id
+                      formData[currentStepData.field] === option.id
                         ? 'bg-gradient-to-r from-rose-500 to-amber-500 border-transparent scale-110'
                         : 'bg-white border-slate-300 group-hover:border-rose-300'
                     }`}>
-                      {answers[currentStep] === option.id && (
+                      {formData[currentStepData.field] === option.id && (
                         <div className="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                       )}
                     </div>
                   </div>
                   <span className={`text-lg transition-all duration-300 ${
-                    answers[currentStep] === option.id 
+                    formData[currentStepData.field] === option.id 
                       ? 'text-slate-800 font-semibold' 
                       : 'text-slate-700 group-hover:text-slate-800'
                   }`}>
@@ -273,6 +387,15 @@ export const EmoHubOnboarding = () => {
             </div>
           )}
         </div>
+
+        {/* Error Message */}
+        {submitError && (
+          <div className="mb-6 text-center">
+            <div className="inline-block bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+              {submitError}
+            </div>
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div className={`flex items-center justify-center gap-6 transition-all duration-700 delay-800 ${
@@ -293,18 +416,28 @@ export const EmoHubOnboarding = () => {
 
           <button
             onClick={handleNext}
-            disabled={!answers[currentStep]}
+            disabled={!isCurrentStepCompleted || isSubmitting}
             className={`group relative flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 overflow-hidden ${
-              answers[currentStep]
-                ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white hover:from-amber-500 hover:to-emerald-500 hover:scale-105 transform'
+              isCurrentStepCompleted && !isSubmitting
+                ? 'bg-gradient-to-r from-[#fb923c] to-amber-500 text-white hover:from-amber-500 hover:to-emerald-500 hover:scale-105 transform'
                 : 'bg-slate-300 text-slate-500 cursor-not-allowed'
             }`}
           >
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             <span className="relative z-10">
-              {currentStep === totalSteps ? 'Complete Journey' : 'Continue'}
+              {isSubmitting 
+                ? <div className='flex items-center justify-center'>
+                <Loader2 className="mr-2 h-4 w-10 animate-spin" />
+                Submitting...
+              </div>
+                : currentStep === totalSteps 
+                ? 'Complete Journey' 
+                : 'Continue'
+              }
             </span>
-            <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            {!isSubmitting && (
+              <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            )}
           </button>
         </div>
       </div>

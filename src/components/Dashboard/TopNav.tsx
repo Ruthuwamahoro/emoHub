@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { CircleUser, Menu, Settings, LogOut, Bell, X } from "lucide-react";
 import Link from "next/link";
@@ -13,10 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "next-auth/react";
-
-
-
+import { signOut, useSession } from "next-auth/react";
 
 export const getInitials = (name?: string) => {
   if (!name) return "U";
@@ -27,14 +24,52 @@ export const getInitials = (name?: string) => {
     .toUpperCase();
 };
 
+const getTimeAgo = (timestamp?: number) => {
+  if (!timestamp) return 'Unknown';
+  
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+  
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  return 'Just now';
+};
+
 export default function HeaderDashboard() {
   const isLoading = false;
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(20);
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
   const { data: session, status } = useSession();
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); 
 
+    return () => clearInterval(interval);
+  }, []);
+
+  console.log("status", status);
+  console.log("session loginTime", session?.loginTime);
+
+  const handleSignOut = async () => {
+    try {
+      console.log('Attempting to sign out...');
+      await signOut({ 
+        callbackUrl: '/login',
+        redirect: true 
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      window.location.href = '/login';
+    }
+  };
 
   const notifications = [
     {
@@ -84,6 +119,11 @@ export default function HeaderDashboard() {
 
   const markAllAsRead = () => {
     setNotificationCount(0);
+  };
+
+  // Get last login text based on session login time
+  const getLastLoginText = () => {
+    return getTimeAgo(session?.loginTime);
   };
 
   if (isLoading) {
@@ -145,15 +185,15 @@ export default function HeaderDashboard() {
                   <div className="bg-slate-400 p-6 rounded-t-xl">
                     <div className="flex flex-col items-center text-center text-white">
                       <Avatar className="h-16 w-16 border-4 border-white shadow-lg mb-3">
-                        <AvatarImage src="" />
+                        <AvatarImage src={session?.user?.profilePicUrl || ""} />
                         <AvatarFallback className="bg-white text-blue-600 text-xl font-bold">
                         {getInitials(session?.user?.fullName)}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="text-lg font-bold">Ruth Uwamahoro</h3>
-                      <p className="text-blue-100 text-sm">ruthuwamahoro@gmail.com</p>
+                      <h3 className="text-lg font-bold">{session?.user?.fullName}</h3>
+                      <p className="text-blue-100 text-sm">{session?.user?.email}</p>
                       <div className="mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full">
-                        <span className="text-xs font-medium">SuperAdmin</span>
+                        <span className="text-xs font-medium">{session?.user?.role}</span>
                       </div>
                     </div>
                   </div>
@@ -173,7 +213,8 @@ export default function HeaderDashboard() {
 
                     <DropdownMenuSeparator className="my-2 bg-gray-100" />
 
-                    <DropdownMenuItem className="rounded-lg p-3 hover:bg-red-50 transition-colors duration-200 cursor-pointer group">
+                    <DropdownMenuItem className="rounded-lg p-3 hover:bg-red-50 transition-colors duration-200 cursor-pointer group" onClick={handleSignOut}
+                    >
                       <div className="w-full flex items-center gap-3">
                         <div className="p-2 bg-red-50 group-hover:bg-red-100 rounded-lg transition-colors duration-200">
                           <LogOut className="h-4 w-4 text-red-600" />
@@ -188,7 +229,7 @@ export default function HeaderDashboard() {
 
                   <div className="px-4 py-3 bg-gray-50 rounded-b-xl border-t">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Last login: 2 hours ago</span>
+                      <span>Last login: {getLastLoginText()}</span>
                       <span className="flex items-center gap-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         Online

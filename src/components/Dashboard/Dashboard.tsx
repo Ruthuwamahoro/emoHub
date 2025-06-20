@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   MoreHorizontal,
   Shield
@@ -8,15 +8,47 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell
 import { Zap } from 'lucide-react';
 import { Brain } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { Loader2 } from 'lucide-react';
+import { usegetReflectionsSummary } from '@/hooks/reflection/useGetAllReflectionsOverview';
+import { usegetReflection } from '@/hooks/reflection/useGetReflection';
+import { useCreateResponseReflection } from '@/hooks/reflection/useCreateResponseReflection';
+import { getDatesInSeconds } from './emotions/EmotionsDailyCheckins';
 
 const EmoHubDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState('March 2020');
-  const dailyPrompt = {
-    id: 'prompt-1',
-    question: 'What moment today made you feel most connected to yourself or others?',
-    category: 'Connection'
-  };
-  const progressData = [
+  const [currentQuestionId, setCurrentQuestionId] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+  
+  // Mark component as mounted to prevent hydration errors
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const {
+    data,
+    isLoading,
+    isPending,
+    isFetching,
+  } = usegetReflection();
+
+  const {
+    data: reflectionSummaryss,
+    isPending: isPendingSummary,
+  } = usegetReflectionsSummary();
+
+  // Initialize the hook with the current question ID
+  const {
+    formData,
+    setFormData,
+    errors,
+    isPending: isPendingResponse,
+    handleChange,
+    handleSubmit,
+    resetForm,
+  } = useCreateResponseReflection(currentQuestionId);
+
+  // Static data - memoized to prevent unnecessary re-renders
+  const progressData = useMemo(() => [
     { day: 1, progress: 15 },
     { day: 5, progress: 25 },
     { day: 10, progress: 20 },
@@ -24,23 +56,230 @@ const EmoHubDashboard = () => {
     { day: 20, progress: 75 },
     { day: 25, progress: 85 },
     { day: 30, progress: 70 }
-  ];
+  ], []);
 
-  const participationData = [
+  const participationData = useMemo(() => [
     { name: 'Posts', value: 40, color: '#10B981' },
     { name: 'Comments', value: 32, color: '#F59E0B' },
     { name: 'Likes', value: 28, color: '#8B5CF6' }
-  ];
-  const {data: session} = useSession();
+  ], []);
+  
+  const { data: session } = useSession();
+  const fullName = useMemo(() => 
+    session?.user?.fullName?.split(" ")[0] || '', 
+    [session?.user?.fullName]
+  );
 
-  const fullName = session?.user?.fullName?.split(" ")[0] || '';
+  // Set the current question ID when data loads - fixed to prevent unnecessary re-renders
+  useEffect(() => {
+    if (data?.data && data.data.length > 0 && !currentQuestionId) {
+      const firstQuestionId = data.data[0].id;
+      if (firstQuestionId !== currentQuestionId) {
+        setCurrentQuestionId(firstQuestionId);
+      }
+    }
+  }, [data?.data, currentQuestionId]);
 
-  return (
+  // Handle reflection submission - improved to prevent unnecessary re-renders
+  const handleSaveReflection = async (questionId: string) => {
+    try {
+      if (questionId !== currentQuestionId) {
+        setCurrentQuestionId(questionId);
+        // Use a more reliable approach than setTimeout
+        await new Promise(resolve => {
+          const checkUpdate = () => {
+            if (currentQuestionId === questionId) {
+              resolve(undefined);
+            } else {
+              requestAnimationFrame(checkUpdate);
+            }
+          };
+          checkUpdate();
+        });
+      }
+      
+      const result = await handleSubmit();
+      if (result?.success) {
+        resetForm();
+      }
+    } catch (error) {
+      console.error('Failed to save reflection:', error);
+    }
+  };
+
+  // Complete Dashboard Skeleton Component
+  const DashboardSkeleton = () => (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-1 overflow-auto">
         {/* Dashboard Content */}
         <div className="p-6">
-          {/* Welcome Section */}
+          {/* Welcome Section Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-72 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-96"></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* EI Challenges Progress Skeleton */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-6 bg-gray-300 rounded w-48"></div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  <div className="h-8 bg-gray-200 rounded w-32"></div>
+                  <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="text-right mb-2">
+                  <div className="h-4 bg-gray-200 rounded w-32 ml-auto mb-2"></div>
+                  <div className="h-8 bg-gray-300 rounded w-16 ml-auto"></div>
+                </div>
+              </div>
+
+              <div className="h-64 bg-gray-100 rounded-lg"></div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-6 bg-gray-300 rounded w-32"></div>
+              </div>
+              
+              <div className="space-y-4">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="h-4 bg-gray-300 rounded w-20"></div>
+                      <div className="h-4 w-4 bg-gray-300 rounded"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                    <div className="mt-2">
+                      <div className="h-6 bg-gray-300 rounded w-24"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Group Participation Skeleton */}
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-6 bg-gray-300 rounded w-40"></div>
+              <div className="h-8 bg-gray-200 rounded w-32"></div>
+            </div>
+            
+            <div className="flex items-center gap-8">
+              <div className="w-48 h-48 bg-gray-100 rounded-full"></div>
+              
+              <div className="flex-1">
+                <div className="grid grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, index) => (
+                    <div key={index} className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                      <div className="h-6 bg-gray-300 rounded w-12 mx-auto"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-6 h-6 bg-gray-300 rounded mr-2"></div>
+                <div className="h-6 bg-gray-300 rounded w-48"></div>
+              </div>
+              <div className="bg-violet-50 rounded-lg p-4 mb-4">
+                <div className="space-y-6">
+                  {[...Array(2)].map((_, index) => (
+                    <div key={index}>
+                      <div className="h-3 bg-violet-200 rounded w-32 mb-2"></div>
+                      <div className="h-4 bg-gray-300 rounded w-full mb-3"></div>
+                      <div className="h-24 bg-gray-200 rounded-md mb-2"></div>
+                      <div className="h-8 bg-violet-200 rounded w-32"></div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="border-t border-slate-100 pt-4 mt-4">
+                  <div className="flex items-center mb-2">
+                    <div className="w-4 h-4 bg-amber-300 rounded mr-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-24"></div>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-lg">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-amber-200 rounded w-full"></div>
+                      <div className="h-4 bg-amber-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-amber-200 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Individual Skeleton Components
+  const ReflectionSummarySkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(3)].map((_, index) => (
+        <div key={index} className="p-4 bg-gray-50 rounded-lg border animate-pulse">
+          <div className="flex items-center justify-between mb-2">
+            <div className="h-4 bg-gray-300 rounded w-20"></div>
+            <div className="h-4 w-4 bg-gray-300 rounded"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+          </div>
+          <div className="mt-2">
+            <div className="h-6 bg-gray-300 rounded w-24"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ReflectionQuestionsSkeleton = () => (
+    <div className="space-y-6">
+      {[...Array(2)].map((_, index) => (
+        <div key={index} className="animate-pulse">
+          <div className="h-3 bg-violet-200 rounded w-32 mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded w-full mb-3"></div>
+          <div className="h-24 bg-gray-200 rounded-md mb-2"></div>
+          <div className="h-8 bg-violet-200 rounded w-32"></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Return null during hydration to prevent mismatch
+  if (!mounted) {
+    return null;
+  }
+
+  if (isLoading || isPending || isFetching) {
+    return <DashboardSkeleton />;
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <div className="flex-1 overflow-auto">
+        <div className="p-6 max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome <span className="text-orange-500">{fullName}</span>!
@@ -49,30 +288,29 @@ const EmoHubDashboard = () => {
               Your personal space for emotional growth and meaningful conversations
             </p>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* EI Challenges Progress */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* EI Challenges Progress - Main Analytics */}
             <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">EI Challenges progress</h2>
+                <h2 className="text-lg font-semibold text-gray-900">EI Challenges Progress</h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">Previous period</span>
                   <select
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="text-sm border border-gray-200 rounded px-2 py-1"
+                    className="text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-violet-500"
                   >
                     <option>March 2020</option>
                     <option>April 2020</option>
                     <option>May 2020</option>
                   </select>
-                  <button className="p-1 hover:bg-gray-100 rounded">
+                  <button className="p-1 hover:bg-gray-100 rounded transition-colors">
                     <MoreHorizontal size={16} />
                   </button>
                 </div>
               </div>
               
-              <div className="mb-4">
+              <div className="mb-6">
                 <div className="text-right mb-2">
                   <span className="text-sm text-gray-500">Challenges completed</span>
                   <div className="text-3xl font-bold text-gray-900">44</div>
@@ -117,54 +355,56 @@ const EmoHubDashboard = () => {
               </div>
             </div>
 
+            {/* Today's Updates - Recent Activity */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">To Day's Updates</h2>
-                <button className="text-sm text-blue-600 hover:text-blue-700">Subscribe</button>
+                <h2 className="text-lg font-semibold text-gray-900">Recent Updates</h2>
               </div>
               
-              <div className="space-y-4">
-                <div className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">Today 11:36</span>
-                    <Shield size={16} className="text-purple-500" />
-                  </div>
-                  <p className="text-sm text-gray-700 mb-1">Your Mood: You are feeling excited for the day</p>
-                  <p className="text-xs text-gray-500">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam</p>
-                  <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">self-awareness</span>
+              {isPendingSummary ? (
+                <ReflectionSummarySkeleton />
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {reflectionSummaryss?.data?.map((summary: any, index: number) => (
+                    <div key={summary.id || index} className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400 hover:bg-purple-100 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900">
+                          {summary.responseDate ? getDatesInSeconds(summary.responseDate) : 'Today'}
+                        </span>
+                        <Shield size={16} className="text-purple-500" />
+                      </div>
+                      <p className="text-sm text-gray-700 mb-1 font-medium">{summary.title}</p>
+                      <p className="text-xs text-gray-600 line-clamp-2">{summary.response || 'No response yet'}</p>
+                      <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">
+                        self-awareness
+                      </span>
+                    </div>
+                  ))}
+                  
+                  {(!reflectionSummaryss?.data || reflectionSummaryss.data.length === 0) && (
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <p className="text-sm text-gray-500">No reflection summaries available yet.</p>
+                      <p className="text-xs text-gray-400 mt-1">Complete your daily reflections to see updates here.</p>
+                    </div>
+                  )}
                 </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">Yesterday</span>
-                    <Shield size={16} className="text-blue-500" />
-                  </div>
-                  <p className="text-sm text-gray-700 mb-1">Your Mood: You are feeling excited for the day</p>
-                  <p className="text-xs text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</p>
-                  <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Self-awareness</span>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">Today 11:36</span>
-                    <Shield size={16} className="text-blue-500" />
-                  </div>
-                  <p className="text-xs text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
-          <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Group participation</h2>
-              <select className="text-sm border border-gray-200 rounded px-2 py-1">
+              <h2 className="text-lg font-semibold text-gray-900">Community Participation</h2>
+              <select className="text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-violet-500">
                 <option>March 2020</option>
               </select>
             </div>
             
-            <div className="flex items-center gap-8">
-              <div className="w-48 h-48">
+            <div className="flex items-center gap-8 flex-wrap lg:flex-nowrap">
+              <div className="w-48 h-48 flex-shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -184,54 +424,102 @@ const EmoHubDashboard = () => {
                 </ResponsiveContainer>
               </div>
               
-              <div className="flex-1">
-                <div className="grid grid-cols-3 gap-6">
+              <div className="flex-1 min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   {participationData.map((item, index) => (
-                    <div key={index} className="text-center">
+                    <div key={index} className="text-center p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center justify-center gap-2 mb-2">
                         <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: item.color }}></div>
                         <span className="text-sm font-medium text-gray-700">{item.name}</span>
                       </div>
-                      <div className="text-lg font-bold text-gray-900">{item.value}%</div>
+                      <div className="text-2xl font-bold text-gray-900">{item.value}%</div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      <div className="col-span-1 bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center mb-4">
-                <Brain className="text-violet-500 mr-2" />
-                <h2 className="text-xl font-semibold">Reflection & Growth</h2>
-              </div>
-              
-              <div className="bg-violet-50 rounded-lg p-4 mb-4">
-                <div className="text-xs font-medium text-violet-600 mb-1">DAILY REFLECTION PROMPT</div>
-                <p className="text-sm font-medium text-slate-700">{dailyPrompt.question}</p>
-                <textarea 
-                  className="w-full mt-3 p-3 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 h-24 resize-none"
-                  placeholder="Write your thoughts here..."
-                ></textarea>
-                <button className="mt-2 bg-violet-600 text-white py-1.5 px-4 rounded-md text-sm hover:bg-violet-700 transition-colors">
-                  Save Reflection
-                </button>
-              </div>
-              
-              <div className="border-t border-slate-100 pt-4">
-                <div className="flex items-center mb-2">
-                  <Zap className="text-amber-500 w-4 h-4 mr-2" />
-                  <h3 className="font-medium text-sm">Growth Insight</h3>
-                </div>
-                <div className="bg-amber-50 p-3 rounded-lg">
-                  <p className="text-sm text-slate-700">
-                    When feeling overwhelmed, practice the "5-4-3-2-1" grounding technique: Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.
-                  </p>
+
+          {session?.user?.role === "User" && (
+            <div className="mb-8 pt-10">
+              <div className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-orange-200">
+                <div className="p-6">
+                  <div className="flex items-center mb-4">
+                    <Brain className="text-violet-500 mr-2" />
+                    <h2 className="text-xl font-semibold">Daily Reflection & Growth</h2>
+                  </div>
+                  <div className="bg-violet-50 rounded-lg p-4 mb-4">
+                    {isLoading ? (
+                      <ReflectionQuestionsSkeleton />
+                    ) : (
+                      <>
+                        {data?.data?.map((question: {
+                          id: string;
+                          question: string;
+                        }) => (
+                          <div key={question.id} className="mb-6">
+                            <div className="text-xs font-medium text-violet-600 mb-1 uppercase tracking-wide">
+                              Daily Reflection Prompt
+                            </div>
+                            <p className="text-sm font-medium text-slate-700 mb-3">{question.question}</p>
+                            <textarea
+                              name="response"
+                              className="w-full p-3 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent h-24 resize-none transition-all duration-200"
+                              placeholder="Take a moment to reflect and share your thoughts..."
+                              value={currentQuestionId === question.id ? formData.response : ''}
+                              onChange={(e) => {
+                                if (currentQuestionId !== question.id) {
+                                  setCurrentQuestionId(question.id);
+                                }
+                                handleChange(e);
+                              }}
+                            />
+                            {errors.response && (
+                              <p className="text-red-500 text-xs mt-1">{errors.response}</p>
+                            )}
+                            <button 
+                              type="button"
+                              onClick={() => handleSaveReflection(question.id)}
+                              disabled={isPendingResponse || (currentQuestionId === question.id && !formData.response.trim())}
+                              className="mt-3 bg-violet-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                              {isPendingResponse && currentQuestionId === question.id ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : (
+                                'Save Reflection'
+                              )}
+                            </button>
+                          </div>
+                        ))}
+                        
+                        {(!data?.data || data.data.length === 0) && (
+                          <div className="text-center py-8">
+                            <p className="text-sm text-gray-500">No reflection prompts available today.</p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    
+                    <div className="border-t border-slate-200 pt-4 mt-6">
+                      <div className="flex items-center mb-3">
+                        <Zap className="text-amber-500 w-4 h-4 mr-2" />
+                        <h3 className="font-medium text-sm text-gray-700">Today's Growth Insight</h3>
+                      </div>
+                      <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <p className="text-sm text-slate-700">
+                          When feeling overwhelmed, practice the "5-4-3-2-1" grounding technique: Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

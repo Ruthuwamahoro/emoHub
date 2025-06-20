@@ -10,3 +10,10 @@ export interface UpdateprofileInterface {
     bio: string;
     location: string;
 }
+
+export interface userOnBoardingProfileInterface {
+    impression: string,
+    currentEmotions: string;
+    expressFellings: string;
+    goals: string;
+}

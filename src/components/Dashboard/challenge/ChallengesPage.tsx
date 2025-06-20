@@ -647,7 +647,7 @@ useEffect(() => {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="rounded-xl shadow-lg border border-gray-200 p-6 bg-gray-200">
         <div className="flex justify-between items-start mb-4">
-          <h1 className="text-2xl font-bold text-gray-600"><span className="text-orange-500 font-bold"> Hi {(session?.user?.fullName)?.split(" ")[0]}</span>, <br/> Welcome to Emotional Intelligence Challenges</h1>
+          <h1 className="text-2xl font-bold text-gray-600"><span className="text-[#fb923c] font-bold"> Hi {(session?.user?.fullName)?.split(" ")[0]},</span> <br/> Welcome to Emotional Intelligence Challenges</h1>
         </div>
         
         <div className="mb-6">
@@ -686,7 +686,7 @@ useEffect(() => {
             </div>
             
             <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-[#fb923c]">
                 {userProgressData.overall_completion_percentage}%
               </div>
               <div className="text-sm text-gray-600">Overall Progress</div>
@@ -728,7 +728,7 @@ useEffect(() => {
           {canCreateResources && (
             <button
               onClick={startAddingWeek}
-              className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-1 px-4 py-2 bg-[#fb923c] text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
             >
               <Plus className="w-4 h-4" />
               Add New Week
