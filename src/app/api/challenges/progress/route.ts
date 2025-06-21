@@ -1,4 +1,3 @@
-// /api/user-progress/route.ts - CLEANED VERSION
 import db from "@/server/db";
 import { UserProgress } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";

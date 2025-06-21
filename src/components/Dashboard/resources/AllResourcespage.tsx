@@ -11,15 +11,53 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreVertical } from 'lucide-react';
 import { X } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
-// import CreateResourceDialog from './createResources';
 import { LearningResource, SingleResource } from '@/types/resources';
 import { LearningResourcesPageSkeleton, PaginationComponentSkeleton, ResourceSkeleton } from './resourcesSkeleton';
 import { CATEGORY_OPTIONS, DIFFICULTY_OPTIONS } from '@/constants/resources';
 
+// Define types for better type safety
+interface QueryParams {
+  search: string;
+  page: number;
+  pageSize: number;
+  category: string;
+  difficultyLevel: string;
+  sortBy: 'newest' | 'oldest';
+}
 
+interface PaginationData {
+  currentPage: number;
+  totalPages: number;
+  totalResources: number;
+}
 
+interface ResourcesResponse {
+  data: SingleResource[];
+  pagination?: PaginationData;
+}
 
-const ErrorState = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
+interface UseGetAllResourcesReturn {
+  resources: ResourcesResponse | undefined;
+  pagination: PaginationData | undefined;
+  isLoading: boolean;
+  isPending: boolean;
+  isFetching: boolean;
+  error: Error | null;
+  isError: boolean;
+  refetch: () => void;
+}
+
+interface CategoryOption {
+  value: string;
+  label: string;
+}
+
+interface DifficultyOption {
+  value: string;
+  label: string;
+}
+
+const ErrorState: React.FC<{ error: Error; onRetry: () => void }> = ({ error, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-12">
     <AlertCircle size={48} className="text-red-400 mb-4" />
     <h3 className="text-lg font-medium text-gray-900 mb-2">Something went wrong</h3>
@@ -35,19 +73,19 @@ const ErrorState = ({ error, onRetry }: { error: Error; onRetry: () => void }) =
   </div>
 );
 
-export default function LearningResourcesUI() {
-  const [searchTerm, setSearchTerm] = useState('');
+const LearningResourcesUI: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(8);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(8);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
 
   const { data: session } = useSession();
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,7 +99,7 @@ export default function LearningResourcesUI() {
     setCurrentPage(1);
   }, [debouncedSearchTerm, selectedCategory, selectedDifficulty, sortBy]);
 
-  const queryParams = useMemo(() => ({
+  const queryParams: QueryParams = useMemo(() => ({
     search: debouncedSearchTerm,
     page: currentPage,
     pageSize: itemsPerPage,
@@ -79,7 +117,7 @@ export default function LearningResourcesUI() {
     error, 
     isError, 
     refetch 
-  } = useGetAllResources(queryParams);
+  } = useGetAllResources(queryParams) as unknown as UseGetAllResourcesReturn;
 
   useEffect(() => {
     if (!isLoading && !isPending && isInitialLoad) {
@@ -95,37 +133,53 @@ export default function LearningResourcesUI() {
     return resourcesArray.filter((resource: SingleResource) => resource.isSaved);
   }, [resources, showSavedOnly]);
 
-  const toggleSaveResource = (resourceId: string) => {
+  const toggleSaveResource = (resourceId: string): void => {
     console.log('Toggle save for resource:', resourceId);
   };
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (category: string): void => {
     setSelectedCategory(category === selectedCategory ? '' : category);
   };
 
-  const handleDifficultyChange = (difficulty: string) => {
+  const handleDifficultyChange = (difficulty: string): void => {
     setSelectedDifficulty(difficulty === selectedDifficulty ? '' : difficulty);
   };
 
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = (): void => {
     setShowCreateModal(true);
   };
 
-  const handleCloseCreateModal = () => {
+  const handleCloseCreateModal = (): void => {
     setShowCreateModal(false);
   };
 
-  const handleResourceCreated = () => {
+  const handleResourceCreated = (): void => {
     refetch();
   };
 
   const savedResourcesCount = useMemo(() => {
     if (!resources?.data || !Array.isArray(resources.data)) return 0;
-    return resources.data.filter(r => r.isSaved).length;
+    return resources.data.filter((r: SingleResource) => r.isSaved).length;
   }, [resources]);
 
   const isInitialLoading = isInitialLoad && (isLoading || isPending);
   const isFilteringLoading = !isInitialLoad && (isLoading || isFetching);
+
+  const handleSortByChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setSortBy(e.target.value as 'newest' | 'oldest');
+  };
+
+  const handleClearAllFilters = (): void => {
+    setSearchTerm('');
+    setSelectedCategory('');
+    setSelectedDifficulty('');
+    setSortBy('newest');
+  };
+
+  const getCategoryLabel = (categoryValue: string): string => {
+    const category = (CATEGORY_OPTIONS as CategoryOption[]).find(c => c.value === categoryValue);
+    return category?.label || categoryValue;
+  };
 
   if (isInitialLoading) {
     return <LearningResourcesPageSkeleton />;
@@ -187,7 +241,7 @@ export default function LearningResourcesUI() {
                     type="text"
                     placeholder="Search Resources"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={isFilteringLoading}
                   />
@@ -202,7 +256,7 @@ export default function LearningResourcesUI() {
               <div className="mb-6">
                 <h3 className="font-medium text-gray-900 mb-4">Category</h3>
                 <div className="space-y-3">
-                  {CATEGORY_OPTIONS.map((category) => (
+                  {(CATEGORY_OPTIONS as CategoryOption[]).map((category) => (
                     <label key={category.value} className="flex items-center cursor-pointer">
                       <input
                         type="radio"
@@ -235,7 +289,7 @@ export default function LearningResourcesUI() {
                   <ChevronDown size={16} className="ml-2 text-gray-500" />
                 </h3>
                 <div className="space-y-3">
-                  {DIFFICULTY_OPTIONS.map((difficulty) => (
+                  {(DIFFICULTY_OPTIONS as DifficultyOption[]).map((difficulty) => (
                     <label key={difficulty.value} className="flex items-center cursor-pointer">
                       <input
                         type="radio"
@@ -274,7 +328,7 @@ export default function LearningResourcesUI() {
                       name="sortBy"
                       value="newest"
                       checked={sortBy === 'newest'}
-                      onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
+                      onChange={handleSortByChange}
                       className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       disabled={isFilteringLoading}
                     />
@@ -288,7 +342,7 @@ export default function LearningResourcesUI() {
                       name="sortBy"
                       value="oldest"
                       checked={sortBy === 'oldest'}
-                      onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
+                      onChange={handleSortByChange}
                       className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       disabled={isFilteringLoading}
                     />
@@ -357,7 +411,7 @@ export default function LearningResourcesUI() {
                         
                         <div className="flex items-center gap-3 mb-4">
                           <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                            {CATEGORY_OPTIONS.find(c => c.value === resource.category)?.label}
+                            {getCategoryLabel(resource.category)}
                           </span>
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
                             {resource.difficultyLevel}
@@ -407,7 +461,7 @@ export default function LearningResourcesUI() {
                   <PaginationComponent 
                     currentPages={pagination.currentPage}
                     totalPages={pagination.totalPages} 
-                    onPageChange={(page) => setCurrentPage(page)}
+                    onPageChange={(page: number) => setCurrentPage(page)}
                     disabled={isFilteringLoading}
                   />
                 )}
@@ -426,12 +480,7 @@ export default function LearningResourcesUI() {
                 </p>
                 {(debouncedSearchTerm || selectedCategory || selectedDifficulty) && (
                   <button
-                    onClick={() => {
-                      setSearchTerm('');
-                      setSelectedCategory('');
-                      setSelectedDifficulty('');
-                      setSortBy('newest');
-                    }}
+                    onClick={handleClearAllFilters}
                     className="mt-4 px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Clear all filters
@@ -450,4 +499,6 @@ export default function LearningResourcesUI() {
       /> */}
     </div>
   );
-}
+};
+
+export default LearningResourcesUI;
