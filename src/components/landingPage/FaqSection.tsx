@@ -5,6 +5,7 @@ import { Heart, Users, Brain,  Shield, Calendar, GraduationCap, Plus, Minus, Hel
 export const FAQContactSection = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
+
   const faqs = [
     {
       question: "What makes emoHub different from therapy or counseling?",
@@ -41,6 +42,7 @@ export const FAQContactSection = () => {
   return (
     <div className="bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40">
       <section className="py-24 relative overflow-hidden">
+
         <div className="absolute inset-0">
           <div className="absolute top-20 right-1/4 w-64 h-64 bg-gradient-to-br from-rose-300/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-gradient-to-br from-emerald-300/15 to-teal-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>

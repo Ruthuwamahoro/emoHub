@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  date,
   decimal,
   integer,
   jsonb,
@@ -89,9 +90,6 @@ const UserProfile = pgTable("user_profiles", {
   location: text("location"),
 });
 
-
-
-
 export const postContentTypeEnum = pgEnum("post_content_type", [
   "text",
   "image",
@@ -118,60 +116,7 @@ const Post = pgTable("Post", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-const EmotionHealthTracker = pgTable("mental_health_tracker", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  emotionRating: integer("emotion_rating").notNull(),
-  stressLevel: integer("stress_level").notNull(),
-  sleepQuality: integer("sleep_quality").notNull(),
-  comments: text("comments"),
-  emotionFactors: jsonb("emotion_factors")
-    .$type<{
-      energy: number;
-      anxiety: number;
-      motivation: number;
-      socialConnection: {
-        connected: boolean;
-        feedback?: string;
-      };
-      activities: {
-        exercise?: {
-          done: boolean;
-          type?: string;
-        };
-        mindfulness?: {
-          done: boolean;
-          technique?: string;
-        };
-        nutrition: number;
-      };
-      stressors: {
-        work: number;
-        relationships: string;
-      };
-      copingStrategies: {
-        supportSystem?: {
-          reachedOut: boolean;
-          contact?: string;
-        };
-        selfCare: string[];
-      };
-      symptoms: {
-        physical: string[];
-        emotional: string[];
-      };
-    }>()
-    .notNull(),
-  analysisResults: jsonb("analysis_results").$type<{
-    status: "good" | "moderate" | "concerning";
-    insights: string[];
-    suggestions: string[];
-    followUpNeeded: boolean;
-    analysisDate: string;
-  }>(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+
 
 const Event = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -189,21 +134,8 @@ const Event = pgTable("events", {
 
 
 
-const AIConversation = pgTable("ai_conversations", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  query: text("query").notNull(),
-  aiResponse: text("ai_response").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-const Analytics = pgTable("analytics", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  action: varchar("action", { length: 100 }).notNull(), 
-  data: text("data"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 const Message = pgTable("messages", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -218,14 +150,7 @@ const Message = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-const HealthTest = pgTable("health_tests", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  question1: integer("question_1").notNull(),
-  question2: integer("question_2").notNull(),
-  testDate: timestamp("test_date").defaultNow(),
 
-});
 
 const GroupCategories = pgTable("GroupCategories", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -235,13 +160,7 @@ const GroupCategories = pgTable("GroupCategories", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// const GroupRoles = pgTable("GroupRoles", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   user_id: uuid("user_id").references(() => User.id, { onDelete: 'cascade'}),
-//   group_id: uuid("group_id").references(() => Group.id, { onDelete: "cascade"}),
-//   role: varchar("role", { length: 50 }).notNull(), // 'owner' | 'member' | 'pending' | 'moderator'
-//   assigned_at: timestamp("assigned_at").defaultNow(),
-// })
+
 
 const Group = pgTable("groups", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -503,12 +422,12 @@ const quizAttempts = pgTable('quiz_attempts', {
   userId: uuid('user_id').notNull().references(() => User.id, { onDelete: 'cascade' }),
   startedAt: timestamp('started_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
-  score: integer('score'), // Total points earned
-  maxScore: integer('max_score'), // Total possible points
-  percentage: integer('percentage'), // Score as percentage
-  passed: boolean('passed'), // Whether user passed based on passing score
-  timeSpent: integer('time_spent'), // Time spent in seconds
-  attemptNumber: integer('attempt_number').notNull(), // Which attempt this is for the user
+  score: integer('score'), 
+  maxScore: integer('max_score'),
+  percentage: integer('percentage'), 
+  passed: boolean('passed'),
+  timeSpent: integer('time_spent'), 
+  attemptNumber: integer('attempt_number').notNull(),
 });
 
 const quizResponses = pgTable('quiz_responses', {
@@ -623,6 +542,27 @@ const UserEmotion = pgTable("user_emotions", {
 })
 
 
+const UserEmotionSummary = pgTable("user_emotion_summaries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => User.id, { onDelete: "cascade" })
+    .notNull(),
+  summaryDate: date("summary_date").notNull(), // yyyy-mm-dd
+  emotionalState: varchar("emotional_state", { length: 50 }).notNull(), // e.g., Positive, Neutral, Negative
+  emotionalScore: integer("emotional_score").notNull(), // range: -100 to +100
+  colorCode: varchar("color_code", { length: 20 }).notNull(), // e.g., "green", "yellow", "red"
+  totalEntries: integer("total_entries").notNull(), // number of entries for that day
+  aiAnalysis: varchar("ai_analysis", { length: 1000 }),
+  aiInsights: text("ai_insights").array(),
+  aiRecommendations: text("ai_recommendations").array(),
+  aiDailyTips: text("ai_daily_tips").array(),
+  aiMotivationalMessage: text("ai_motivational_message"),
+  aiWarningFlags: text("ai_warning_flags").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+
 
 const TodoPriorityEnum = pgEnum("todo_priority", ["LOW", "MEDIUM", "HIGH"]);
 const TodoStatusEnum = pgEnum("todo_status", [
@@ -702,12 +642,8 @@ export {
   User,
   UserProfile,
   Post,
-  EmotionHealthTracker,
   Event,
-  AIConversation,
-  Analytics,
   Message,
-  HealthTest,
   Group,
   GroupMember,
   Notification,
@@ -733,6 +669,7 @@ export {
   quizQuestionsRelations,
   quizzesRelations,
   UserEmotion,
+  UserEmotionSummary,
   quizResponses,
   quizAttempts,
   quizQuestions,

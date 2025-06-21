@@ -13,6 +13,8 @@ import { usegetReflectionsSummary } from '@/hooks/reflection/useGetAllReflection
 import { usegetReflection } from '@/hooks/reflection/useGetReflection';
 import { useCreateResponseReflection } from '@/hooks/reflection/useCreateResponseReflection';
 import { getDatesInSeconds } from './emotions/EmotionsDailyCheckins';
+import EmotionGauge from './emotions/EmotionsTracker';
+import { Calendar } from 'lucide-react';
 
 const EmoHubDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState('March 2020');
@@ -280,14 +282,39 @@ const EmoHubDashboard = () => {
     <div className="flex h-screen bg-gray-50">
       <div className="flex-1 overflow-auto">
         <div className="p-6 max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome <span className="text-orange-500">{fullName}</span>!
-            </h1>
-            <p className="text-gray-600">
-              Your personal space for emotional growth and meaningful conversations
-            </p>
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-4xl lg:text-5xl font-bold mb-2">
+                <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Welcome back, 
+                </span>
+                <span className="text-orange-500 ml-2">{fullName}!</span>
+                <span className="ml-2">✨</span>
+              </h1>
+              <p className="text-gray-600 text-lg max-w-2xl">
+                Your personal space for emotional growth, meaningful reflections, and building stronger connections
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border border-white/50">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-violet-600" />
+                  <div>
+                    <div className="text-sm font-semibold text-gray-800">
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {new Date().toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+          </div>
+          <EmotionGauge />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* EI Challenges Progress - Main Analytics */}
             <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -391,11 +418,7 @@ const EmoHubDashboard = () => {
               )}
             </div>
           </div>
-
-
-
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Community Participation</h2>
               <select className="text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-violet-500">
@@ -438,7 +461,7 @@ const EmoHubDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {session?.user?.role === "User" && (
             <div className="mb-8 pt-10">
@@ -502,18 +525,6 @@ const EmoHubDashboard = () => {
                         )}
                       </>
                     )}
-                    
-                    <div className="border-t border-slate-200 pt-4 mt-6">
-                      <div className="flex items-center mb-3">
-                        <Zap className="text-amber-500 w-4 h-4 mr-2" />
-                        <h3 className="font-medium text-sm text-gray-700">Today's Growth Insight</h3>
-                      </div>
-                      <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                        <p className="text-sm text-slate-700">
-                          When feeling overwhelmed, practice the "5-4-3-2-1" grounding technique: Name 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
