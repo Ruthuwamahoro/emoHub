@@ -146,7 +146,17 @@ export function GetsReflectionForm(){
                                         ))}
                                     </>
                                 ) : reflectionSummaryss?.data && reflectionSummaryss.data.length > 0 ? (
-                                    reflectionSummaryss.data.map((reflection) => (
+                                    reflectionSummaryss.data.map((reflection:
+{
+                                        id: string;
+                                        title: string;
+                                        response: string;
+                                        responseDate: string;
+                                        responder: {
+                                            userName: string;
+                                        };
+                                    }
+                                    ) => (
                                         <div key={reflection.id} className="p-6 hover:bg-orange-50 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-slate-200">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="flex items-center gap-3">

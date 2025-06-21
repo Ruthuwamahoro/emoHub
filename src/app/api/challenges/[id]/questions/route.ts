@@ -1,4 +1,3 @@
-// /api/challenges/[id]/elements/route.ts - FIXED VERSION
 import db from "@/server/db";
 import { ChallengeElements, Challenges } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
@@ -23,12 +22,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             challenge_id: id,
         };
 
-        // Insert the new challenge element
         await db.insert(ChallengeElements).values(insertedData);
 
         console.log('New element added, recalculating challenge stats...');
 
-        // Recalculate challenge statistics after adding new element
         const elementsStats = await db.select({
             total: sql<number>`count(*)`.as('total'),
             completed: sql<number>`count(case when ${ChallengeElements.is_completed} = true then 1 end)`.as('completed'),
@@ -47,7 +44,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             isCompleted: isWeekCompleted 
         });
 
-        // Update the challenge with new statistics
         await db.update(Challenges).set({
             total_elements: stats.total,
             completed_elements: stats.completed,
@@ -56,12 +52,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             updated_at: new Date()
         }).where(eq(Challenges.id, id));
 
-        console.log('Challenge stats updated, now updating user progress...');
 
-        // Update user progress to reflect the new totals
         await updateUserProgress(userId);
 
-        console.log('User progress updated successfully');
 
         return sendResponse(200, {
             message: 'Element created successfully',

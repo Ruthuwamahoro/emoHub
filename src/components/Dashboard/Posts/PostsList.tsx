@@ -71,7 +71,7 @@ const PostsList: React.FC<PostsListProps> = ({ groupId, onCreatePost }) => {
 
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
+      {posts.map((post: any) => (
         <PostItem key={post.id} post={post} />
       ))}
     </div>

@@ -33,7 +33,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             )
         );
 
-        console.log('API Route - Element updated:', updateResult);
 
         const allElementsDebug = await db.select()
             .from(ChallengeElements)
