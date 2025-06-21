@@ -86,8 +86,9 @@ export function EmotionsCheckIns() {
     ];
 
     const addTag = () => {
-        if (newTag.trim() && !formData.activities.includes(newTag.trim())) {
-            updateFormData('activities', [...formData.activities, newTag.trim()]);
+        const currentActivities = formData.activities as string[];
+        if (newTag.trim() && !currentActivities.includes(newTag.trim())) {
+            updateFormData('activities', [...currentActivities, newTag.trim()]);
             setNewTag('');
         }
     };

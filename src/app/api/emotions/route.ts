@@ -1,9 +1,11 @@
 import db from "@/server/db";
 import { UserEmotion } from "@/server/db/schema";
+import { generateDailySummary } from "@/services/emotions/emotionSummaryService";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
 import { desc, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
+
 
 
 // Google Gemini API configuration
@@ -311,14 +313,20 @@ export async function POST(req: NextRequest) {
         
         const result = await db.insert(UserEmotion).values(insertData).returning();
         
+        // **UPDATE DAILY SUMMARY AFTER EACH EMOTION CHECK-IN**
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        generateDailySummary(userId, today).catch(error => {
+            console.error("Error updating daily summary:", error);
+        });
+        
         return sendResponse(200, {
-            message: "Emotion recorded successfully! 🎉",
+            message: "Emotion recorded and summary updated successfully! 🎉",
             analysis: {
                 ...analysis,
                 id: result[0]?.id,
                 createdAt: insertData.createdAt
             }
-        }, "Emotion recorded successfully! 🎉");
+        }, "Emotion recorded and summary updated successfully! 🎉");
         
     } catch (error) {
         console.error("Error in emotion analysis:", error);

@@ -38,17 +38,17 @@ export const WhyEmoHubSection = () => {
         <div className="text-center mb-20">
           <h3 className="text-5xl md:text-title-large font-bold text-slate-900 mb-6">
             Why Choose{' '}
-            <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-[#fb923c] bg-clip-text text-transparent">
               emoHub?
             </span>
           </h3>
-          <p className="text-body-medium text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-body-medium  max-w-2xl mx-auto leading-relaxed">
             We believe everyone deserves emotional wellness and genuine human connection.
             Here's how we're different from other platforms.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 px-16">
           {benefits.map((benefit, index) => (
             <div
               key={index}
@@ -60,7 +60,7 @@ export const WhyEmoHubSection = () => {
                 {benefit.icon}
               </div>
               
-              <h3 className="relative font-bold text-slate-900 mb-4 group-hover:text-rose-600 transition-colors duration-300">
+              <h3 className="relative font-bold  text-amber-800 mb-4 group-hover:text-orange-600 transition-colors duration-300">
                 {benefit.title}
               </h3>
               <p className="relative text-slate-600 leading-relaxed">
