@@ -50,6 +50,7 @@ const User = pgTable("users", {
   username: varchar("username").notNull(),
   role: uuid("role").references(() => Role.id, { onDelete: "cascade" }),
   profilePicUrl: text("profile_pic_url"),
+  gender: varchar("gender", { length: 100 }),
   bio: text("bio"),
   expertise: text("expertise"),
   anonymityPreference: varchar("anonymity_preference", { length: 50 }),

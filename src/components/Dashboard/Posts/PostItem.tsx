@@ -1,120 +1,349 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, ExternalLink } from 'lucide-react';
-import Image from 'next/image';
-import { Post } from '@/hooks/users/groups/posts/useGetAllPosts';
+import React, { useState, useEffect } from 'react';
+import { Heart, MessageCircle, Share2, ExternalLink, Send, MoreHorizontal, Bookmark, Eye, Play, X, ChevronDown, Reply, ThumbsUp } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Post } from '@/types/posts';
+import { useCreateComment } from '@/hooks/users/groups/posts/comments/usePostComments';
+import { useParams } from 'next/navigation';
+import { Avatar as AvatarImages } from "@/utils/genderAvatar";
+
+
 
 interface PostItemProps {
   post: Post;
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post }) => {
+interface Comment {
+  id: string | number;
+  content: string;
+  author: {
+    id?: string;
+    name: string;
+    username?: string;
+    image?: string;
+    gender?: string;
+  };
+  createdAt: string;
+  likes?: number;
+  isLiked?: boolean;
+}
+
+
+
+const PostItem = ({ post } : {post: any}) => {
+  const { data: session } = useSession();
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [displayedComments, setDisplayedComments] = useState<Comment[]>([]);
+  const [commentsPage, setCommentsPage] = useState(0);
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const [likeCount, setLikeCount] = useState(post.likes || 0);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | number | null>(null);
+  const params = useParams();
+  const groupId = params?.id as string;
+
+  const COMMENTS_PER_PAGE = 3;
+
+  const {
+    mutate,
+    formData,
+    setFormData,
+    isPending,
+    errors,
+    setErrors,
+    handleSubmit,
+    handleInputField
+  } = useCreateComment(groupId);
+
+  useEffect(() => {
+    if (post.comments && Array.isArray(post.comments)) {
+      const formattedComments: Comment[] = post.comments.map((comment: any) => ({
+        id: comment.id,
+        content: comment.content,
+        author: {
+          id: comment.author?.id,
+          name: comment.author?.name || 'Anonymous',
+          username: comment.author?.username,
+          image: comment.author?.image,
+          gender: comment.author?.gender || 'other'
+        },
+        createdAt: comment.createdAt,
+        likes: comment.likes || 0,
+        isLiked: false
+      }));
+      setComments(formattedComments);
+      setDisplayedComments(formattedComments.slice(0, COMMENTS_PER_PAGE));
+    }
+  }, [post.comments]);
+
+  const loadMoreComments = () => {
+    if (isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const nextPage = commentsPage + 1;
+      const startIndex = nextPage * COMMENTS_PER_PAGE;
+      const endIndex = startIndex + COMMENTS_PER_PAGE;
+      const moreComments = comments.slice(startIndex, endIndex);
+      
+      if (moreComments.length > 0) {
+        setDisplayedComments(prev => [...prev, ...moreComments]);
+        setCommentsPage(nextPage);
+      }
+      setIsLoadingMore(false);
+    }, 800);
   };
 
-  const handleLike = () => {
+
+  console.log(post.author)
+
+  const getUserAvatar = () => {
+    if (post.author?.image) {
+      return (
+        <div className="relative">
+          <img 
+            src={post.author.image}
+            alt={post.author?.username || 'User'} 
+            className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg"
+          />
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+        </div>
+      );
+    }
+
+
+
+    return (
+
+        <AvatarImages
+        gender={post.author?.gender || 'other'} 
+        name={post.author?.username || 'Anonymous'} 
+        />
+    );
+  };
+
+  const getUserDisplayName = () => {
+    if (session?.user?.username === post.author?.username) {
+      return "You";
+    }
+    return post.author?.name || 'Anonymous User';
+  };
+
+  const getCurrentUserAvatar = () => {
+    if (session?.user?.profilePicUrl) {
+      return (
+        <div className="relative">
+          <img 
+            src={session.user.profilePicUrl}
+            alt="Your avatar" 
+            className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-200 shadow-sm"
+          />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
+        </div>
+      );
+    }
+    return (
+
+        <AvatarImages
+        gender={session?.user?.gender || 'other'} 
+        name={session?.user?.username || 'You'} 
+        size={36}
+        />
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    return 'Just now';
+  };
+
+  const formatCount = (count: number) => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
+  };
+
+  const submitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.content?.trim()) return;
+
+    try {
+      await handleSubmit(post.id, groupId);
+      // Add optimistic update
+      const newComment: Comment = {
+        id: Date.now(),
+        content: formData.content,
+        author: {
+          name: session?.user?.fullName || "You",
+          username: session?.user?.username,
+          image: session?.user?.profilePicUrl,
+          gender: session?.user?.gender || 'other'
+        },
+        createdAt: new Date().toISOString(),
+        likes: 0,
+        isLiked: false
+      };
+      
+      setComments(prev => [newComment, ...prev]);
+      setDisplayedComments(prev => [newComment, ...prev.slice(0, COMMENTS_PER_PAGE - 1)]);
+      setFormData({ content: '' });
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const toggleLike = () => {
     setLiked(!liked);
     setLikeCount(liked ? likeCount - 1 : likeCount + 1);
   };
 
+  const toggleBookmark = () => {
+    setBookmarked(!bookmarked);
+  };
+
+  const toggleCommentLike = (commentId: string | number) => {
+    setDisplayedComments(prev => 
+      prev.map(comment => 
+        comment.id === commentId 
+          ? { 
+              ...comment, 
+              isLiked: !comment.isLiked,
+              likes: (comment.likes || 0) + (comment.isLiked ? -1 : 1)
+            }
+          : comment
+      )
+    );
+    
+    setComments(prev => 
+      prev.map(comment => 
+        comment.id === commentId 
+          ? { 
+              ...comment, 
+              isLiked: !comment.isLiked,
+              likes: (comment.likes || 0) + (comment.isLiked ? -1 : 1)
+            }
+          : comment
+      )
+    );
+  };
+
+  const getCommentUserAvatar = (comment: Comment) => {
+    if (comment.author.image) {
+      return (
+        <div className="relative">
+          <img 
+            src={comment.author.image} 
+            alt={comment.author.name} 
+            className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm"
+          />
+          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
+        </div>
+      );
+    }
+    return (
+        <AvatarImages
+        gender={comment.author.gender || 'other'} 
+        name={comment.author?.username || comment.author.name} 
+        size={48}
+        />
+    );
+  };
+
+  const getCommentUserDisplayName = (comment: Comment) => {
+    if (session?.user?.username === comment.author.username) {
+      return "You";
+    }
+    return comment.author.name || 'Anonymous';
+  };
+
   const renderPostContent = () => {
     switch (post.contentType) {
-      case 'text':
-        return (
-          <div className="mt-4">
-            <p className="text-gray-800 whitespace-pre-wrap">{post.textContent}</p>
-          </div>
-        );
-        
       case 'image':
         return (
-          <div className="mt-4">
-            <div className="rounded-lg overflow-hidden">
-              <Image 
-                src={post.mediaUrl || '/api/placeholder/600/400'} 
-                alt={post.mediaAlt || 'Post image'} 
-                width={600} 
-                height={400} 
-                className="w-full object-cover"
-              />
-            </div>
-            {post.mediaAlt && (
-              <p className="text-sm text-gray-500 mt-2">{post.mediaAlt}</p>
-            )}
+          <div className="mt-3 group relative overflow-hidden rounded-xl">
+            <img 
+              src={post.mediaUrl || '/api/placeholder/600/300'} 
+              alt={post.mediaAlt || 'Post image'} 
+              className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
         );
         
       case 'video':
         return (
-          <div className="mt-4">
-            <div className="rounded-lg overflow-hidden">
-              <video 
-                src={post.mediaUrl} 
-                controls 
-                className="w-full" 
-                poster="/api/placeholder/600/400"
-              />
+          <div className="mt-3 relative group rounded-xl overflow-hidden">
+            <video 
+              src={post.mediaUrl} 
+              controls 
+              className="w-full h-52 object-cover"
+              poster="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=300&fit=crop"
+            />
+            <div className="absolute top-3 left-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1.5 rounded-full text-xs flex items-center font-medium shadow-lg">
+              <Play className="w-3 h-3 mr-1.5" />
+              Video
             </div>
-            {post.mediaAlt && (
-              <p className="text-sm text-gray-500 mt-2">{post.mediaAlt}</p>
-            )}
-          </div>
-        );
-        
-      case 'audio':
-        return (
-          <div className="mt-4">
-            <audio src={post.mediaUrl} controls className="w-full" />
-            {post.mediaAlt && (
-              <p className="text-sm text-gray-500 mt-2">{post.mediaAlt}</p>
-            )}
           </div>
         );
         
       case 'link':
         return (
-          <div className="mt-4">
-            <a 
-              href={post.linkUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block p-4 border rounded-lg hover:bg-gray-50"
-            >
-              <div className="flex items-start">
-                {post.linkPreviewImage && (
-                  <div className="flex-shrink-0 mr-4">
-                    <Image 
-                      src={post.linkPreviewImage} 
-                      alt="Link preview" 
-                      width={120} 
-                      height={120} 
-                      className="rounded-md object-cover"
-                    />
-                  </div>
-                )}
-                <div className="flex-grow">
-                  <h4 className="font-medium text-blue-600 flex items-center">
-                    {post.linkUrl?.replace(/^https?:\/\//, '').split('/')[0]}
-                    <ExternalLink className="ml-1 w-4 h-4" />
-                  </h4>
-                  {post.linkDescription && (
-                    <p className="text-gray-600 mt-1">{post.linkDescription}</p>
+          <div className="mt-3">
+            <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 hover:shadow-lg transition-all duration-300">
+              <a 
+                href={post.linkUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="block"
+              >
+                <div className="flex">
+                  {post.linkPreviewImage && (
+                    <div className="w-24 h-24 flex-shrink-0">
+                      <img 
+                        src={post.linkPreviewImage} 
+                        alt="Link preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   )}
+                  <div className="flex-1 p-4">
+                    <div className="flex items-center text-blue-600 text-xs font-semibold mb-2">
+                      {post.linkUrl?.replace(/^https?:\/\//, '').split('/')[0]}
+                      <ExternalLink className="ml-1.5 w-3 h-3" />
+                    </div>
+                    {post.linkDescription && (
+                      <p className="text-gray-700 text-sm line-clamp-2 leading-relaxed">{post.linkDescription}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </a>
+              </a>
+            </div>
+            {post.textContent && (
+              <p className="text-gray-800 mt-3 text-sm leading-relaxed line-clamp-3">{post.textContent}</p>
+            )}
+          </div>
+        );
+        
+      case 'text':
+        return (
+          <div className="mt-3">
+            <p className="text-gray-800 text-sm leading-relaxed line-clamp-6 whitespace-pre-wrap">{post.textContent}</p>
           </div>
         );
         
@@ -123,48 +352,242 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
     }
   };
 
-  return (
-    <div className="bg-white p-4 rounded-lg border shadow-sm mb-4">
-      <div className="flex items-center">
-        <Image 
-          src={post.user?.image || '/api/placeholder/40/40'} 
-          alt={post.user?.name || 'User'} 
-          width={40} 
-          height={40} 
-          className="rounded-full mr-3"
-        />
-        <div>
-          <h4 className="font-semibold">{post.user?.name || 'Anonymous User'}</h4>
-          <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+  const hasMoreComments = displayedComments.length < comments.length;
+
+return (
+  <div className="relative w-full max-w-2xl">
+    {/* Main Post Card */}
+    <article className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 w-full">
+      {/* Post Header */}
+      <div className="p-5 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {getUserAvatar()}
+            <div>
+              <h4 className="font-semibold text-gray-900 text-sm">{getUserDisplayName()}</h4>
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <span>{formatDate(post.createdAt)}</span>
+                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                <div className="flex items-center">
+                  <Eye className="w-3 h-3 mr-1" />
+                  <span>{formatCount(post.views || 0)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={toggleBookmark}
+              className={`p-2 rounded-full hover:bg-yellow-50 transition-all duration-200 ${bookmarked ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-yellow-500'}`}
+            >
+              <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+            </button>
+            <button className="p-2 rounded-full hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all duration-200">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-      
+
       {/* Post Title */}
-      <h3 className="font-medium text-lg mt-3">{post.title}</h3>
-      
+      {post.title && (
+        <div className="px-5 pb-2">
+          <h3 className="font-semibold text-gray-900 text-base leading-tight">{post.title}</h3>
+        </div>
+      )}
+
       {/* Post Content */}
-      {renderPostContent()}
-      
-      {/* Post Actions */}
-      <div className="flex items-center mt-4 pt-3 border-t">
-        <button 
-          className={`flex items-center mr-4 ${liked ? 'text-red-500' : 'text-gray-600'} hover:text-red-500`}
-          onClick={handleLike}
-        >
-          <Heart className={`mr-1 w-5 h-5 ${liked ? 'fill-current' : ''}`} /> 
-          <span>{likeCount}</span>
-        </button>
-        
-        <button className="flex items-center mr-4 text-gray-600 hover:text-blue-500">
-          <MessageCircle className="mr-1 w-5 h-5" /> Comment
-        </button>
-        
-        <button className="flex items-center text-gray-600 hover:text-green-500">
-          <Share2 className="mr-1 w-5 h-5" /> Share
-        </button>
+      <div className="px-5 pb-3">
+        {renderPostContent()}
       </div>
-    </div>
-  );
+
+      {/* Post Actions */}
+      <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/30">
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={toggleLike}
+            className={`flex items-center space-x-2 transition-all duration-200 group ${
+              liked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+            }`}
+          >
+            <Heart className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+              liked ? 'fill-current' : ''
+            }`} />
+            <span className="text-sm font-medium">{formatCount(likeCount)}</span>
+          </button>
+          <button
+            onClick={toggleComments}
+            className={`flex items-center space-x-2 transition-all duration-200 group ${
+              showComments ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'
+            }`}
+          >
+            <MessageCircle className="w-4 h-4 transition-all duration-200 group-hover:scale-110" />
+            <span className="text-sm font-medium">{formatCount(comments.length)}</span>
+          </button>
+          <button className="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition-all duration-200 group">
+            <Share2 className="w-4 h-4 transition-all duration-200 group-hover:scale-110" />
+            <span className="text-sm font-medium">{formatCount(post.shares || 0)}</span>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    {/* Comments Panel - Absolutely Positioned */}
+    {showComments && (
+      <div className="absolute top-0 left-full ml-4 w-96 bg-white rounded-2xl shadow-lg border border-gray-200 flex flex-col max-h-[calc(100vh-120px)] z-10">
+        {/* Comments Header */}
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base">Comments</h3>
+            <p className="text-xs text-gray-500">{comments.length} comments</p>
+          </div>
+          <button
+            onClick={() => setShowComments(false)}
+            className="p-1.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all duration-200"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Comment Input */}
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex space-x-3">
+            {getCurrentUserAvatar()}
+            <div className="flex-1 relative">
+              <textarea
+                value={formData.content || ''}
+                name="content"
+                id="content"
+                onChange={handleInputField}
+                placeholder="Add a comment..."
+                className="w-full p-3 pr-10 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-gray-50 focus:bg-white"
+                rows={2}
+              />
+              <button
+                onClick={submitComment}
+                disabled={!formData.content?.trim() || isPending}
+                className="absolute bottom-2 right-2 p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Comments List */}
+        <div className="flex-1 overflow-y-auto">
+          {displayedComments.length > 0 ? (
+            <div className="p-4 space-y-4">
+              {displayedComments.map((comment, index) => (
+                <div key={comment.id} className="group">
+                  <div className="flex space-x-3">
+                    {getCommentUserAvatar(comment)}
+                    <div className="flex-1 min-w-0">
+                      <div className="bg-gray-50 rounded-xl px-3 py-2.5 hover:bg-gray-100 transition-colors duration-200">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-medium text-sm text-gray-900 truncate">
+                            {getCommentUserDisplayName(comment)}
+                          </span>
+                          <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(comment.createdAt)}</span>
+                        </div>
+                        <p className="text-gray-800 text-sm leading-relaxed break-words">{comment.content}</p>
+                      </div>
+
+                      {/* Comment Actions */}
+                      <div className="flex items-center mt-2 ml-3 space-x-4">
+                        <button
+                          onClick={() => toggleCommentLike(comment.id)}
+                          className={`flex items-center space-x-1 text-xs transition-colors duration-200 ${
+                            comment.isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+                          }`}
+                        >
+                          <ThumbsUp className={`w-3 h-3 ${comment.isLiked ? 'fill-current' : ''}`} />
+                          <span className="font-medium">{comment.likes || 0}</span>
+                        </button>
+                        <button
+                          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                          className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors duration-200"
+                        >
+                          <Reply className="w-3 h-3" />
+                          <span className="font-medium">Reply</span>
+                        </button>
+                      </div>
+
+                      {/* Reply Input */}
+                      {replyingTo === comment.id && (
+                        <div className="mt-3 ml-3 animate-in slide-in-from-top-2 duration-200">
+                          <div className="flex space-x-2">
+                            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            {getCurrentUserAvatar()}
+                            </div>
+                            <div className="flex-1 relative">
+                              <textarea
+                                placeholder={`Reply to ${getCommentUserDisplayName(comment)}...`}
+                                className="w-full p-2.5 pr-8 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white"
+                                rows={2}
+                                autoFocus
+                              />
+                              <div className="flex items-center justify-end space-x-2 mt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setReplyingTo(null)}
+                                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                                >
+                                  Reply
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Load More Button */}
+              {hasMoreComments && (
+                <div className="text-center pt-2">
+                  <button
+                    onClick={loadMoreComments}
+                    disabled={isLoadingMore}
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-all duration-200"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-600 border-t-transparent" />
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        <span>Show {Math.min(COMMENTS_PER_PAGE, comments.length - displayedComments.length)} more replies</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-6 text-center">
+              <div className="bg-gray-50 rounded-xl p-6">
+                <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">No comments yet</p>
+                <p className="text-gray-400 text-xs mt-1">Be the first to comment!</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default PostItem;

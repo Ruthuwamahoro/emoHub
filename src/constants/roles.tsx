@@ -58,11 +58,6 @@ export const ROLE_BASED_LINKS = {
         icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "Emotions Insights",
-        href: "/dashboard/emotions",
-        icon: <SiGoogleanalytics className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
         label: "Ask AI",
         href: "/dashboard/askus",
         icon: <FaRobot className="text-white h-5 w-5 flex-shrink-0" />,
@@ -122,6 +117,11 @@ export const ROLE_BASED_LINKS = {
         label: "User Management",
         href: "/dashboard/admin/usermanagement",
         icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
+      },
+      {
+        label: "Emotion Insights",
+        href: "/dashboard/emotions",
+        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Weekly challenges",

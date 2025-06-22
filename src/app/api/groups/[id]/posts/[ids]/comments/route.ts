@@ -6,17 +6,25 @@ import { sendResponse } from "@/utils/Responses";
 
 export async function POST(
     req: NextRequest,
-    {params}: {params: Promise<{commentsId: string}>}
-
-    
+    {params}: {params: Promise<{id: string, ids: string}>}
 ){
     try {
         const userId = await getUserIdFromSession();
         if (!userId) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
-        const {commentsId} = await params;
-        const postId = commentsId
+        const {id, ids} = await params;
+        if (!id) {
+            return sendResponse(400, null, "Group ID is required");
+        }
+        if (!ids) {
+            return sendResponse(400, null, "Post ID is required");
+        }
+
+        console.log("Received Group ID:", ids);
+        console.log("Received Post ID:", id);
+
+        const postId = id
         if (!postId) {
             return new Response(JSON.stringify({ error: "Post ID is required" }), { status: 400 });
         }
@@ -24,6 +32,7 @@ export async function POST(
         if (!content) {
             return new Response(JSON.stringify({ error: "Content is required" }), { status: 400 });
         }
+        console.log("Received content:+++++++++++", content);
         await db.insert(Comment).values({
             content,
             postId,

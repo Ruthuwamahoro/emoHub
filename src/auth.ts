@@ -18,6 +18,7 @@ declare module "next-auth" {
       profilePicUrl?: string;
       expertise?: string;
       isActive: boolean;
+      gender?: string;
       isOnboardingCompleted?: boolean;
     },
     loginTime?: number;
@@ -70,6 +71,7 @@ export const options: NextAuthOptions = {
               expertise: User.expertise,
               isActive: User.isActive,
               isVerified: User.isVerified,
+              gender: User.gender,
               roleName: Role.name,
               isOnboardingCompleted: User.onboardingCompleted,
             })
@@ -105,6 +107,7 @@ export const options: NextAuthOptions = {
               profilePicUrl: user.profilePicUrl,
               expertise: user.expertise,
               isActive: user.isActive,
+              gender: user.gender,
               isOnboardingCompleted: user.isOnboardingCompleted,
             };
           }
@@ -181,6 +184,7 @@ export const options: NextAuthOptions = {
               expertise: User.expertise,
               isActive: User.isActive,
               roleName: Role.name,
+              gender: User.gender,
               isOnboardingCompleted: User.onboardingCompleted,
             })
             .from(User)
@@ -197,6 +201,7 @@ export const options: NextAuthOptions = {
             token.profilePicUrl = user.profilePicUrl ?? undefined;
             token.expertise = user.expertise ?? undefined;
             token.isActive = user.isActive ?? false;
+            token.gender = user.gender ?? undefined;
             token.onboardingCompleted = user.isOnboardingCompleted ?? false;
           }
         } catch (error) {
@@ -218,6 +223,7 @@ export const options: NextAuthOptions = {
         session.user.isActive = token.isActive as boolean;
         session.user.isOnboardingCompleted = token.onboardingCompleted as boolean;
         session.loginTime = token.loginTime;
+        session.user.gender = token.gender as string;
       }
       return session;
     },

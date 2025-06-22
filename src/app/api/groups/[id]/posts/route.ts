@@ -170,7 +170,9 @@ export const GET = async (
           id: User.id,
           name: User.fullName,
           username: User.username,
+          gender: User.gender,
           image: User.profilePicUrl,
+          verified: User.isVerified
         },
       })
       .from(Post)
@@ -190,6 +192,7 @@ export const GET = async (
               id: User.id,
               name: User.fullName,
               username: User.username,
+              gender: User.gender,
               image: User.profilePicUrl,
             },
             likesCount: sql<number>`count(distinct ${CommentLikes.id})`,
