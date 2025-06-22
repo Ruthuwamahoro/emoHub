@@ -2,9 +2,9 @@ import db from "@/server/db";
 import { ChallengeElements, Challenges } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
+import { updateUserProgress } from "@/utils/userProgressUtils";
 import { eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
-import { updateUserProgress } from "../completed/route";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {

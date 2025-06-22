@@ -2,10 +2,29 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Users, Clock, Mic, MicOff, Send, X, MoreHorizontal, ArrowLeft } from 'lucide-react';
 
-const DialogueSession = () => {
-  const [message, setMessage] = useState('');
-  const [micEnabled, setMicEnabled] = useState(false);
-  const [messages, setMessages] = useState([
+interface Message {
+  id: string;
+  sender: string;
+  role: string;
+  content: string;
+  time: string;
+  isFacilitator?: boolean;
+  isYou?: boolean;
+}
+
+interface Participant {
+  id: string;
+  name: string;
+  role: string;
+  isActive: boolean;
+  isFacilitator?: boolean;
+  isYou?: boolean;
+}
+
+const DialogueSession: React.FC = () => {
+  const [message, setMessage] = useState<string>('');
+  const [micEnabled, setMicEnabled] = useState<boolean>(false);
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'Dr. Maya Chen',
@@ -30,7 +49,7 @@ const DialogueSession = () => {
     }
   ]);
   
-  const [participants, setParticipants] = useState([
+  const [participants, setParticipants] = useState<Participant[]>([
     { id: '1', name: 'Dr. Maya Chen', role: 'Facilitator', isActive: true, isFacilitator: true },
     { id: '2', name: 'You', role: 'Participant', isActive: true, isYou: true },
     { id: '3', name: 'Jamie Miller', role: 'Participant', isActive: true },
@@ -39,12 +58,12 @@ const DialogueSession = () => {
     { id: '6', name: 'Alex Rivera', role: 'Participant', isActive: false }
   ]);
   
-  const [timeRemaining, setTimeRemaining] = useState(42); // minutes remaining
-  const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(42); // minutes remaining
+  const [isInfoPanelOpen, setIsInfoPanelOpen] = useState<boolean>(false);
   
-  const handleSendMessage = () => {
+  const handleSendMessage = (): void => {
     if (message.trim()) {
-      const newMessage = {
+      const newMessage: Message = {
         id: String(messages.length + 1),
         sender: 'You',
         role: 'Participant',
@@ -58,7 +77,7 @@ const DialogueSession = () => {
       
       if (messages.length === 3) {
         setTimeout(() => {
-          const facilitatorResponse = {
+          const facilitatorResponse: Message = {
             id: String(messages.length + 2),
             sender: 'Dr. Maya Chen',
             role: 'Facilitator',
@@ -79,6 +98,17 @@ const DialogueSession = () => {
     
     return () => clearInterval(timer);
   }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    setMessage(e.target.value);
+  };
   
   return (
     <div className="flex flex-col h-screen bg-slate-50">
@@ -163,16 +193,11 @@ const DialogueSession = () => {
               <div className="flex-1 relative">
                 <textarea
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={handleMessageChange}
                   placeholder="Share your thoughts..."
                   className="w-full border border-slate-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none overflow-hidden"
                   rows={1}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <button 

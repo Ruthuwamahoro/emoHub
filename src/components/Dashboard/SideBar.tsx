@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
 import VibratingHelpButton from "./HelperButton";
 import { Avatar as AvatarImages } from "@/utils/genderAvatar";
-
+// npm i react-joyride@next
 
 const SidebarSkeleton = ({ open }: { open: boolean }) => (
   <div className={cn("h-screen")}>

@@ -7,9 +7,43 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Sun, Moon, Cloud, Clock, Heart, Smile, Frown, Meh, AlertTriangle, Battery, Coffee } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
 
-const questions = [
+interface MoodOption {
+  emoji: string;
+  text: string;
+  value: number;
+}
+
+interface Question {
+  id: number;
+  text: string;
+  type: "mood" | "slider" | "text";
+  icon: React.ReactNode;
+  options?: MoodOption[];
+  min?: number;
+  max?: number;
+  timed?: boolean;
+  timeLimit?: number;
+}
+
+interface Activity {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+interface MoodDataPoint {
+  day: string;
+  mood: number;
+  energy: number;
+}
+
+interface PieDataPoint {
+  name: string;
+  value: number;
+}
+
+const questions: Question[] = [
   {
     id: 1,
     text: "How are you feeling today?",
@@ -49,7 +83,7 @@ const questions = [
   },
 ];
 
-const motivationalQuotes = [
+const motivationalQuotes: string[] = [
   "You're doing great!",
   "Every step counts!",
   "Your mental health matters!",
@@ -57,22 +91,22 @@ const motivationalQuotes = [
   "Taking care of yourself is a priority!",
 ];
 
-const activities = [
+const activities: Activity[] = [
   { title: "Meditation", description: "10 minutes of mindful breathing", icon: <Heart /> },
   { title: "Walking", description: "20 minutes nature walk", icon: <Coffee /> },
   { title: "Journaling", description: "Write down your thoughts", icon: <Cloud /> },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS: string[] = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-export const MentalHealthTest = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [showResults, setShowResults] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(null);
-  const [dailyStreak, setDailyStreak] = useState(5); // Mock streak
+export const MentalHealthTest: React.FC = () => {
+  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
+  const [answers, setAnswers] = useState<Record<number, number | string>>({});
+  const [showResults, setShowResults] = useState<boolean>(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [dailyStreak, setDailyStreak] = useState<number>(5); 
 
-  const moodData = [
+  const moodData: MoodDataPoint[] = [
     { day: "Mon", mood: 4, energy: 3 },
     { day: "Tue", mood: 3, energy: 4 },
     { day: "Wed", mood: 5, energy: 5 },
@@ -82,7 +116,7 @@ export const MentalHealthTest = () => {
     { day: "Sun", mood: 5, energy: 4 },
   ];
 
-  const pieData = [
+  const pieData: PieDataPoint[] = [
     { name: 'Very Good', value: 30 },
     { name: 'Good', value: 25 },
     { name: 'Okay', value: 20 },
@@ -92,21 +126,24 @@ export const MentalHealthTest = () => {
 
   useEffect(() => {
     if (questions[currentQuestion]?.timed && !showResults) {
-      setTimeLeft(questions[currentQuestion].timeLimit);
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
+      const timeLimit = questions[currentQuestion].timeLimit;
+      if (timeLimit) {
+        setTimeLeft(timeLimit);
+        const timer = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev === null || prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }
     }
-  }, [currentQuestion]);
+  }, [currentQuestion, showResults]);
 
-  const handleAnswer = (answer) => {
+  const handleAnswer = (answer: number | string): void => {
     setAnswers({ ...answers, [currentQuestion]: answer });
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -115,86 +152,70 @@ export const MentalHealthTest = () => {
     }
   };
 
-  const renderQuestion = () => {
+  const renderQuestion = (): React.ReactNode => {
     const question = questions[currentQuestion];
 
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={question.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex justify-center mb-6">
-            {question.icon}
-          </div>
+      <div key={question.id}>
+        <div className="flex justify-center mb-6">
+          {question.icon}
+        </div>
 
-          {question.type === "mood" && (
-            <div className="grid grid-cols-5 gap-4 mt-6">
-              {question.options.map((option) => (
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  key={option.value}
+        {question.type === "mood" && question.options && (
+          <div className="grid grid-cols-5 gap-4 mt-6">
+            {question.options.map((option) => (
+              <div key={option.value}>
+                <Button
+                  onClick={() => handleAnswer(option.value)}
+                  variant="outline"
+                  className="w-full flex flex-col items-center p-4 hover:bg-blue-50 transition-colors"
                 >
-                  <Button
-                    onClick={() => handleAnswer(option.value)}
-                    variant="outline"
-                    className="w-full flex flex-col items-center p-4 hover:bg-blue-50 transition-colors"
-                  >
-                    <span className="text-2xl mb-2">{option.emoji}</span>
-                    <span className="text-sm">{option.text}</span>
-                  </Button>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {question.type === "slider" && (
-            <div className="mt-6 px-4">
-              <Slider
-                defaultValue={[5]}
-                max={10}
-                min={1}
-                step={1}
-                onValueChange={(value) => handleAnswer(value[0])}
-                className="mt-6"
-              />
-              <div className="flex justify-between mt-2 text-sm text-gray-600">
-                <span>Low</span>
-                <span>High</span>
+                  <span className="text-2xl mb-2">{option.emoji}</span>
+                  <span className="text-sm">{option.text}</span>
+                </Button>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        )}
 
-          {question.type === "text" && (
-            <div className="mt-6">
-              {timeLeft !== null && (
-                <div className="mb-4 text-center">
-                  <Clock className="inline-block mr-2" />
-                  Time remaining: {timeLeft}s
-                </div>
-              )}
-              <Textarea
-                placeholder="Share your thoughts..."
-                className="min-h-[100px]"
-                onChange={(e) => handleAnswer(e.target.value)}
-              />
+        {question.type === "slider" && (
+          <div className="mt-6 px-4">
+            <Slider
+              defaultValue={[5]}
+              max={question.max || 10}
+              min={question.min || 1}
+              step={1}
+              onValueChange={(value) => handleAnswer(value[0])}
+              className="mt-6"
+            />
+            <div className="flex justify-between mt-2 text-sm text-gray-600">
+              <span>Low</span>
+              <span>High</span>
             </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+          </div>
+        )}
+
+        {question.type === "text" && (
+          <div className="mt-6">
+            {timeLeft !== null && (
+              <div className="mb-4 text-center">
+                <Clock className="inline-block mr-2" />
+                Time remaining: {timeLeft}s
+              </div>
+            )}
+            <Textarea
+              placeholder="Share your thoughts..."
+              className="min-h-[100px]"
+              onChange={(e) => handleAnswer(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
     );
   };
 
-  const renderResults = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-6"
-    >
+  const renderResults = (): React.ReactNode => (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -242,33 +263,33 @@ export const MentalHealthTest = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4">
-          <motion.div whileHover={{ scale: 1.02 }}>
+          <div>
             <div className="flex items-center space-x-2">
               <Heart className="text-red-500" />
               <h3 className="font-semibold">Daily Streak</h3>
             </div>
             <p className="mt-2 text-sm">You've completed {dailyStreak} days in a row!</p>
-          </motion.div>
+          </div>
         </Card>
 
         <Card className="p-4">
-          <motion.div whileHover={{ scale: 1.02 }}>
+          <div>
             <div className="flex items-center space-x-2">
               <Sun className="text-yellow-500" />
               <h3 className="font-semibold">Today's Insight</h3>
             </div>
             <p className="mt-2 text-sm">Your energy levels are improving!</p>
-          </motion.div>
+          </div>
         </Card>
 
         <Card className="p-4">
-          <motion.div whileHover={{ scale: 1.02 }}>
+          <div>
             <div className="flex items-center space-x-2">
               <AlertTriangle className="text-blue-500" />
               <h3 className="font-semibold">Resources</h3>
             </div>
             <p className="mt-2 text-sm">Access our meditation guides</p>
-          </motion.div>
+          </div>
         </Card>
       </div>
 
@@ -279,9 +300,8 @@ export const MentalHealthTest = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {activities.map((activity, index) => (
-              <motion.div
+              <div
                 key={activity.title}
-                whileHover={{ scale: 1.05 }}
                 className="p-4 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center space-x-2 mb-2">
@@ -289,26 +309,22 @@ export const MentalHealthTest = () => {
                   <h4 className="font-semibold">{activity.title}</h4>
                 </div>
                 <p className="text-sm text-gray-600">{activity.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
+      <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Daily Wellness Check-In</h1>
         <p className="text-gray-600">
           Answer a few questions to understand your well-being better
         </p>
-      </motion.div>
+      </div>
 
       {!showResults ? (
         <Card className="mb-8">
@@ -331,13 +347,9 @@ export const MentalHealthTest = () => {
               {renderQuestion()}
             </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center mt-6 text-sm text-gray-600 italic"
-            >
+            <div className="text-center mt-6 text-sm text-gray-600 italic">
               {motivationalQuotes[currentQuestion % motivationalQuotes.length]}
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -346,4 +358,3 @@ export const MentalHealthTest = () => {
     </div>
   );
 };
-

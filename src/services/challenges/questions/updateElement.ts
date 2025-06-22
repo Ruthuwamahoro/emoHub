@@ -1,4 +1,5 @@
-import { Challenge } from "@/components/Dashboard/challenge/ChallengesPage";
+// import { Challenge } from "@/components/Dashboard/challenge/ChallengesPage";
+import { Challenge } from "@/types/challenges";
 import axios from "axios";
 
 export const UpdateElementChallenge = async (id: string, ids: string, data: Challenge) => {

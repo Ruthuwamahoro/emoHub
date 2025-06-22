@@ -76,7 +76,7 @@ export const useCreateEmotionCheckins = () => {
         }
         
         try {
-            await mutate(formData);
+            mutate(formData);
             return { success: true };
         } catch (error) {
             if (error instanceof z.ZodError) {

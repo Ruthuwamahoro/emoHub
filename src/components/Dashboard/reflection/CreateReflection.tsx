@@ -19,9 +19,21 @@ export function GetsReflectionForm(){
 
       console.log("Reflection Summary Data:", reflectionSummaryss);
 
+     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const syntheticEvent = {
+            ...e,
+            target: {
+                ...e.target,
+                id: e.target.id,
+                value: e.target.value
+            }
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
+        
+        handleChange(syntheticEvent);
+     };
+
      return(
         <div className="min-h-screen bg-slate-50">
-            {/* Header */}
             <div className="bg-white border-b border-slate-200">
                 <div className="mx-auto max-w-7xl px-6 py-6">
                     <div className="flex items-center justify-between">
@@ -45,7 +57,6 @@ export function GetsReflectionForm(){
 
             <div className="mx-auto max-w-7xl px-6 py-8">
                 <div className="grid grid-cols-12 gap-8">
-                    {/* Post New Reflection - Sidebar */}
                     <div className="col-span-12 lg:col-span-4">
                         <div className="sticky top-8">
                             <div className="bg-white rounded-lg border border-slate-200 shadow-sm h-[340px]">
@@ -68,7 +79,7 @@ export function GetsReflectionForm(){
                                             <textarea
                                                 id="reflectionQuestion"
                                                 value={formData.reflectionQuestion}
-                                                onChange={handleChange}
+                                                onChange={handleTextareaChange}
                                                 required
                                                 rows={4}
                                                 placeholder="What question would you like users to reflect on today?"
@@ -99,7 +110,6 @@ export function GetsReflectionForm(){
                         </div>
                     </div>
 
-                    {/* Responses Feed - Main Content */}
                     <div className="col-span-12 lg:col-span-8">
                         <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
                             <div className="bg-slate-700 px-6 py-4">
@@ -118,7 +128,6 @@ export function GetsReflectionForm(){
                             
                             <div className="divide-y divide-slate-200">
                                 {isPendingSummary ? (
-                                    // Skeleton Loading
                                     <>
                                         {[...Array(4)].map((_, i) => (
                                             <div key={i} className="p-6">
@@ -146,8 +155,7 @@ export function GetsReflectionForm(){
                                         ))}
                                     </>
                                 ) : reflectionSummaryss?.data && reflectionSummaryss.data.length > 0 ? (
-                                    reflectionSummaryss.data.map((reflection:
-{
+                                    reflectionSummaryss.data.map((reflection: {
                                         id: string;
                                         title: string;
                                         response: string;
@@ -155,8 +163,7 @@ export function GetsReflectionForm(){
                                         responder: {
                                             userName: string;
                                         };
-                                    }
-                                    ) => (
+                                    }) => (
                                         <div key={reflection.id} className="p-6 hover:bg-orange-50 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-slate-200">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="flex items-center gap-3">
