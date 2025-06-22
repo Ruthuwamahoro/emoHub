@@ -8,10 +8,11 @@ import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest){
   try {
-    const [isModerator, isRegularUser, userId] = await Promise.all([
+    const userId = await getUserIdFromSession()
+
+    const [isModerator, isRegularUser] = await Promise.all([
       checkIfUserIsModerator(),
       checkIfIsRegularUser(),
-      getUserIdFromSession()
     ]);
 
     if (!userId) {
