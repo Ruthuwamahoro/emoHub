@@ -4,41 +4,21 @@ import React, { useState } from 'react';
 import { 
   MessageCircle, 
   Users, 
-  Award,  
   BookOpen, 
   PlusCircle,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useParams } from 'next/navigation';
 import CreatePostModal from '@/components/Dashboard/CreatePostModal';
 import PostsList from '@/components/Dashboard/Posts/PostsList';
-
-export const useGetSingleGroup = (groupId: string) => {
-  const { data, isPending } = useQuery({
-    queryKey: ["group", groupId],
-    queryFn: async () => {
-      const response = await axios.get(`/api/groups/${groupId}`);
-      return response.data;
-    },
-  });
-  return { data, isPending };
-};
+import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
 
 
-export function GroupDetailPage() {
+function GroupDetailPage() {
   const { id }: { id: string } = useParams();
   const { data, isPending } = useGetSingleGroup(id);
   const [activeTab, setActiveTab] = useState<'discussions' | 'members'>('discussions');
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
-  
-  const [challengeProgress, setChallengeProgress] = useState<Record<string, Record<string, boolean>>>({});
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
 
   const renderDiscussionsTab = () => (
     <div className="space-y-4">
@@ -130,7 +110,6 @@ export function GroupDetailPage() {
     <div className="container mx-auto px-4 py-8">
       {isPending ? (
         <div className="animate-pulse">
-          {/* Hero Section Skeleton */}
           <div className="relative mb-8">
             <div className="h-64 bg-gray-300 rounded-xl relative">
               <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-6">
@@ -140,7 +119,6 @@ export function GroupDetailPage() {
             </div>
           </div>
 
-          {/* Tab Navigation Skeleton */}
           <div className="flex border-b mb-6">
             {[1, 2].map((tab) => (
               <div key={tab} className="flex items-center px-4 py-3">
@@ -150,9 +128,7 @@ export function GroupDetailPage() {
             ))}
           </div>
 
-          {/* Content Area Skeleton */}
           <div className="space-y-4">
-            {/* Header with button skeleton */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
                 <div className="w-6 h-6 bg-gray-300 rounded mr-2"></div>
@@ -161,11 +137,9 @@ export function GroupDetailPage() {
               <div className="h-10 bg-gray-300 rounded w-32"></div>
             </div>
 
-            {/* Posts List Skeleton */}
             <div className="space-y-4">
               {[...Array(3)].map((_, index) => (
                 <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
-                  {/* User info skeleton */}
                   <div className="flex items-center mb-4">
                     <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
                     <div className="ml-3 flex-1">
@@ -174,14 +148,12 @@ export function GroupDetailPage() {
                     </div>
                   </div>
                   
-                  {/* Post content skeleton */}
                   <div className="space-y-3 mb-4">
                     <div className="h-4 bg-gray-300 rounded w-full"></div>
                     <div className="h-4 bg-gray-300 rounded w-4/5"></div>
                     <div className="h-4 bg-gray-300 rounded w-3/5"></div>
                   </div>
                   
-                  {/* Action buttons skeleton */}
                   <div className="flex items-center space-x-6 pt-4 border-t border-gray-100">
                     <div className="h-8 bg-gray-200 rounded w-16"></div>
                     <div className="h-8 bg-gray-200 rounded w-20"></div>

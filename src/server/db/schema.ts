@@ -119,6 +119,8 @@ const Post = pgTable("Post", {
 
 
 
+
+
 const Event = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),

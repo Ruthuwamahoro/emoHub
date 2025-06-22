@@ -1,5 +1,5 @@
 export interface Emotion {
-    feeling: string;
+    feelings: string;
     emotionIntensity: number;
     activities: string[];
     notes?: string;

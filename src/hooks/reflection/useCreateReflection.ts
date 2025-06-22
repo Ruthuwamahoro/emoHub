@@ -38,15 +38,12 @@ export const useCreateDailyReflection = () => {
     })
 
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        setFormData(prev => ({ ...prev, [id]: value }));
-        if (errors[id]) {
-          setErrors(prev => {
-            const { [id]: _, ...rest } = prev;
-            return rest;
-          });
-        }
+    const handleChange = (e: React.ChangeEvent<HTMLElement & { id: string; value: string }>) => {
+      const { id, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [id]: value
+      }));
     };
     
     const handleSubmit = async (e?: React.FormEvent): Promise<SubmitResult> => {

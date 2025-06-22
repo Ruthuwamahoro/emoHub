@@ -98,7 +98,7 @@ const DialogueJoinModal: React.FC<DialogueJoinModalProps> = ({
               <div className="mb-4">
                 <h3 className="font-medium text-slate-700 mb-2">Dialogue Guidelines</h3>
                 <ul className="space-y-2">
-                  {fullDialogue.guidelines.map((guideline, index) => (
+                  {(fullDialogue.guidelines ?? []).map((guideline, index) => (
                     <li key={index} className="text-sm text-slate-600 flex">
                       <span className="text-indigo-500 mr-2">•</span>
                       {guideline}

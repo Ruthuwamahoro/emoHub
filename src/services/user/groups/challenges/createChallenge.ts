@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 
-export const createChallenges = async(data: CreateChallengesInterfaceAllInputs) => {
+export const createChallenges = async(data: any) => {
     try {
 
         const response = await axios.post(`/api/groups/${data.group_id}/challenges`, {

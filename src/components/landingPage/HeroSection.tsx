@@ -136,7 +136,6 @@ export const EmoHubHero: React.FC = () => {
       <div className={`relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${
         isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}>
-        {/* African-inspired brand badge */}
         <div className={`inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-100/90 to-orange-100/90 backdrop-blur-sm shadow-lg border border-amber-200/60 mb-8 transition-all duration-700 hover:shadow-xl hover:scale-105 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
         }`}>

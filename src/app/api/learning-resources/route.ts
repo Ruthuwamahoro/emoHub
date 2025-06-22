@@ -6,7 +6,6 @@ import { NextRequest } from "next/server";
 import { and, asc, desc, eq, is, or, sql } from "drizzle-orm";
 import { checkIfUserIsAdmin, checkIfUserIsSpecialists, checkIfUserIsSuperAdmin, getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { uploadImage } from "@/utils/cloudinary";
-import { pgEnum } from "drizzle-orm/pg-core";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -61,21 +60,7 @@ export const POST = async (req: NextRequest) => {
 // searching, paginating and filtering by category, updatedAt and difficulty level
 
 
-export const resourceTypeEnum = pgEnum("resourceType", ["video", "audio", "article", "image"]);
-export const emotionCategoryEnum = pgEnum("emotionCategory", [
-  "self-regulation", 
-  "self-awareness", 
-  "motivation", 
-  "empathy", 
-  "social-skills", 
-  "relationship-management", 
-  "stress-management"
-]);
-export const difficultyLevelEnum = pgEnum("difficultyLevelEnum", [
-  "beginner", 
-  "intermediate", 
-  "advanced"
-]);
+
 
 function sanitizeSearchQuery(query: string): string {
   return query.replace(/[^\w\s]/gi, '').trim();
@@ -196,7 +181,6 @@ export const GET = async (req: NextRequest) => {
     }, 'Learning resources fetched successfully');
     
   } catch (error) {
-    console.error('Error fetching learning resources:', error);
     const err = error instanceof Error ? error.message : 'Internal Server Error';
     return sendResponse(500, null, err);
   }

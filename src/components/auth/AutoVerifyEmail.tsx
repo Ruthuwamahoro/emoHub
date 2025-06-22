@@ -1,15 +1,14 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useVerifyEmail } from "@/hooks/users/useLoginUser";
 
-export const AutoVerifyEmail: React.FC = () => {
-  
+// Separate the component that uses useSearchParams
+const VerifyEmailContent: React.FC = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const hasInitialized = useRef(false);
   
-
   const { 
     handleVerifyEmailSubmission, 
     isLoading, 
@@ -25,7 +24,7 @@ export const AutoVerifyEmail: React.FC = () => {
       hasInitialized.current = true;
       handleVerifyEmailSubmission();
     }
-  }, [token]); 
+  }, [token, handleVerifyEmailSubmission]); 
 
   if (!token) {
     return (
@@ -124,4 +123,27 @@ export const AutoVerifyEmail: React.FC = () => {
   }
 
   return null;
+};
+
+// Loading fallback component
+const VerifyEmailLoading: React.FC = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="text-center p-8 bg-white rounded-lg shadow-md">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-2">
+        Loading...
+      </h2>
+      <p className="text-gray-600">
+        Please wait while we prepare the verification page.
+      </p>
+    </div>
+  </div>
+);
+
+export const AutoVerifyEmail: React.FC = () => {
+  return (
+    <Suspense fallback={<VerifyEmailLoading />}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
 };

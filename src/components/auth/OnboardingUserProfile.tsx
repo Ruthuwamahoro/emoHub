@@ -8,11 +8,20 @@ interface OnboardingStep {
   id: number;
   question: string;
   subtitle?: string;
-  field: string;
+  field: keyof FormData; // Changed from string to keyof FormData
   options: {
     id: string;
     label: string;
   }[];
+}
+
+// Define the form data interface
+interface FormData {
+  impression: string;
+  currentEmotions: string;
+  expressFellings: string;
+  goals: string;
+  experienceLevel: string;
 }
 
 const onboardingSteps: OnboardingStep[] = [
@@ -84,7 +93,7 @@ const onboardingSteps: OnboardingStep[] = [
 
 // Custom hook for onboarding submission
 const useOnboardingSubmission = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     impression: "",
     currentEmotions: "",
     expressFellings: "",
@@ -94,7 +103,7 @@ const useOnboardingSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const updateFormField = (field: string, value: string) => {
+  const updateFormField = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setSubmitError(null);
   };
@@ -131,7 +140,7 @@ const useOnboardingSubmission = () => {
     }
   };
 
-  const isFieldComplete = (field: string): boolean => {
+  const isFieldComplete = (field: keyof FormData): boolean => {
     return !!formData[field];
   };
 

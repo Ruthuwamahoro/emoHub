@@ -1,13 +1,14 @@
 
 import type { Metadata } from "next";
-import "./globals.css";
 import HeaderDashboard from "@/components/Dashboard/TopNav";
-import { SidebarDemo } from "@/components/Dashboard/SideBar";
+// import { SidebarDemo } from "@/components/Dashboard/SideBar";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { SessionProvider } from "@/utils/providers/sessionProvider";
 import { Toaster } from "react-hot-toast";
 import { getServerSession } from "next-auth";
 import { options } from "@/auth";
+import { SidebarDemo } from "@/components/Dashboard/SideBar";
+
 
 export const metadata: Metadata = {
   title: "emoHub Dashboard",
