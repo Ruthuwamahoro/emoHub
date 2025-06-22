@@ -5,6 +5,7 @@ import { CircleUser, Menu, Settings, LogOut, Bell, X } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Avatar as AvatarImages } from "@/utils/genderAvatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -169,8 +170,14 @@ export default function HeaderDashboard() {
                         alt={session.user.fullName || "User"}
                       />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-medium">
-                        {getInitials(session.user.fullName)}
+                        <AvatarImages
+                        gender={session?.user?.gender || 'other'} 
+                        name={session?.user?.username || 'Anonymous'} 
+                        size={48}
+                      />
                       </AvatarFallback>
+
+
                     </Avatar>
                   ) : (
                     <Avatar className="h-8 w-8">
@@ -184,11 +191,17 @@ export default function HeaderDashboard() {
                 <DropdownMenuContent align="end" className="w-[320px] p-0 border-0 shadow-xl rounded-xl bg-white">
                   <div className="bg-slate-400 p-6 rounded-t-xl">
                     <div className="flex flex-col items-center text-center text-white">
-                      <Avatar className="h-16 w-16 border-4 border-white shadow-lg mb-3">
+                      <Avatar className="bg-gradient-to-br from-blue-500 to-purple-600 h-16 w-16 border-4 border-white shadow-lg mb-3">
                         <AvatarImage src={session?.user?.profilePicUrl || ""} />
-                        <AvatarFallback className="bg-white text-blue-600 text-xl font-bold">
-                        {getInitials(session?.user?.fullName)}
+                        <AvatarFallback className="text-blue-600 text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600">
+                        <AvatarImages
+                        gender={session?.user?.gender || 'other'} 
+                        name={session?.user?.username || 'Anonymous'} 
+                        size={48}
+                        />
                         </AvatarFallback>
+
+
                       </Avatar>
                       <h3 className="text-lg font-bold">{session?.user?.fullName}</h3>
                       <p className="text-blue-100 text-sm">{session?.user?.email}</p>

@@ -15,6 +15,8 @@ import { COMMON_LINKS, ROLE_BASED_LINKS } from "@/constants/roles";
 import { useRouter } from "next/navigation";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
 import VibratingHelpButton from "./HelperButton";
+import { Avatar as AvatarImages } from "@/utils/genderAvatar";
+
 
 const SidebarSkeleton = ({ open }: { open: boolean }) => (
   <div className={cn("h-screen")}>
@@ -368,8 +370,10 @@ export function SidebarDemo() {
                           alt={session?.user?.fullName || ""}
                         /> */}
                         <AvatarFallback className="text-white test-sm font-medium">
-                          {getInitials(session?.user?.fullName)}
+                          {getInitials(session?.user?.username)}
                         </AvatarFallback>
+
+                        
                       </Avatar>
                     ) : (
                       <Avatar className="h-8 w-8">
@@ -390,9 +394,11 @@ export function SidebarDemo() {
                           src={session?.user?.profilePicUrl || ""}
                           alt={session?.user?.fullName || ""}
                         /> */}
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-2 rounded-full text-sm font-medium">
-                          {getInitials(session.user.fullName)}
-                        </AvatarFallback>
+                        <AvatarImages
+                        gender={session?.user?.gender || 'other'} 
+                        name={session?.user?.username || 'Anonymous'} 
+                        size={48}
+                      />
                       </Avatar>
                     ) : (
                       <Avatar className="h-8 w-8">

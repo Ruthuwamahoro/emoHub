@@ -10,6 +10,7 @@ export interface createPostsInterface {
   }
   
   export interface Post {
+    likes: number;
     id: string;
     userId: string;
     groupId: string;
@@ -17,6 +18,13 @@ export interface createPostsInterface {
     contentType: "text" | "image" | "video" | "audio" | "link";
     textContent: string | null;
     mediaUrl: string | null;
+    author: {
+      name: string;
+      username: string;
+      gender: string;
+      image: string;
+      verified: boolean;
+    }
     mediaAlt: string | null;
     linkUrl: string | null;
     linkDescription: string | null;

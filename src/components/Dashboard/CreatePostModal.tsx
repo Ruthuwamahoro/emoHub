@@ -31,27 +31,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [linkPreviewImageFile, setLinkPreviewImageFile] = useState<File | null>(null);
   const [linkPreviewImage, setLinkPreviewImage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { handleSubmit, isPending } = useCreatePosts(groupId);
-  const [formValues, setFormValues] = useState({
-    title: '',
-    textContent: '',
-    mediaAlt: '',
-    linkUrl: '',
-    linkDescription: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target;
-    setFormValues(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
+  const { formData, errors, handleChange, updateField, handleSubmit, isPending } = useCreatePosts(groupId);
 
   const handleTabChange = (value: ContentType) => {
     setActiveTab(value);
+    updateField('contentType', value);
   };
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,54 +65,41 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
 
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
-
+    
     try {
-      setIsSubmitting(true);
-      const formData = new FormData();
+      const formDataObj = new FormData();
       
-      if (!formValues.title) {
-        throw new Error("Title is required");
-      }
+      // Add basic fields
+      formDataObj.append('title', formData.title);
+      formDataObj.append('contentType', activeTab);
       
-      formData.append('title', formValues.title);
-      formData.append('contentType', activeTab);
-      
+      // Add content based on type
       switch (activeTab) {
         case 'text':
-          if (!formValues.textContent) {
-            throw new Error("Content is required");
-          }
-          formData.append('textContent', formValues.textContent);
+          formDataObj.append('textContent', formData.textContent || '');
           break;
         case 'image':
         case 'video':
         case 'audio':
-          if (!mediaFile) {
-            throw new Error(`${activeTab} file is required`);
+          if (mediaFile) {
+            formDataObj.append('media', mediaFile);
           }
-          formData.append('media', mediaFile);
-          formData.append('mediaAlt', formValues.mediaAlt);
+          formDataObj.append('mediaAlt', formData.mediaAlt || '');
           break;
         case 'link':
-          if (!formValues.linkUrl) {
-            throw new Error("URL is required");
-          }
-          formData.append('linkUrl', formValues.linkUrl);
-          formData.append('linkDescription', formValues.linkDescription);
+          formDataObj.append('linkUrl', formData.linkUrl || '');
+          formDataObj.append('linkDescription', formData.linkDescription || '');
           if (linkPreviewImageFile) {
-            formData.append('linkPreviewImage', linkPreviewImageFile);
+            formDataObj.append('linkPreviewImage', linkPreviewImageFile);
           }
           break;
       }
 
-      await handleSubmit(formData);
+      await handleSubmit(formDataObj);
       resetForm();
       onClose();
     } catch (error) {
       console.error("Failed to create post:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -136,24 +108,23 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
     setMediaFile(null);
     setLinkPreviewImage(null);
     setLinkPreviewImageFile(null);
-    setFormValues({
-      title: '',
-      textContent: '',
-      mediaAlt: '',
-      linkUrl: '',
-      linkDescription: '',
-    });
+    setActiveTab('text');
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[600px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Create New Post</DialogTitle>
           <Button 
             variant="ghost" 
             className="absolute right-4 top-4 rounded-full p-2" 
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -166,9 +137,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
               <Input 
                 id="title" 
                 placeholder="Give your post a title" 
-                value={formValues.title}
+                value={formData.title}
                 onChange={handleChange}
+                className={errors.title ? 'border-red-500' : ''}
               />
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as ContentType)}>
@@ -196,10 +171,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                   <Textarea 
                     id="textContent" 
                     placeholder="Share your thoughts..." 
-                    className="min-h-32"
-                    value={formValues.textContent}
+                    className={`min-h-32 ${errors.textContent ? 'border-red-500' : ''}`}
+                    value={formData.textContent || ''}
                     onChange={handleChange}
                   />
+                  {errors.textContent && (
+                    <p className="text-red-500 text-sm mt-1">{errors.textContent}</p>
+                  )}
                 </div>
               </TabsContent>
 
@@ -213,6 +191,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                       accept="image/*"
                       onChange={handleMediaChange}
                     />
+                    {!mediaFile && activeTab === 'image' && (
+                      <p className="text-red-500 text-sm mt-1">Image file is required</p>
+                    )}
                   </div>
                   
                   {mediaPreview && (
@@ -230,7 +211,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                     <Input 
                       id="mediaAlt" 
                       placeholder="Describe the image for accessibility"
-                      value={formValues.mediaAlt}
+                      value={formData.mediaAlt || ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -247,6 +228,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                       accept="video/*"
                       onChange={handleMediaChange}
                     />
+                    {!mediaFile && activeTab === 'video' && (
+                      <p className="text-red-500 text-sm mt-1">Video file is required</p>
+                    )}
                   </div>
                   
                   {mediaPreview && mediaFile?.type.startsWith('video/') && (
@@ -264,7 +248,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                     <Input 
                       id="mediaAlt" 
                       placeholder="Describe the video for accessibility"
-                      value={formValues.mediaAlt}
+                      value={formData.mediaAlt || ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -281,6 +265,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                       accept="audio/*"
                       onChange={handleMediaChange}
                     />
+                    {!mediaFile && activeTab === 'audio' && (
+                      <p className="text-red-500 text-sm mt-1">Audio file is required</p>
+                    )}
                   </div>
                   
                   {mediaPreview && mediaFile?.type.startsWith('audio/') && (
@@ -298,7 +285,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                     <Input 
                       id="mediaAlt" 
                       placeholder="Describe the audio for accessibility"
-                      value={formValues.mediaAlt}
+                      value={formData.mediaAlt || ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -312,9 +299,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                     <Input 
                       id="linkUrl" 
                       placeholder="https://example.com" 
-                      value={formValues.linkUrl}
+                      value={formData.linkUrl || ''}
                       onChange={handleChange}
+                      className={errors.linkUrl ? 'border-red-500' : ''}
                     />
+                    {errors.linkUrl && (
+                      <p className="text-red-500 text-sm mt-1">{errors.linkUrl}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -322,7 +313,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                     <Textarea 
                       id="linkDescription" 
                       placeholder="Describe what this link is about" 
-                      value={formValues.linkDescription}
+                      value={formData.linkDescription || ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -354,23 +345,21 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={onClose}
-              disabled={isSubmitting}
+              onClick={handleClose}
+              disabled={isPending}
             >
               Cancel
             </Button>
             <Button 
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="flex items-center gap-2"
             >
-              {isSubmitting && <Loader size="small" />}
-              {isSubmitting ? 'Creating...' : 'Create Post'}
+              {isPending && <Loader size="small" />}
+              {isPending ? 'Creating...' : 'Create Post'}
             </Button>
           </DialogFooter>
-
         </form>
-
       </DialogContent>
     </Dialog>
   );

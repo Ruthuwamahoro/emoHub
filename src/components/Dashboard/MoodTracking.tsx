@@ -11,7 +11,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { X, Plus, Eye, Trash2, Brain, Target, Users } from 'lucide-react';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { X, Plus, Eye, Trash2, Brain, Target, Users, Calendar, Clock } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useGetAllEmotionsInputs } from '@/hooks/emotions/useGetAllEmotionsInsights';
 
 // Types
 type MoodType = 'happy' | 'annoyed' | 'angry' | 'tired' | 'neutral' | 'loved';
@@ -28,468 +39,416 @@ interface MoodEntry {
   tags?: string[];
 }
 
-interface Session {
-  user: {
-    id: string;
-    name: string;
-    role: UserRole;
-  };
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image?: string;
 }
 
-// Mock data
-const mockMoodEntries: MoodEntry[] = [
-  {
-    id: '1',
-    userId: 'alex1',
-    userName: 'Alex Thompson',
-    mood: 'happy',
-    intensity: 80,
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    notes: 'Had a wonderful day exploring new concepts at work, felt energized and focused. Feeling grateful for supportive colleagues.',
-    tags: ['Work', 'Achievements', 'Gratitude']
-  },
-  {
-    id: '2',
-    userId: 'sarah2',
-    userName: 'Sarah Johnson',
-    mood: 'tired',
-    intensity: 70,
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    notes: 'Long day with back-to-back meetings. Need some rest.',
-    tags: ['Work', 'Meetings', 'Exhaustion']
-  },
-  {
-    id: '3',
-    userId: 'mike3',
-    userName: 'Mike Davis',
-    mood: 'neutral',
-    intensity: 60,
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    notes: 'Regular day, nothing particularly exciting but stable mood overall.',
-    tags: ['Work', 'Routine']
-  },
-  {
-    id: '4',
-    userId: 'emma4',
-    userName: 'Emma Wilson',
-    mood: 'loved',
-    intensity: 90,
-    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-    notes: 'Spending quality time with family. Feeling blessed and connected.',
-    tags: ['Family', 'Love', 'Connection']
-  }
-];
+interface EmotionEntry {
+  id: string;
+  feelings: string;
+  emotionIntensity: number;
+  notes: string;
+  activities: string[];
+  createdAt: string;
+  updatedAt: string;
+  user: User;
+}
 
 const EmotionTrackingApp: React.FC = () => {
-  // Mock session - in real app this would come from your auth system
-  const [session] = useState<Session>({
-    user: {
-      id: 'alex1',
-      name: 'Alex Thompson',
-      role: 'Admin' // Change this to 'Admin' to see admin view
-    }
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
-  // Role-based access control
-  const canAccess = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
+  const { data: session } = useSession();
+  const {
+    data,
+    isLoading,
+    isPending,
+    isFetching,
+  } = useGetAllEmotionsInputs();
 
-  // Emotion tracking states
-  const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
-  const [intensity, setIntensity] = useState([60]);
-  const [notes, setNotes] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(mockMoodEntries);
-
-  const moodEmojis: Record<MoodType, string> = {
-    happy: '😊',
-    annoyed: '😤',
-    angry: '😠',
-    tired: '😴',
-    neutral: '😐',
-    loved: '💖'
+  const moodEmojis: Record<string, string> = {
+    Happy: '😊',
+    Sad: '😢',
+    Excited: '🤗',
+    Angry: '😠',
+    Neutral: '😐',
+    Loved: '💖',
+    Annoyed: '😤'
   };
 
-  const moodLabels: Record<MoodType, string> = {
-    happy: 'Happy',
-    annoyed: 'Annoyed',
-    angry: 'Angry',
-    tired: 'Tired',
-    neutral: 'Neutral',
-    loved: 'Loved'
+  const moodLabels: Record<string, string> = {
+    Happy: 'Happy',
+    Sad: 'Sad',
+    Excited: 'Excited',
+    Angry: 'Angry',
+    Neutral: 'Neutral',
+    Loved: 'Loved',
   };
 
-  const moodColors: Record<MoodType, string> = {
-    happy: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    annoyed: 'bg-orange-100 text-orange-800 border-orange-200',
-    angry: 'bg-red-100 text-red-800 border-red-200',
-    tired: 'bg-blue-100 text-blue-800 border-blue-200',
-    neutral: 'bg-gray-100 text-gray-800 border-gray-200',
-    loved: 'bg-pink-100 text-pink-800 border-pink-200'
+  const moodColors: Record<string, string> = {
+    Happy: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+    Sad: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+    Excited: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
+    Angry: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+    Neutral: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
+    Loved: 'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100',
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const saveMoodEntry = () => {
-    if (selectedMood && session?.user) {
-      const newEntry: MoodEntry = {
-        id: Date.now().toString(),
-        userId: session.user.id,
-        userName: session.user.name,
-        mood: selectedMood,
-        intensity: intensity[0],
-        timestamp: new Date(),
-        notes: notes.trim() || undefined,
-        tags: tags.length > 0 ? tags : undefined
-      };
-      setMoodEntries([newEntry, ...moodEntries]);
-      
-      // Reset form
-      setSelectedMood(null);
-      setIntensity([60]);
-      setNotes('');
-      setTags([]);
-    }
-  };
-
-  const formatDateTime = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric'
+      }),
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
   };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const EmotionInputForm = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            How are you feeling today?
-          </CardTitle>
-          <CardDescription>
-            Track your emotions and reflect on your daily experiences
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Mood Selection */}
-          <div>
-            <Label className="text-base font-medium">Select your mood</Label>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-3">
-              {(Object.entries(moodEmojis) as [MoodType, string][]).map(([mood, emoji]) => (
-                <Button
-                  key={mood}
-                  variant={selectedMood === mood ? "default" : "outline"}
-                  className={`h-auto p-4 flex flex-col items-center gap-2 ${
-                    selectedMood === mood ? 'bg-primary' : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedMood(mood)}
-                >
-                  <span className="text-2xl">{emoji}</span>
-                  <span className="text-sm font-medium">{moodLabels[mood]}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
+  // Pagination logic
+  const emotionEntries = data?.data || [];
+  const totalPages = Math.ceil(emotionEntries.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEntries = emotionEntries.slice(startIndex, endIndex);
 
-          {selectedMood && (
-            <>
-              <Separator />
-              
-              {/* Intensity Slider */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{moodEmojis[selectedMood]}</span>
-                  <div>
-                    <Label className="text-base font-medium">
-                      Emotional intensity: {intensity[0]}%
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      How strongly do you feel this emotion?
-                    </p>
-                  </div>
-                </div>
-                <Slider
-                  value={intensity}
-                  onValueChange={setIntensity}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Low</span>
-                  <span>High</span>
-                </div>
-              </div>
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
 
-              <Separator />
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
 
-              {/* Tags */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Context & Activities</Label>
-                <p className="text-sm text-muted-foreground">
-                  Add tags to describe what influenced your mood
-                </p>
-                
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="e.g., Work, Family, Exercise"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                    className="flex-1"
-                  />
-                  <Button onClick={addTag} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Tag
-                  </Button>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="gap-1">
-                      {tag}
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-auto p-0 hover:bg-transparent"
-                        onClick={() => removeTag(tag)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+  };
 
-              <Separator />
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePageClick(i)}
+              isActive={currentPage === i}
+              className="cursor-pointer"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Always show first page
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            onClick={() => handlePageClick(1)}
+            isActive={currentPage === 1}
+            className="cursor-pointer"
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
 
-              {/* Notes */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Additional notes</Label>
-                <p className="text-sm text-muted-foreground">
-                  Describe what happened or why you feel this way
-                </p>
-                <Textarea
-                  placeholder="Share your thoughts..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={4}
-                />
-              </div>
+      // Show ellipsis if needed
+      if (currentPage > 3) {
+        items.push(
+          <PaginationItem key="ellipsis1">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
 
-              {/* Save Button */}
-              <Button onClick={saveMoodEntry} className="w-full" size="lg">
-                Save Emotion Entry
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      // Show pages around current page
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePageClick(i)}
+              isActive={currentPage === i}
+              className="cursor-pointer"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
 
-      {/* Recent Entries Preview for Users */}
-      {moodEntries.filter(entry => entry.userId === session?.user?.id).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Your Recent Entries
-            </CardTitle>
-            <CardDescription>
-              A quick look at your emotional journey
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {moodEntries
-                .filter(entry => entry.userId === session?.user?.id)
-                .slice(0, 3)
-                .map((entry) => (
-                <div key={entry.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                  <span className="text-2xl">{moodEmojis[entry.mood]}</span>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{moodLabels[entry.mood]}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {entry.intensity}% intensity
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDateTime(entry.timestamp)}
-                    </p>
-                    {entry.notes && (
-                      <p className="text-sm">{entry.notes}</p>
-                    )}
-                    {entry.tags && (
-                      <div className="flex flex-wrap gap-1">
-                        {entry.tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+      // Show ellipsis if needed
+      if (currentPage < totalPages - 2) {
+        items.push(
+          <PaginationItem key="ellipsis2">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Always show last page if there are multiple pages
+      if (totalPages > 1) {
+        items.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink
+              onClick={() => handlePageClick(totalPages)}
+              isActive={currentPage === totalPages}
+              className="cursor-pointer"
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    return items;
+  };
 
   const AdminDashboard = () => (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+      <Card className="shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Users className="h-6 w-6 text-blue-600" />
             Emotion Records Dashboard
           </CardTitle>
-          <CardDescription>
-            View and manage all user emotion entries
+          <CardDescription className="text-base">
+            View and manage all user emotion entries ({emotionEntries.length} total records)
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
+        <CardContent className="p-0">
+          <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Mood</TableHead>
-                  <TableHead>Intensity</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="bg-gray-50/50">
+                  <TableHead className="font-semibold">User</TableHead>
+                  <TableHead className="font-semibold">Emotion</TableHead>
+                  <TableHead className="font-semibold">Intensity</TableHead>
+                  <TableHead className="font-semibold">Date & Time</TableHead>
+                  <TableHead className="font-semibold">Activities</TableHead>
+                  <TableHead className="font-semibold">Notes</TableHead>
+                  <TableHead className="text-right font-semibold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {moodEntries.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{getInitials(entry.userName)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{entry.userName}</div>
-                          <div className="text-sm text-muted-foreground">{entry.userId}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{moodEmojis[entry.mood]}</span>
-                        <Badge className={moodColors[entry.mood]}>
-                          {moodLabels[entry.mood]}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress value={entry.intensity} className="w-16 h-2" />
-                        <span className="text-sm font-medium">{entry.intensity}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {formatDateTime(entry.timestamp)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {entry.tags?.slice(0, 2).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {entry.tags && entry.tags.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{entry.tags.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs truncate text-sm">
-                        {entry.notes}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                {isLoading || isPending ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        Loading emotion records...
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : currentEntries.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                      No emotion records found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  currentEntries.map((entry: EmotionEntry) => {
+                    const { date, time } = formatDateTime(entry.createdAt);
+                    return (
+                      <TableRow key={entry.id} className="hover:bg-gray-50/50 transition-colors">
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 border-2 border-gray-100">
+                              {entry.user.image ? (
+                                <AvatarImage 
+                                  src={entry.user.image} 
+                                  alt={entry.user.name}
+                                  className="object-cover"
+                                />
+                              ) : null}
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                                {getInitials(entry.user.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <div className="font-medium text-gray-900 truncate">
+                                {entry.user.name}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate">
+                                @{entry.user.username}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{moodEmojis[entry.feelings]}</span>
+                            <Badge 
+                              variant="outline" 
+                              className={`${moodColors[entry.feelings]} font-medium px-3 py-1 transition-colors`}
+                            >
+                              {moodLabels[entry.feelings]}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <Progress 
+                              value={entry.emotionIntensity} 
+                              className="w-20 h-2"
+                            />
+                            <span className="text-sm font-semibold text-gray-700 min-w-[35px]">
+                              {entry.emotionIntensity}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1 text-sm font-medium text-gray-700">
+                              <Calendar className="h-3 w-3" />
+                              {date}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Clock className="h-3 w-3" />
+                              {time}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {entry.activities?.slice(0, 2).map((activity, index) => (
+                              <Badge 
+                                key={index} 
+                                variant="secondary" 
+                                className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                              >
+                                {activity}
+                              </Badge>
+                            ))}
+                            {entry.activities && entry.activities.length > 2 && (
+                              <Badge 
+                                variant="secondary" 
+                                className="text-xs bg-gray-100 text-gray-600 border-gray-200"
+                              >
+                                +{entry.activities.length - 2} more
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="max-w-xs">
+                            <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                              {entry.notes || 'No notes provided'}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right py-4">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50/30">
+              <div className="text-sm text-gray-700">
+                Showing {startIndex + 1} to {Math.min(endIndex, emotionEntries.length)} of {emotionEntries.length} entries
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={handlePreviousPage}
+                      className={`cursor-pointer ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={handleNextPage}
+                      className={`cursor-pointer ${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Total Entries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{moodEntries.length}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold text-gray-900">{emotionEntries.length}</div>
+            <p className="text-xs text-gray-500 mt-1">
               Emotion records tracked
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {new Set(moodEntries.map(entry => entry.userId)).size}
+            <div className="text-3xl font-bold text-gray-900">
+              {new Set(emotionEntries.map((entry: EmotionEntry) => entry.user.id)).size}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 mt-1">
               Users tracking emotions
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Most Common Mood</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Most Common Mood</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className="text-xl">😊</span>
-              <div className="text-lg font-bold">Happy</div>
+              <span className="text-2xl">😊</span>
+              <div className="text-xl font-bold text-gray-900">Happy</div>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 mt-1">
               Across all users
             </p>
           </CardContent>
@@ -499,24 +458,22 @@ const EmotionTrackingApp: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50/30">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="gap-3">
-              <p className="font-semibold text-2xl">Day Plan And Emotions Inputs</p>
-              <p className='text-orange-400 text-lg font-bold'>Start your day with energy</p>
+            <div className="space-y-1">
+              <h1 className="font-bold text-3xl text-gray-900">Day Plan And Emotions Inputs</h1>
+              <p className='text-orange-500 text-lg font-semibold'>Start your day with energy</p>
             </div>
-            
-            
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {canAccess ? <AdminDashboard /> : <EmotionInputForm />}
+        <AdminDashboard />
       </main>
     </div>
   );
