@@ -118,6 +118,19 @@ const Post = pgTable("Post", {
 });
 
 
+const PostLikes = pgTable("PostLikes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  post_id: uuid("post_id")
+    .references(() => Post.id, { onDelete: "cascade" })
+    .notNull(),
+  user_id: uuid("user_id")
+    .references(() => User.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+
 
 
 
@@ -657,6 +670,7 @@ export {
   sessions,
   verificationTokens,
   Role,
+  PostLikes,
   Challenges,
   ChallengeElements,
   learningResources,

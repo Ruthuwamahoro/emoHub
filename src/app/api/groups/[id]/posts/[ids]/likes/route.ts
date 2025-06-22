@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/server/db";
-import { CommentLikes } from "@/server/db/schema";
+import { PostLikes } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { HttpStatusCode } from "axios";
 import { and, eq, count } from "drizzle-orm";
@@ -8,16 +8,16 @@ import { sendResponse } from "@/utils/Responses";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string, ids: string, commentsId: string }> }
+  { params }: { params: Promise<{ id: string, ids: string}> }
 ) {
   try {
-    const { commentsId, id, ids } = await params;
+    const { id, ids } = await params;
     
     if (!id || !ids) {
       return sendResponse(401, null, "Group id or post id is needed");
     }
 
-    const commentId = commentsId;
+    const postId = ids;
     const userId = await getUserIdFromSession();
     
     if (!userId) {
@@ -27,36 +27,35 @@ export async function POST(
       );
     }
 
-    // Check if user already liked this comment
+    // Check if user already liked this post
     const existingLike = await db
       .select()
-      .from(CommentLikes)
+      .from(PostLikes)
       .where(
         and(
-          eq(CommentLikes.comment_id, commentId as string),
-          eq(CommentLikes.user_id, userId as string)
+          eq(PostLikes.post_id, postId as string),
+          eq(PostLikes.user_id, userId as string)
         )
       );
 
     let liked = false;
 
     if (existingLike.length > 0) {
-      // Unlike the comment
       await db
-        .delete(CommentLikes)
+        .delete(PostLikes)
         .where(
           and(
-            eq(CommentLikes.comment_id, commentId as string),
-            eq(CommentLikes.user_id, userId as string)
+            eq(PostLikes.post_id, postId as string),
+            eq(PostLikes.user_id, userId as string)
           )
         );
       liked = false;
     } else {
-      // Like the comment
+      // Like the post
       await db
-        .insert(CommentLikes)
+        .insert(PostLikes)
         .values({
-          comment_id: commentId as string,
+          post_id: postId as string,
           user_id: userId as string
         });
       liked = true;
@@ -65,14 +64,14 @@ export async function POST(
     // Get the updated likes count
     const likesCountResult = await db
       .select({ count: count() })
-      .from(CommentLikes)
-      .where(eq(CommentLikes.comment_id, commentId as string));
+      .from(PostLikes)
+      .where(eq(PostLikes.post_id, postId as string));
 
     const likesCount = likesCountResult[0]?.count || 0;
 
     return NextResponse.json({
       status: 200,
-      message: liked ? "Comment liked successfully" : "Comment unliked successfully",
+      message: liked ? "Post liked successfully" : "Post unliked successfully",
       data: { 
         liked,
         likesCount
@@ -80,7 +79,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error("Comment like error:", error);
     return NextResponse.json(
       {
         message: error instanceof Error ? error.message : 'Internal server error',

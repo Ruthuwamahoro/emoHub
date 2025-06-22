@@ -17,7 +17,6 @@ export async function GET(
     }
     const params = await segmentedData.params;
     const groupId = params.id;
-    console.log("groups id", groupId)
     
     const [group] = await db.select()
       .from(Group)
@@ -28,7 +27,6 @@ export async function GET(
       return NextResponse.json({ error: "Group not found" }, { status: 404 });
     }
     
-    console.log("groupsss", group)
     return NextResponse.json({status: 200,
         group,
     message: "Group details fetched successfully"});

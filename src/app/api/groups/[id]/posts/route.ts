@@ -7,6 +7,7 @@ import {
   Comment,
   CommentLikes,
   CommentReplies,
+  PostLikes, // Add this import
 } from "@/server/db/schema";
 import db from "@/server/db";
 import cloudinary from "@/utils/cloudinary";
@@ -15,24 +16,23 @@ import { userIsGroupMember } from "@/utils/userIsGroupMember";
 
 const validContentTypes = ["text", "image", "video", "audio", "link"];
 
-export async function POST  (
+export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string , ids: string}> }
-){
-
+  { params }: { params: Promise<{ id: string; ids: string }> }
+) {
   try {
     const userId = await getUserIdFromSession();
     if (!userId) {
       return sendResponse(401, null, "Unauthorized");
     }
-    const {id} = await params
-    const groupId = id
+    const { id } = await params;
+    const groupId = id;
     if (!groupId) {
       return sendResponse(400, null, "Group ID is required");
     }
     const isGroupMember = await userIsGroupMember(groupId);
     if (!isGroupMember) {
-        return sendResponse(401, null, "Unauthorized");
+      return sendResponse(401, null, "Unauthorized");
     }
 
     const formData = await req.formData();
@@ -44,7 +44,6 @@ export async function POST  (
     const linkDescription = formData.get("linkDescription") as string | null;
 
     if (!contentTypeInput || !validContentTypes.includes(contentTypeInput)) {
-      console.log("Invalid content type:", contentTypeInput);
       return sendResponse(400, null, "Invalid content type");
     }
 
@@ -146,11 +145,11 @@ export async function POST  (
       error instanceof Error ? error.message : "Unexpected error occurred";
     return sendResponse(500, null, err);
   }
-};
+}
 
 export const GET = async (
   req: NextRequest,
-  { params }: { params: Promise<{ id: string , ids: string}> }
+  { params }: { params: Promise<{ id: string; ids: string }> }
 ) => {
   try {
     const userId = await getUserIdFromSession();
@@ -160,7 +159,7 @@ export const GET = async (
     const contextId = (await params).id;
     const isGroupMember = await userIsGroupMember(contextId as string);
     if (!isGroupMember) {
-        return sendResponse(401, null, "Unauthorized");
+      return sendResponse(401, null, "Unauthorized");
     }
 
     const posts = await db
@@ -172,7 +171,7 @@ export const GET = async (
           username: User.username,
           gender: User.gender,
           image: User.profilePicUrl,
-          verified: User.isVerified
+          verified: User.isVerified,
         },
       })
       .from(Post)
@@ -180,11 +179,9 @@ export const GET = async (
       .where(eq(Post.groupId, contextId))
       .orderBy(desc(Post.createdAt));
 
-
-      console.log("all posts", posts)
-
     const postsWithDetails = await Promise.all(
       posts.map(async ({ post, author }) => {
+        // Get comments with their like counts
         const comments = await db
           .select({
             comment: Comment,
@@ -204,6 +201,7 @@ export const GET = async (
           .groupBy(Comment.id, User.id)
           .orderBy(desc(Comment.createdAt));
 
+        // Get comment replies
         const commentsWithReplies = await Promise.all(
           comments.map(async (comment) => {
             const replies = await db
@@ -221,8 +219,24 @@ export const GET = async (
               .where(eq(CommentReplies.comment_id, comment.comment.id))
               .orderBy(desc(CommentReplies.createdAt));
 
+            // Check if current user liked this comment
+            const userCommentLike = await db
+              .select()
+              .from(CommentLikes)
+              .where(
+                and(
+                  eq(CommentLikes.comment_id, comment.comment.id),
+                  eq(CommentLikes.user_id, userId)
+                )
+              )
+              .limit(1);
+
             return {
               ...comment,
+              comment: {
+                ...comment.comment,
+                isLiked: userCommentLike.length > 0,
+              },
               replies: replies.map((r) => ({
                 ...r.reply,
                 author: r.author,
@@ -231,11 +245,23 @@ export const GET = async (
           })
         );
 
-        const postLikes = await db
+        // Get post likes count
+        const postLikesResult = await db
           .select({ count: sql<number>`count(*)` })
-          .from(CommentLikes)
-          .where(eq(CommentLikes.comment_id, post.id))
-          .groupBy(CommentLikes.comment_id);
+          .from(PostLikes)
+          .where(eq(PostLikes.post_id, post.id));
+
+        // Check if current user liked this post
+        const userPostLike = await db
+          .select()
+          .from(PostLikes)
+          .where(
+            and(
+              eq(PostLikes.post_id, post.id),
+              eq(PostLikes.user_id, userId)
+            )
+          )
+          .limit(1);
 
         return {
           ...post,
@@ -243,10 +269,15 @@ export const GET = async (
           comments: commentsWithReplies.map((c) => ({
             ...c.comment,
             author: c.author,
-            likesCount: c.likesCount,
+            likesCount: Number(c.likesCount),
+            likes: Number(c.likesCount), // Component expects both
             replies: c.replies,
           })),
-          likesCount: postLikes[0]?.count || 0,
+          likes: Number(postLikesResult[0]?.count || 0),
+          likesCount: Number(postLikesResult[0]?.count || 0), // Component expects both
+          isLiked: userPostLike.length > 0,
+          views: 0, // You might want to implement view tracking
+          shares: 0, // You might want to implement share tracking
         };
       })
     );
