@@ -14,6 +14,7 @@ import PostsList from '@/components/Dashboard/Posts/PostsList';
 import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
 
 
+
 function GroupDetailPage() {
   const { id }: { id: string } = useParams();
   const { data, isPending } = useGetSingleGroup(id);

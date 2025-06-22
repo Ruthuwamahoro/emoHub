@@ -2,7 +2,7 @@ import { createComment } from '@/services/group/comments/postComments';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import showToast from '@/utils/showToast';
 import { useState } from 'react';
-import { z } from 'zod'; // Add this import if you're using zod validation
+import { z } from 'zod'; 
 
 interface CreatePostsCommentInterface {
     content: string;
@@ -32,10 +32,8 @@ export const useCreateComment = (ids: string) => {
             });
         },
         onSuccess: (response, variables) => {
-            // Show success message
             showToast('Comment posted successfully!', 'success');
             
-            // Clear form data and errors
             setFormData(initialData);
             setErrors({});
             
