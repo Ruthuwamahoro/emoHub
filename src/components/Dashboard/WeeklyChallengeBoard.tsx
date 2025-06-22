@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-// Types
 interface Element {
   id: string;
   challenge_id: string;
@@ -20,7 +19,7 @@ interface Element {
   notes: string;
   created_at: string;
   updated_at: string;
-  completed?: boolean; // Track completion status locally
+  completed?: boolean; 
 }
 
 interface Participation {
@@ -73,7 +72,6 @@ interface ApiResponse {
   message: string;
 }
 
-// API hook
 export const useGetSingleGroup = (groupId: string) => {
   const { data, isPending } = useQuery({
     queryKey: ["group", groupId],
@@ -98,7 +96,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
   const [completedElements, setCompletedElements] = useState<Record<string, boolean>>({});
   const [expandedChallenge, setExpandedChallenge] = useState<string | null>(null);
 
-  // Toggle element completion
   const toggleElementCompletion = (elementId: string) => {
     setCompletedElements(prev => ({
       ...prev,
@@ -106,7 +103,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
     }));
   };
 
-  // Calculate challenge completion percentage
   const calculateCompletionPercentage = (elements: Element[]): number => {
     if (elements.length === 0) return 0;
     
@@ -117,7 +113,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
     return Math.round((completedCount / elements.length) * 100);
   };
 
-  // Format date to display in a readable format
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -135,7 +130,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
     return now >= start && now <= end;
   };
 
-  // Toggle challenge expansion
   const toggleChallengeExpansion = (challengeId: string) => {
     setExpandedChallenge(prev => prev === challengeId ? null : challengeId);
   };
@@ -159,7 +153,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
 
   const { group, challenges } = data.data;
 
-  // Filter out challenges with no elements for cleaner display
   const validChallenges = challenges.filter(challenge => 
     challenge.elements && challenge.elements.length > 0
   );
