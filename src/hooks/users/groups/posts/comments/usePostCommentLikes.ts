@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import showToast from '@/utils/showToast';
-import { createCommentLikes } from '@/services/group/comments/postCommentsLikes';
+import { createCommentLikes } from '@/services/user/groups/comments/postCommentsLikes';
 
 interface CommentLikeData {
   commentId: string;

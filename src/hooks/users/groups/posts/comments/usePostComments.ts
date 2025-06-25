@@ -1,4 +1,4 @@
-import { createComment } from '@/services/group/comments/postComments';
+import { createComment } from '@/services/user/groups/comments/postComments';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import showToast from '@/utils/showToast';
 import { useState } from 'react';

@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { Users, ArrowRight, PlusCircle, RefreshCw, Search, Filter, Heart, Settings, UserPlus, Shield, Clock, Check, X, Eye, Edit } from "lucide-react";
-import { useRouter } from 'next/navigation';
+import {  useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useSession } from "next-auth/react";
 import { useGetAllGroups } from '@/hooks/users/groups/useGetGroups';
@@ -59,7 +59,6 @@ export function CommunityGroups() {
   const canManageGroups = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
   const isRegularUser = !canManageGroups;
 
-  // Mock requests data - replace with actual API call
   const [requests] = useState<GroupRequest[]>([
     {
       id: 1,
@@ -83,6 +82,9 @@ export function CommunityGroups() {
       groupId: 2
     }
   ]);
+
+   
+
 
   const filteredGroups = groups?.filter(group => 
     group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
