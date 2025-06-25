@@ -12,6 +12,10 @@ import { useParams } from 'next/navigation';
 import CreatePostModal from '@/components/Dashboard/CreatePostModal';
 import PostsList from '@/components/Dashboard/Posts/PostsList';
 import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
+import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
+import { measureMemory } from 'vm';
+import GroupMembersDisplay from '@/components/Dashboard/community/GroupMembers';
+import { useSession } from 'next-auth/react';
 
 
 
@@ -20,6 +24,15 @@ function GroupDetailPage() {
   const { data, isPending } = useGetSingleGroup(id);
   const [activeTab, setActiveTab] = useState<'discussions' | 'members'>('discussions');
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const {data: session } = useSession();
+
+
+  const params = useParams();
+  const groupId = params?.id as string;
+
+
+  const canManageMembers = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
+
 
   const renderDiscussionsTab = () => (
     <div className="space-y-4">
@@ -49,63 +62,6 @@ function GroupDetailPage() {
     </div>
   );
 
-  const renderMembersTab = () => {
-    if (isPending) {
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center mb-4">
-            <div className="h-6 bg-gray-300 rounded w-48 animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, index) => (
-              <div key={index} className="bg-white p-3 rounded-lg border flex items-center animate-pulse">
-                <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-300 rounded w-20 mb-1"></div>
-                  <div className="h-3 bg-gray-200 rounded w-24"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    if (!data || !data.data || !data.data.group) {
-      return <div className="text-center py-10">No data available</div>;
-    }
-
-    const memberCount = 10; 
-
-    return (
-      <div className="space-y-4">
-        <h3 className="text-xl font-bold flex items-center">
-          <Users className="mr-2 text-purple-600" /> 
-          Group Members ({memberCount})
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(memberCount)].map((_, index) => (
-            <div 
-              key={index} 
-              className="bg-white p-3 rounded-lg border flex items-center"
-            >
-              <Image 
-                src={`/api/placeholder/40/40?seed=${index}`} 
-                alt={`Member ${index + 1}`} 
-                width={40} 
-                height={40} 
-                className="rounded-full mr-3"
-              />
-              <div>
-                <h4 className="font-medium">Member {index + 1}</h4>
-                <p className="text-xs text-gray-500">Joined 2 months ago</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -208,7 +164,12 @@ function GroupDetailPage() {
           </div>
 
           {activeTab === 'discussions' && renderDiscussionsTab()}
-          {activeTab === 'members' && renderMembersTab()}
+          {activeTab === 'members' && (
+          <GroupMembersDisplay 
+            groupId={groupId}
+            groupName="Your Group Name" // You can fetch this from your group data
+            canManageMembers={canManageMembers}
+          />)}
         </>
       )}
     </div>

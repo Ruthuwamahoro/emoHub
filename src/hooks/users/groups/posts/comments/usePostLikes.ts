@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import showToast from '@/utils/showToast';
-import { createPostLikes } from '@/services/group/comments/postLikes';
+import { createPostLikes } from '@/services/user/groups/comments/postLikes';
 
 interface PostMutationParams {
   groupId: string;

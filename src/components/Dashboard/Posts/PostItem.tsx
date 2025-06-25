@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 import { Avatar as AvatarImages } from "@/utils/genderAvatar";
 import { useCommentLikes } from '@/hooks/users/groups/posts/comments/usePostCommentLikes';
 import { usePostLikes } from '@/hooks/users/groups/posts/comments/usePostLikes';
+import CommentReplies from './CommentReplies';
 
 interface PostItemProps {
   post: Post;
@@ -28,6 +29,8 @@ interface Comment {
   likes?: number;
   likesCount?: number;
   isLiked?: boolean;
+  repliesCount?: number;
+  replies?: any[]; // Add replies to the interface
 }
 
 const PostItem: React.FC<{ post: any }> = ({ post }) => {
@@ -38,7 +41,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const [commentsPage, setCommentsPage] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [replyingTo, setReplyingTo] = useState<string | number | null>(null);
   
   const params = useParams();
   const groupId = params?.id as string;
@@ -59,7 +61,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const { toggleCommentLike, isPending: isLikePending } = useCommentLikes();
   const { togglePostLike, isPending: isPostLikePending } = usePostLikes();
 
-
   useEffect(() => {
     if (post.comments && Array.isArray(post.comments)) {
       const formattedComments: Comment[] = post.comments.map((comment: any) => ({
@@ -75,7 +76,9 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         createdAt: comment.createdAt,
         likes: comment.likes || 0,
         likesCount: comment.likesCount || comment.likes || 0,
-        isLiked: comment.isLiked || false
+        isLiked: comment.isLiked || false,
+        repliesCount: comment.repliesCount || 0,
+        replies: comment.replies || [] // Map the replies properly
       }));
       setComments(formattedComments);
       setDisplayedComments(formattedComments.slice(0, COMMENTS_PER_PAGE));
@@ -192,7 +195,9 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         createdAt: new Date().toISOString(),
         likes: 0,
         likesCount: 0,
-        isLiked: false
+        isLiked: false,
+        repliesCount: 0,
+        replies: [] // Initialize empty replies array
       };
       
       setComments(prev => [newComment, ...prev]);
@@ -204,7 +209,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   };
 
   const handlePostLike = () => {
-    if (isPostLikePending) return; // Prevent multiple clicks
+    if (isPostLikePending) return;
     togglePostLike(groupId, post.id);
   };
 
@@ -244,6 +249,13 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
       return "You";
     }
     return comment.author.name || 'Anonymous';
+  };
+
+  // Callback to refresh comments when a reply is added
+  const handleReplyAdded = () => {
+    // You can implement logic here to refresh comments if needed
+    // For now, this is a placeholder for future implementation
+    console.log('Reply added, refreshing comments...');
   };
 
   const renderPostContent = () => {
@@ -329,8 +341,8 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const hasMoreComments = displayedComments.length < comments.length;
 
   return (
-    <div className="relative w-full max-w-2xl">
-      {/* Main Post Card - Add red background when liked */}
+    <div className="relative w-full max-w-3xl">
+      {/* Main Post Card */}
       <article className={`rounded-2xl shadow-md border overflow-hidden hover:shadow-lg transition-all duration-300 w-full`}>
         {/* Post Header */}
         <div className="p-5 pb-3">
@@ -378,18 +390,18 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         {/* Post Actions */}
         <div className={`px-5 py-3 border-t transition-all duration-300`}>
           <div className="flex items-center space-x-6">
-          <button
-            onClick={handlePostLike}
-            disabled={isPostLikePending}
-            className={`flex items-center space-x-2 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed ${
-              post.isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
-            }`}
-          >
-            <Heart className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
-              post.isLiked ? 'fill-current' : ''
-            } ${isPostLikePending ? 'animate-pulse' : ''}`} />
-            <span className="text-sm font-medium">{formatCount(post.likes || 0)}</span>
-          </button>
+            <button
+              onClick={handlePostLike}
+              disabled={isPostLikePending}
+              className={`flex items-center space-x-2 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed ${
+                post.isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+              }`}
+            >
+              <Heart className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+                post.isLiked ? 'fill-current' : ''
+              } ${isPostLikePending ? 'animate-pulse' : ''}`} />
+              <span className="text-sm font-medium">{formatCount(post.likes || 0)}</span>
+            </button>
             <button
               onClick={toggleComments}
               className={`flex items-center space-x-2 transition-all duration-200 group ${
@@ -407,7 +419,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         </div>
       </article>
 
-      {/* Comments Panel - Absolutely Positioned */}
+      {/* Comments Panel */}
       {showComments && (
         <div className="absolute top-0 left-full ml-4 w-96 bg-white rounded-2xl shadow-lg border border-gray-200 flex flex-col max-h-[calc(100vh-120px)] z-10">
           {/* Comments Header */}
@@ -451,114 +463,61 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
 
           {/* Comments List */}
           <div className="flex-1 overflow-y-auto">
-            {displayedComments.length > 0 ? (
-              <div className="p-4 space-y-4">
-                {displayedComments.map((comment, index) => (
-                  <div key={comment.id} className="group">
-                    <div className="flex space-x-3">
-                      {getCommentUserAvatar(comment)}
-                      <div className="flex-1 min-w-0">
-                        <div className="bg-gray-50 rounded-xl px-3 py-2.5 hover:bg-gray-100 transition-colors duration-200">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="font-medium text-sm text-gray-900 truncate">
-                              {getCommentUserDisplayName(comment)}
-                            </span>
-                            <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(comment.createdAt)}</span>
-                          </div>
-                          <p className="text-gray-800 text-sm leading-relaxed break-words">{comment.content}</p>
-                        </div>
-
-                        {/* Comment Actions */}
-                        <div className="flex items-center mt-2 ml-3 space-x-4">
-                          <button
-                            onClick={() => handleCommentLike(comment.id)}
-                            disabled={isLikePending}
-                            className={`flex items-center space-x-1 text-xs transition-all duration-200 disabled:opacity-50 px-2 py-1 rounded-full ${
-                              comment.isLiked 
-                                ? 'text-white bg-black hover:bg-gray-800' 
-                                : 'text-gray-500 hover:text-black hover:bg-gray-100'
-                            }`}
-                          >
-                            <ThumbsUp className={`w-3 h-3 ${comment.isLiked ? 'fill-current' : ''} ${isLikePending ? 'animate-pulse' : ''}`} />
-                            <span className="font-medium">{comment.likesCount || comment.likes || 0}</span>
-                          </button>
-                          <button
-                            onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                            className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors duration-200"
-                          >
-                            <Reply className="w-3 h-3" />
-                            <span className="font-medium">Reply</span>
-                          </button>
-                        </div>
-
-                        {/* Reply Input */}
-                        {replyingTo === comment.id && (
-                          <div className="mt-3 ml-3 animate-in slide-in-from-top-2 duration-200">
-                            <div className="flex space-x-2">
-                              <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                {getCurrentUserAvatar()}
-                              </div>
-                              <div className="flex-1 relative">
-                                <textarea
-                                  placeholder={`Reply to ${getCommentUserDisplayName(comment)}...`}
-                                  className="w-full p-2.5 pr-8 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm bg-white"
-                                  rows={2}
-                                  autoFocus
-                                />
-                                <div className="flex items-center justify-end space-x-2 mt-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => setReplyingTo(null)}
-                                    className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
-                                  >
-                                    Reply
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+            {displayedComments.map((comment, index) => (
+              <div key={comment.id} className="group p-4 border-b border-gray-50 last:border-b-0">
+                <div className="flex space-x-3">
+                  {getCommentUserAvatar(comment)}
+                  <div className="flex-1 min-w-0">
+                    <div className="bg-gray-50 rounded-xl px-3 py-2.5 hover:bg-gray-100 transition-colors duration-200">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-medium text-sm text-gray-900 truncate">
+                          {getCommentUserDisplayName(comment)}
+                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(comment.createdAt)}</span>
                       </div>
+                      <p className="text-gray-800 text-sm leading-relaxed break-words">{comment.content}</p>
                     </div>
-                  </div>
-                ))}
 
-                {/* Load More Button */}
-                {hasMoreComments && (
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={loadMoreComments}
-                      disabled={isLoadingMore}
-                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-all duration-200"
-                    >
-                      {isLoadingMore ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-600 border-t-transparent" />
-                          <span>Loading...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="w-4 h-4" />
-                          <span>Show {Math.min(COMMENTS_PER_PAGE, comments.length - displayedComments.length)} more replies</span>
-                        </>
-                      )}
-                    </button>
+                    {/* Comment Actions */}
+                    <div className="flex items-center mt-2 ml-3 space-x-4">
+                      <button
+                        onClick={() => handleCommentLike(comment.id)}
+                        disabled={isLikePending}
+                        className={`flex items-center space-x-1 text-xs transition-all duration-200 disabled:opacity-50 px-2 py-1 rounded-full ${
+                          comment.isLiked 
+                            ? 'text-white bg-black hover:bg-gray-800' 
+                            : 'text-gray-500 hover:text-black hover:bg-gray-100'
+                        }`}
+                      >
+                        <ThumbsUp className={`w-3 h-3 ${comment.isLiked ? 'fill-current' : ''} ${isLikePending ? 'animate-pulse' : ''}`} />
+                        <span className="font-medium">{comment.likesCount || comment.likes || 0}</span>
+                      </button>
+                    </div>
+
+                    {/* CommentReplies Component - Fixed props */}
+                    <CommentReplies
+                      groupId={groupId}
+                      postId={post.id}
+                      commentReplies={comment.replies || []} // Pass the actual comment replies
+                      commentId={comment.id.toString()}
+                      commentAuthorName={getCommentUserDisplayName(comment)}
+                      initialRepliesCount={comment.repliesCount || (comment.replies?.length || 0)}
+                    />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-6 text-center">
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">No comments yet</p>
-                  <p className="text-gray-400 text-xs mt-1">Be the first to comment!</p>
                 </div>
+              </div>
+            ))}
+
+            {/* Load More Comments */}
+            {hasMoreComments && (
+              <div className="p-4 text-center">
+                <button
+                  onClick={loadMoreComments}
+                  disabled={isLoadingMore}
+                  className="text-sm text-blue-500 hover:text-blue-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoadingMore ? 'Loading...' : 'Load more comments'}
+                </button>
               </div>
             )}
           </div>
