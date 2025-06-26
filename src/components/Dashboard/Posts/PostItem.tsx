@@ -10,10 +10,10 @@ import { Avatar as AvatarImages } from "@/utils/genderAvatar";
 import { useCommentLikes } from '@/hooks/users/groups/posts/comments/usePostCommentLikes';
 import { usePostLikes } from '@/hooks/users/groups/posts/comments/usePostLikes';
 import CommentReplies from './CommentReplies';
+import { formatDistanceToNow } from 'date-fns';
+import { Flag } from 'lucide-react';
+import { PostReportModal } from "./ReportModal";
 
-interface PostItemProps {
-  post: Post;
-}
 
 interface Comment {
   id: string | number;
@@ -30,7 +30,7 @@ interface Comment {
   likesCount?: number;
   isLiked?: boolean;
   repliesCount?: number;
-  replies?: any[]; // Add replies to the interface
+  replies?: any[];
 }
 
 const PostItem: React.FC<{ post: any }> = ({ post }) => {
@@ -41,6 +41,9 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const [commentsPage, setCommentsPage] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+
   
   const params = useParams();
   const groupId = params?.id as string;
@@ -78,7 +81,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         likesCount: comment.likesCount || comment.likes || 0,
         isLiked: comment.isLiked || false,
         repliesCount: comment.repliesCount || 0,
-        replies: comment.replies || [] // Map the replies properly
+        replies: comment.replies || [] 
       }));
       setComments(formattedComments);
       setDisplayedComments(formattedComments.slice(0, COMMENTS_PER_PAGE));
@@ -155,16 +158,38 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
     );
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showDropdown]);
+
+
+  const handleReportPost = () => {
+    setShowReportModal(true);
+    setShowDropdown(false);
+  };
+
+
+
+
+  const formatDate = (date: string) => {
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-    
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    return 'Just now';
+    const commentDate = new Date(date);
+    const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
+    if (diffInSeconds < 60) {
+      return 'now';
+    }
+    return formatDistanceToNow(commentDate, { addSuffix: true })
+      .replace('about ', '')
+      .replace('less than ', '');
   };
 
   const formatCount = (count: number) => {
@@ -197,7 +222,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         likesCount: 0,
         isLiked: false,
         repliesCount: 0,
-        replies: [] // Initialize empty replies array
+        replies: [] 
       };
       
       setComments(prev => [newComment, ...prev]);
@@ -251,12 +276,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
     return comment.author.name || 'Anonymous';
   };
 
-  // Callback to refresh comments when a reply is added
-  const handleReplyAdded = () => {
-    // You can implement logic here to refresh comments if needed
-    // For now, this is a placeholder for future implementation
-    console.log('Reply added, refreshing comments...');
-  };
 
   const renderPostContent = () => {
     switch (post.contentType) {
@@ -342,9 +361,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
 
   return (
     <div className="relative w-full max-w-3xl">
-      {/* Main Post Card */}
       <article className={`rounded-2xl shadow-md border overflow-hidden hover:shadow-lg transition-all duration-300 w-full`}>
-        {/* Post Header */}
         <div className="p-5 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -371,6 +388,24 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
               <button className="p-2 rounded-full hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all duration-200">
                 <MoreHorizontal className="w-4 h-4" />
               </button>
+                  <div className="absolute right-0 bottom-0 mt-1 w-40   py-2 z-20">
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="w-full px-4 py-2 text-left text-sm text-rose-600 flex items-center space-x-2 transition-colors duration-200"
+                    >
+                      <Flag className="w-4 h-4" />
+                      <span>Report post</span>
+                    </button>
+              </div>
+              {showReportModal && (
+                <PostReportModal
+                isOpen={showReportModal}
+                onOpenChange={setShowReportModal}
+                postId={post.id}
+                postAuthor={post.author?.name || 'Anonymous'}
+              />
+              )}
+
             </div>
           </div>
         </div>
