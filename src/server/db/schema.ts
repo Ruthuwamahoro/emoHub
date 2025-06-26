@@ -299,6 +299,7 @@ const verificationTokens = pgTable(
 const Challenges = pgTable("Challenges", {
   id: uuid("id").defaultRandom().primaryKey(),
   weekNumber: integer("week_Number"),
+  group_id: uuid("group_id").references(() => Group.id),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   theme: varchar("theme", { length: 255 }).notNull(),

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
 import { Badge } from '@/components/ui/badge';
 
-// TypeScript interfaces
 interface GroupMember {
   id: string;
   name: string;
@@ -25,7 +24,6 @@ interface GroupMembersDisplayProps {
   canManageMembers?: boolean;
 }
 
-// Member skeleton component
 const MemberSkeleton = () => (
   <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 animate-pulse">
     <div className="flex items-center space-x-4">
@@ -43,7 +41,6 @@ const MemberSkeleton = () => (
   </div>
 );
 
-// Members grid skeleton
 const MembersGridSkeleton = () => (
   <div className="space-y-4">
     <div className="flex items-center justify-between mb-6">
@@ -129,7 +126,6 @@ const RoleBadge: React.FC<{ roleName: string }> = ({ roleName }) => {
   );
 };
 
-// Individual member card component
 const MemberCard: React.FC<{ 
   member: GroupMember; 
   canManageMembers: boolean;
@@ -146,7 +142,6 @@ const MemberCard: React.FC<{
     });
   };
 
-  // Safe role name extraction
   const roleName = member?.role?.name || 'member';
   const normalizedRole = roleName.toLowerCase().trim();
 
@@ -249,7 +244,6 @@ const MemberCard: React.FC<{
   );
 };
 
-// Main GroupMembersDisplay component
 export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({ 
   groupId, 
   groupName,
@@ -260,9 +254,7 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
 
   // Handle member actions
   const handleMemberAction = (memberId: string, action: 'promote' | 'demote' | 'remove') => {
-    // Implement your member management logic here
     console.log(`Action: ${action} for member: ${memberId}`);
-    // You can add API calls here to handle the actions
   };
 
   // Handle error state
@@ -286,9 +278,7 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
 
   const members: GroupMember[] = data?.data || [];
   
-  // Filter members based on search term with proper null checking
   const filteredMembers = members.filter(member => {
-    // Skip members with invalid data
     if (!member || !member.id) return false;
     
     const searchLower = searchTerm.toLowerCase();
@@ -300,7 +290,6 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
 
   const totalMembers = members.length;
   
-  // Count members by role with proper null checking
   const getRoleCounts = () => {
     const counts = {
       admins: 0,
@@ -342,13 +331,12 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center">
               <Users className="mr-3 text-purple-600" size={32} />
-              {groupName ? `${groupName} Members` : 'Group Members'}
+              {groupName ? `${groupName} Members` : 'Group Member'}
             </h2>
             {!isPending && (
               <p className="text-gray-600 mt-2 text-lg">
@@ -358,7 +346,6 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
           </div>
         </div>
 
-        {/* Member Stats */}
         {!isPending && totalMembers > 0 && (
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="flex items-center text-yellow-700 bg-gradient-to-r from-yellow-50 to-amber-50 px-4 py-2 rounded-full border-2 border-yellow-200 shadow-md">
