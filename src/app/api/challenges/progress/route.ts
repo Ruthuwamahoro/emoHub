@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
             .where(eq(UserProgress.user_id, userId))
             .limit(1);
 
-        // Create initial progress record if it doesn't exist
         if (userProgress.length === 0) {
             await db.insert(UserProgress).values({
                 user_id: userId,

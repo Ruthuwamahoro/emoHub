@@ -13,6 +13,7 @@ import { useUpdateElementProgress } from '@/hooks/challenges/elements/useUpdateE
 import { useQueryClient } from '@tanstack/react-query';
 import { Challenge, WeeklyCard } from '@/types/challenges';
 import { useParams } from "next/navigation";
+import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
 
 
 
@@ -61,7 +62,7 @@ const WeeklyChallengesCard: React.FC = () => {
   const [isAddingChallenge, setIsAddingChallenge] = useState<string | null>(null);
   
   const [isAddingWeek, setIsAddingWeek] = useState(false);
-
+  const { data: groupData, isPending: isPendingGroupData} = useGetSingleGroup(groupId as string)
 
 
   const deleteChallenge = async (cardId: string, challengeId: string) => {
@@ -435,7 +436,6 @@ const WeeklyChallengesCard: React.FC = () => {
       });
       
     } catch (error) {
-      console.error('Failed to toggle challenge:', error);
       setWeeklyCards(prev => 
         prev.map(weekCard => 
           weekCard.id === cardId 
@@ -451,7 +451,6 @@ const WeeklyChallengesCard: React.FC = () => {
         )
       );
     } finally {
-      // Remove from updating elements
       setUpdatingElements(prev => {
         const newSet = new Set(prev);
         newSet.delete(challengeId);
@@ -521,7 +520,7 @@ const WeeklyChallengesCard: React.FC = () => {
       setEditingChallenge(null);
       setEditForm({ title: '', description: '' });
     } catch (error) {
-      console.error('Update challenge failed:', error);
+      return error
     } finally {
       setUpdatingElement(null);
     }
@@ -657,7 +656,107 @@ const WeeklyChallengesCard: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="rounded-xl shadow-lg border border-gray-200 p-6 bg-gray-200">
+
+    {groupId ? (
+      <div className="bg-slate-50 rounded-2xl shadow-2xl border border-purple-200 p-8 text-black">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{groupData?.group?.name}</h1>
+            <p className=" text-lg">Team Emotional Intelligence Challenges</p>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+            <span className="text-sm font-medium">Group Challenge</span>
+          </div>
+        </div>
+        
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm font-medium ">Team Progress</span>
+            <span className="text-lg font-bold">{overallProgress.progressPercentage}%</span>
+          </div>
+          <div className="w-full bg-white backdrop-blur-sm rounded-full h-4">
+            <div 
+              className="h-4 rounded-full transition-all duration-500 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 shadow-lg"
+              style={{ width: `${overallProgress.progressPercentage}%` }}
+            />
+          </div>
+          <p className="text-xs mt-2">
+            {overallProgress.completedCount} of {overallProgress.totalCount} challenges completed across all topics
+          </p>
+        </div>
+
+        {userProgressData && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-red-50 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+              <div className="text-2xl font-bold text-yellow-300">{userProgressData.completed_weeks}</div>
+              <div className="text-sm">Topics Completed</div>
+              <div className="text-xs">of {userProgressData.total_weeks} total</div>
+            </div>
+            
+            <div className="bg-red-50 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+              <div className="text-2xl font-bold text-green-300">{userProgressData.current_streak}</div>
+              <div className="text-sm">Current Streak</div>
+              <div className="text-xs">days</div>
+            </div>
+            
+            <div className="bg-red-50 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+              <div className="text-2xl font-bold text-pink-300">{userProgressData.longest_streak}</div>
+              <div className="text-sm">Longest Streak</div>
+              <div className="text-xs">days</div>
+            </div>
+            
+            <div className="bg-red-50 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+              <div className="text-2xl font-bold text-orange-300">
+                {userProgressData.overall_completion_percentage}%
+              </div>
+              <div className="text-sm">Team Progress</div>
+              <div className="text-xs">
+                {new Date(userProgressData.last_activity_date).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search team challenges or themes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-red-50 focus:border-transparent outline-none text-black placeholder-indigo-200"
+          />
+        </div>
+
+        <div className="flex gap-3 justify-between items-center">
+          <div className="flex gap-3">
+            {(['all', 'completed', 'incomplete'] as FilterType[]).map((filterType) => (
+              <button
+                key={filterType}
+                onClick={() => setFilter(filterType)}
+                className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  filter === filterType
+                    ? 'bg-white text-indigo-600 shadow-lg border border-white/50'
+                    : 'bg-slate-500  hover:bg-white/30 border border-white/30 text-white'
+                }`}
+              >
+                {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+              </button>
+            ))}
+          </div>
+          
+          {canCreateResources && (
+            <button
+              onClick={startAddingWeek}
+              className="flex items-center gap-2 px-5 py-2 bg-slate-500 text-white rounded-xl hover:from-yellow-300 hover:to-orange-300 transition-all duration-200 text-sm font-semibold shadow-lg"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Topic
+            </button>
+          )}
+        </div>
+      </div>
+    ):(<div className="rounded-xl shadow-lg border border-gray-200 p-6 bg-gray-200">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-2xl font-bold text-gray-600"><span className="text-[#fb923c] font-bold"> Hi {(session?.user?.fullName)?.split(" ")[0]},</span> <br/> Welcome to Emotional Intelligence Challenges</h1>
         </div>
@@ -747,7 +846,7 @@ const WeeklyChallengesCard: React.FC = () => {
             </button>
           )}
         </div>
-      </div>
+      </div>)}
 
       {canCreateResources && isAddingWeek && (
         <form onSubmit={handleWeekFormSubmit}>
