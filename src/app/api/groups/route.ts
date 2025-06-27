@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendResponse } from "@/utils/Responses";
 import db from "@/server/db";
-import { Group} from "@/server/db/schema";
+import { Group, GroupMember} from "@/server/db/schema";
 import { uploadImage } from "@/utils/cloudinary";
-import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
+import { checkIfUserIsAdmin, checkIfUserIsSpecialists, checkIfUserIsSuperAdmin, getUserIdFromSession } from "@/utils/getUserIdFromSession";
 
 
 export const POST = async (req: NextRequest) => {
   try {
+    const [isAdmin, isSpecialists, isSuperAdmin] = await Promise.all([
+      checkIfUserIsAdmin(),
+      checkIfUserIsSpecialists(),
+      checkIfUserIsSuperAdmin()
+    ])
+
+    const isAuthorized = isAdmin || isSpecialists || isSuperAdmin;
     const userId = await getUserIdFromSession();
-    if(!userId){
+    if(!isAuthorized || !userId){
         return sendResponse(401, 'Unauthorized', 'You are not authorized to perform this action')
     }
     const { name, categoryId, description, image } = await req.json();
@@ -25,12 +32,21 @@ export const POST = async (req: NextRequest) => {
     if (image) {
       processedImage = await uploadImage(image);
     }
-    await db.insert(Group).values({
+    
+    const [insertedGroup] = await db.insert(Group).values({
       name,
       categoryId,
       description,
+      userId,
       image: processedImage,
+    }).returning();
+
+    await db.insert(GroupMember).values({
+      user_id: userId,
+      group_id: insertedGroup.id,
+      joined_at: new Date(),
     });
+    
     return sendResponse(200, null, "Group Created Successfully");
   } catch (err) {
     const error = err instanceof Error ? err.message : "Internal Server Error";
@@ -54,6 +70,7 @@ export async function GET(req: Request) {
   
       const groupsWithJoinStatus = groups.map(group => ({
         ...group,
+        membersLength: group.members.length,
         isJoined: userId 
           ? group.members && group.members.length > 0 
           : false
