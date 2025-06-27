@@ -132,9 +132,7 @@ Before setting up the project, ensure that there is the following installed:
 ## Designs
 
 ### Figma Mockups
-- **Design System**: [Insert Figma link to design system]
-- **User Interface Mockups**: [Insert Figma link to UI mockups]
-- **User Flow Diagrams**: [Insert Figma link to user flows]
+- **Design System**: [https://www.figma.com/design/zswZWeXtDOJhJgZ8L9M6eW/emoHub?node-id=213-3323&t=dfCZt1Zzf1TLLTcW-0]
 
 
 ### Screenshots
