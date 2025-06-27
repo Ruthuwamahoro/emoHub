@@ -12,20 +12,27 @@ import { useUserProgress } from '@/hooks/challenges/useUserProgress';
 import { useUpdateElementProgress } from '@/hooks/challenges/elements/useUpdateElementProgress';
 import { useQueryClient } from '@tanstack/react-query';
 import { Challenge, WeeklyCard } from '@/types/challenges';
+import { useParams } from "next/navigation";
 
 
 
 type FilterType = 'all' | 'completed' | 'incomplete';
 
 const WeeklyChallengesCard: React.FC = () => {
-  const { data, isPending } = usegetChallenges();
   const { data: session } = useSession();
-  const { isPendingCreateChallenge, formData, setFormData, handleChange, handleSubmit } = useCreateChallenge();
   const { data: userProgressData, isLoading: isUserProgressLoading } = useUserProgress();
   const updateElementProgressMutation = useUpdateElementProgress();
   const deleteElementMutation = useDeleteChallengeElement();
   const deleteChallengeMutation = useDeleteChallenge();
   const [updatingElements, setUpdatingElements] = useState<Set<string>>(new Set());
+  const params = useParams();
+  const groupId = params?.id as string | undefined;
+  const { data, isPending } = usegetChallenges(groupId);
+  const { isPendingCreateChallenge, formData, setFormData, handleChange, handleSubmit } = useCreateChallenge(groupId);
+
+
+
+
 
   const queryClient = useQueryClient(); 
 
@@ -102,7 +109,13 @@ const WeeklyChallengesCard: React.FC = () => {
 
   const handleWeekFormSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    const result = await handleSubmit(e);
+    const dataToSubmit = {
+      ...formData,
+      group_id: groupId
+    };
+    setFormData(dataToSubmit);
+
+    const result = await handleSubmit(e, dataToSubmit);
     setTimeout(() => {
       if(result?.success){
         setIsAddingWeek(false);
@@ -225,7 +238,7 @@ const WeeklyChallengesCard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Week Number <span className="text-red-500">*</span>
+                  Topic Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -299,7 +312,6 @@ const WeeklyChallengesCard: React.FC = () => {
             </div>
           </div>
         ) : (
-          // View Mode for Week
           <div 
             className="cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => toggleCardExpansion(card.id)}
@@ -307,11 +319,11 @@ const WeeklyChallengesCard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-xl font-bold text-gray-800">Week {card.weekNumber}</h2>
+                  <h2 className="text-xl font-bold text-gray-800">Topic {card.weekNumber}</h2>
                   {isCompleted && (
                   <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full text-xs font-medium shadow-lg">
                     <CheckCircle2 className="w-3 h-3" />
-                    Week Completed! 🎉
+                    Topic Completed! 🎉
                   </div>
                   )}
 
@@ -448,12 +460,12 @@ const WeeklyChallengesCard: React.FC = () => {
     }
   };
 
-useEffect(() => {
-  if (updateElementProgressMutation.isSuccess) {
-    queryClient.invalidateQueries({ queryKey: ['challenges'] });
-    queryClient.invalidateQueries({ queryKey: ['user-progress'] });
-  }
-}, [updateElementProgressMutation.isSuccess]);
+  useEffect(() => {
+    if (updateElementProgressMutation.isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['Challenges', groupId] }); 
+      queryClient.invalidateQueries({ queryKey: ['user-progress'] });
+    }
+  }, [updateElementProgressMutation.isSuccess, groupId]); 
 
   const toggleCardExpansion = (cardId: string) => {
     setExpandedCards(prev => {

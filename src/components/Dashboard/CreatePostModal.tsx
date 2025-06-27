@@ -38,7 +38,7 @@ interface CreatePostModalProps {
   onClose: () => void;
 }
 
-interface FormData {
+interface PostFormData {
   title: string;
   contentType: ContentType;
   textContent?: string;
@@ -63,18 +63,18 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
   const { 
     formData, 
     errors, 
-    moderationData, // This will contain the moderation info when content is flagged
+    moderationData,
     handleChange, 
     updateField, 
     handleSubmit, 
     isPending 
   }: {
-    formData: FormData;
+    formData: PostFormData;  
     errors: FormErrors;
     moderationData: ModerationData | null;
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     updateField: (field: string, value: any) => void;
-    handleSubmit: (formData: FormData) => Promise<void>;
+    handleSubmit: (formData: FormData) => Promise<void>;  
     isPending: boolean;
   } = useCreatePosts(groupId);
 

@@ -16,20 +16,19 @@ interface SubmitResult {
     error?: string;
   }
 
-export const useCreateChallenge = () => {
+export const useCreateChallenge = (groupId?: string) => {
     const [formData, setFormData] = useState(initialData);
     const [ errors, setErrors] = useState<Record<string, string>>({});
     const queryClient = useQueryClient();
     const { mutate, isPending } = useMutation({
         mutationFn: AddChallenge,
         onSuccess: (response) => {
-            console.log('Challenge created successfully:', response);
-            console.log('Form data that was submitted:', formData);
+            console.log('Challenge created successfully:', groupId);
             
             setFormData(initialData); 
             setErrors({});
             showToast(response.message, "success");
-            queryClient.invalidateQueries({ queryKey: ["Challenges"] });
+            queryClient.invalidateQueries({ queryKey: ["Challenges", groupId] });
         },
         onError: (err: unknown) => {
             const error = err as Error;
@@ -52,13 +51,14 @@ export const useCreateChallenge = () => {
         }
     };
     
-    const handleSubmit = async (e?: React.FormEvent): Promise<SubmitResult> => {
+    const handleSubmit = async (e?: React.FormEvent, dataOverride?: typeof formData): Promise<SubmitResult> => {
         if (e) {
           e.preventDefault();
         }
-        
+        const dataToUse = dataOverride || formData;
+
         try {
-          await mutate(formData);
+          await mutate(dataToUse);
           return { success: true };
         } catch (error) {
           if (error instanceof z.ZodError) {

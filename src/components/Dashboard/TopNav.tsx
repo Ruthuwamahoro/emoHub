@@ -56,8 +56,6 @@ export default function HeaderDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  console.log("status", status);
-  console.log("session loginTime", session?.loginTime);
 
   const handleSignOut = async () => {
     try {
@@ -67,7 +65,7 @@ export default function HeaderDashboard() {
         redirect: true 
       });
     } catch (error) {
-      console.error('Sign out error:', error);
+
       window.location.href = '/login';
     }
   };

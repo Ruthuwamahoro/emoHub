@@ -5,6 +5,7 @@ export interface CreateChallengeData {
   startDate: string;
   endDate: string;
   theme: string;
+  group_id?: string;
 }
 
 export const AddChallenge = async (data: CreateChallengeData) => {
