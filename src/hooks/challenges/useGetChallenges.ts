@@ -1,10 +1,10 @@
 import { getAllChallenges } from "@/services/challenges/getChallenges";
 import { useQuery } from "@tanstack/react-query";
 
-export const usegetChallenges = () => {
+export const usegetChallenges = (groupId?: string) => {
     const { data, isLoading, isPending, isFetching } = useQuery({
-      queryKey: ["Challenges"],
-      queryFn: () =>getAllChallenges(),
+      queryKey: ["Challenges", groupId],
+      queryFn: () =>getAllChallenges(groupId),
     });
 
     return {

@@ -1,7 +1,8 @@
 import axios from "axios"
-export const getAllChallenges = async() => {
+export const getAllChallenges = async(groupId?: string) => {
     try{
-        const response = await axios.get("/api/challenges");
+        const url = groupId ? `/api/challenges?groupId=${groupId}` : '/api/challenges';
+        const response = await axios.get(url);
         return response.data;
     } catch(err){
         return err

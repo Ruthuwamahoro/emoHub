@@ -16,13 +16,16 @@ import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmember
 import { measureMemory } from 'vm';
 import GroupMembersDisplay from '@/components/Dashboard/community/GroupMembers';
 import { useSession } from 'next-auth/react';
+import { List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import WeeklyChallengesCard from '@/components/Dashboard/challenge/ChallengesPage';
 
 
 
 function GroupDetailPage() {
   const { id }: { id: string } = useParams();
   const { data, isPending } = useGetSingleGroup(id);
-  const [activeTab, setActiveTab] = useState<'discussions' | 'members'>('discussions');
+  const [activeTab, setActiveTab] = useState<'discussions' | 'challenges' | 'members'>('discussions');
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const {data: session } = useSession();
 
@@ -62,6 +65,23 @@ function GroupDetailPage() {
     </div>
   );
 
+  const renderChallengesTab = () => (
+    <div>
+      <h1 className="text-xl">Group challenges</h1>
+      {groupId && (
+  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+    <p className="text-sm text-blue-700">
+      📋 Viewing challenges for Group ID: <span className="font-semibold">{groupId}</span>
+    </p>
+  </div>
+)}
+      <WeeklyChallengesCard />
+
+
+
+    </div>
+  )
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -77,7 +97,7 @@ function GroupDetailPage() {
           </div>
 
           <div className="flex border-b mb-6">
-            {[1, 2].map((tab) => (
+            {[1, 2, 3].map((tab) => (
               <div key={tab} className="flex items-center px-4 py-3">
                 <div className="w-5 h-5 bg-gray-300 rounded mr-2"></div>
                 <div className="h-4 bg-gray-300 rounded w-20"></div>
@@ -146,6 +166,7 @@ function GroupDetailPage() {
           <div className="flex border-b mb-6">
             {[
               { key: 'discussions', label: 'Discussions', icon: BookOpen },
+              { key: 'challenges', label: 'challenges', icon: List},
               { key: 'members', label: 'Members', icon: Users }
             ].map(tab => (
               <button
@@ -167,9 +188,11 @@ function GroupDetailPage() {
           {activeTab === 'members' && (
           <GroupMembersDisplay 
             groupId={groupId}
-            groupName="Your Group Name" // You can fetch this from your group data
+            groupName="Your Group Name" 
             canManageMembers={canManageMembers}
           />)}
+
+          { activeTab === 'challenges' && renderChallengesTab()}
         </>
       )}
     </div>

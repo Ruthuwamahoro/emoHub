@@ -7,12 +7,11 @@ import {
   getUserIdFromSession 
 } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
-import { desc } from "drizzle-orm";
+import { desc, eq, isNull, or } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('API: POST request received');
     
     const [isAdmin, isSpecialists, isSuperAdmin] = await Promise.all([
       checkIfUserIsAdmin(),
@@ -24,39 +23,33 @@ export async function POST(req: NextRequest) {
     const userId = await getUserIdFromSession();
 
     if (!isAuthorized || !userId) {
-      console.log('API: Unauthorized access attempt');
       return sendResponse(401, null, "Unauthorized");
     }
 
     const body = await req.json();
-    console.log('API: Request body:', body);
 
-    // Validate required fields
     if (!body.weekNumber || !body.startDate || !body.endDate || !body.theme) {
-      console.log('API: Missing required fields');
       return sendResponse(400, null, "Missing required fields");
     }
 
     const now = new Date();
     const insertedData = {
-      weekNumber: parseInt(body.weekNumber) || 0, // Convert to number if needed
+      weekNumber: parseInt(body.weekNumber) || 0,
       theme: body.theme,
       startDate: new Date(body.startDate),
       endDate: new Date(body.endDate),
+      group_id: (body.group_id && body.group_id.trim() !== '') ? body.group_id : null,
       user_id: userId,
       created_at: now,
       updated_at: now,
     };
 
-    console.log('API: Data to insert:', insertedData);
 
     const result = await db.insert(Challenges).values(insertedData);
-    console.log('API: Insert result:', result);
 
     return sendResponse(200, insertedData, 'Challenge created successfully');
     
   } catch (error) {
-    console.error('API: Error in POST:', error);
     const err = error instanceof Error ? error.message : 'An unexpected error occurred';
     return sendResponse(500, null, err);
   }
@@ -66,13 +59,32 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const challenges = await db.select({
+    const url = new URL(req.url);
+    const groupId = url.searchParams.get("groupId");
+    
+    const baseQuery = db.select({
       id: Challenges.id,
       weekNumber: Challenges.weekNumber,
       startDate: Challenges.startDate,
       endDate: Challenges.endDate,
       theme: Challenges.theme,
-    }).from(Challenges).orderBy(desc(Challenges.created_at));
+      group_id: Challenges.group_id, 
+    }).from(Challenges);
+
+    let challengesQuery;
+    if (groupId) {
+      challengesQuery = baseQuery.where(eq(Challenges.group_id, groupId));
+    } else {
+
+      challengesQuery = baseQuery.where(isNull(Challenges.group_id));
+
+    }
+
+    console.log('SQL Query:', challengesQuery.toSQL());
+
+    const challenges = await challengesQuery.orderBy(desc(Challenges.created_at));
+    
+
 
     const challengeElements = await db.select({
       id: ChallengeElements.id,

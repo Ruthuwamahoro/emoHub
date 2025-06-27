@@ -12,9 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+interface PostReportModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  postId: string;
+  postAuthor: string;
+}
 
-
-export const PostReportModal = ({ isOpen, onOpenChange, postId, postAuthor }) => {
+export const PostReportModal: React.FC<PostReportModalProps> = ({ isOpen, onOpenChange, postId, postAuthor }) => {
   const [selectedReason, setSelectedReason] = useState('');
   const [additionalDetails, setAdditionalDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,20 +63,13 @@ export const PostReportModal = ({ isOpen, onOpenChange, postId, postAuthor }) =>
     }
   ];
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReason) return;
 
     setIsSubmitting(true);
     
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Report submitted:', {
-      postId,
-      reason: selectedReason,
-      details: additionalDetails,
-      reportedBy: 'current-user-id'
-    });
     
     setIsSubmitting(false);
     setIsSubmitted(true);
