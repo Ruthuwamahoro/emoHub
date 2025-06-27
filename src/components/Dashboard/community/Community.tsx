@@ -45,7 +45,6 @@ export function CommunityGroups() {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'groups' | 'requests'>('groups');
-  // const { data: AllGroupMembers } = useAllMembersGroup(groupId);
   
   const { 
     data, 
@@ -54,7 +53,6 @@ export function CommunityGroups() {
     isRefetching 
   } = useGetAllGroups(session?.user?.id);
 
-  // const members= AllGroupMembers?.data?.length || 0;
 
   
   const { joinGroup: joinGroupSubmit } = useJoinGroup();
@@ -196,8 +194,8 @@ export function CommunityGroups() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <div className="bg-gray-400 rounded-xl p-8 mb-10 shadow-lg">
+    <div className="container mx-auto px-4 py-8 min-h-screen">
+      <div className="bg-slate-600 rounded-xl p-8 mb-10 shadow-lg">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">Community Groups</h1>
@@ -209,13 +207,14 @@ export function CommunityGroups() {
               <>
                 <button 
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="flex items-center bg-white text-black px-5 py-3 text-lg rounded-lg hover:bg-purple-50 transition duration-300 shadow-md font-medium"
+                  className="flex items-center bg-white text-black px-3 py-2 text-xl rounded-lg hover:bg-purple-50 transition duration-300 shadow-md font-medium"
                 >
                   <PlusCircle className="mr-2" /> Create Group
                 </button>
+
                 <button 
                   onClick={() => setIsManageModalOpen(true)}
-                  className="flex items-center bg-white text-black text-lg px-5 py-3 rounded-lg hover:bg-purple-50 transition duration-300 shadow-md font-medium"
+                  className="flex items-center bg-white text-black text-xl px-3 py-2 rounded-lg hover:bg-purple-50 transition duration-300 shadow-md font-medium"
                 >
                   <Settings className="mr-2" /> Manage
                 </button>

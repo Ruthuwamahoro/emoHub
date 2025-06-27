@@ -100,10 +100,10 @@ export const useCreateEmotionCheckins = () => {
         data: mutate,
         formData,
         setFormData,
-        updateFormData, // New helper function
+        updateFormData, 
         isPendingEmotions: isPending,
         handleChange,
         handleSubmit,
-        errors // Return errors for display
+        errors 
     }
 }
