@@ -66,19 +66,8 @@ function GroupDetailPage() {
   );
 
   const renderChallengesTab = () => (
-    <div>
-      <h1 className="text-xl">Group challenges</h1>
-      {groupId && (
-  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-    <p className="text-sm text-blue-700">
-      📋 Viewing challenges for Group ID: <span className="font-semibold">{groupId}</span>
-    </p>
-  </div>
-)}
+    <div className='pr-52'>
       <WeeklyChallengesCard />
-
-
-
     </div>
   )
 

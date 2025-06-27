@@ -2,7 +2,7 @@ import db from "@/server/db";
 import { ChallengeElements, Challenges } from "@/server/db/schema";
 import { getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
-import { updateUserProgress } from "@/utils/userProgressUtils"; // Import from utils
+import { updateUserProgress } from "@/utils/userProgressUtils"; 
 import { and, eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
@@ -16,12 +16,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         const { elementId, completed } = await req.json();
         const { id } = await params;
-        console.log("idssss", id)
         const challengeId = id;
 
-        console.log('API Route - Received data:', { challengeId, elementId, completed, userId });
 
-        const updateResult = await db.update(ChallengeElements).set({
+        await db.update(ChallengeElements).set({
             is_completed: completed,
             completed_at: completed ? new Date() : null,
             completed_by: completed ? userId : null,
@@ -33,26 +31,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             )
         );
 
-        const allElementsDebug = await db.select()
+        await db.select()
             .from(ChallengeElements)
             .where(eq(ChallengeElements.challenge_id, challengeId));
         
-        console.log("API Route - All elements for challenge:", allElementsDebug);
-
+        console.log("jjjjjjsjdjsdjf")
         const elementsStats = await db.select({
             total: sql<number>`count(*)`.as('total'),
             completed: sql<number>`count(case when ${ChallengeElements.is_completed} = true then 1 end)`.as('completed'),
         }).from(ChallengeElements)
             .where(eq(ChallengeElements.challenge_id, challengeId));
 
-        console.log("API Route - Element stats query result:", elementsStats);
 
         const stats = elementsStats[0] || { total: 0, completed: 0 };
 
         const completionPercentage = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
         const isWeekCompleted = stats.completed === stats.total && stats.total > 0;
 
-        const challengeUpdateResult = await db.update(Challenges).set({
+        await db.update(Challenges).set({
             total_elements: stats.total,
             completed_elements: stats.completed,
             completed_percentage: completionPercentage.toFixed(2),
@@ -60,14 +56,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             updated_at: new Date()
         }).where(eq(Challenges.id, challengeId));
 
-        console.log('API Route - Challenge updated:', challengeUpdateResult);
 
-        const updatedChallenge = await db.select()
+        await db.select()
             .from(Challenges)
             .where(eq(Challenges.id, challengeId))
             .limit(1);
         
-        console.log('API Route - Updated challenge verification:', updatedChallenge);
 
         await updateUserProgress(userId);
 
@@ -82,12 +76,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             }
         };
 
-        console.log('API Route - Sending response:', responseData);
 
         return sendResponse(200, responseData, 'Challenge element updated successfully');
 
     } catch (error) {
-        console.error('API Route - Error in PATCH route:', error);
         const err = error instanceof Error ? error?.message : 'An unexpected error occurred';
         return sendResponse(500, null, err);
     }
