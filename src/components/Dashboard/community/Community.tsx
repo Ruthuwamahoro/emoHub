@@ -12,6 +12,10 @@ import { RequestModal } from './RequestModeratorForm';
 import { ManagementModal } from './ManagingRequest';
 import { CreateGroupModal } from './CreateGroupFormModal';
 import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
+import { Edit2 } from 'lucide-react';
+import { Delete } from 'lucide-react';
+import { DeleteIcon } from 'lucide-react';
+
 
 interface Group {
   id: number;
@@ -23,6 +27,7 @@ interface Group {
   memberCount?: number;
   moderators?: string[];
   createdBy?: string;
+  userId: string;
 }
 
 export interface GroupRequest {
@@ -61,6 +66,7 @@ export function CommunityGroups() {
   const groups = data?.data as Group[] | undefined;
   const canManageGroups = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
   const isRegularUser = !canManageGroups;
+
 
   const [requests] = useState<GroupRequest[]>([
     {
@@ -135,6 +141,10 @@ export function CommunityGroups() {
 
   const handleRejectRequest = async (requestId: number) => {
     showToast('Request rejected', 'error');
+  };
+
+  const isGroupCreator = (group: Group) => {
+    return group.userId === session?.user?.id;
   };
 
   const YourGroupsSkeleton = () => (
@@ -303,7 +313,8 @@ export function CommunityGroups() {
                         <div className="flex-grow">
                           <h3 className="text-xl font-semibold text-gray-800">{group.name}</h3>
                           <p className="text-sm text-gray-500 mt-1">
-                            {group.memberCount || '10+'} members
+                            {/* {group.memberCount || '10+'}  */}
+                            members
                           </p>
                           <div className="flex space-x-3 mt-4">
                             <button 
@@ -312,19 +323,31 @@ export function CommunityGroups() {
                             >
                               View <ArrowRight className="ml-1 w-4 h-4" />
                             </button>
-                            {canManageGroups && (
-                              <button 
-                                className="text-blue-500 hover:text-blue-700 flex items-center font-medium"
-                              >
-                                <Edit className="mr-1 w-4 h-4" /> Edit
-                              </button>
+                            {isGroupCreator(group) ? (
+                              <>
+                                <button 
+                                  // onClick={() => handleManageGroup(group.id)}
+                                  className="text-blue-500 hover:text-blue-700 flex items-center font-medium"
+                                >
+                                  <Edit2 className="mr-1 w-4 h-4" /> Edit
+                                </button>
+                                <button 
+                                  // onClick={() => handleDeleteGroup(group.id)}
+                                  className="text-red-500 hover:text-red-700 font-medium"
+                                >
+                                  <DeleteIcon className="mr-1 w-4 h-4" /> Delete
+                                  </button>
+                              </>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={() => handleExitGroup(group.id)}
+                                  className="text-red-500 hover:text-red-700 font-medium"
+                                >
+                                  Leave
+                                </button>
+                              </>
                             )}
-                            <button 
-                              onClick={() => handleExitGroup(group.id)}
-                              className="text-red-500 hover:text-red-700 font-medium"
-                            >
-                              Leave
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -357,7 +380,8 @@ export function CommunityGroups() {
                           </div>
                         )}
                         <div className="absolute top-3 right-3 bg-white bg-opacity-90 px-2 py-1 rounded-full text-xs font-medium text-gray-700">
-                          {group.memberCount || '10+'} members
+                          {/* {group.memberCount || '10+'}  */}
+                          members
                         </div>
                       </div>
                       <div className="p-6">
@@ -370,7 +394,7 @@ export function CommunityGroups() {
                           >
                             Join Group
                           </button>
-                          {canManageGroups && (
+                          {/* {canManageGroups && (
                             <div className="flex gap-2">
                               <button className="flex-1 flex items-center justify-center text-blue-600 bg-blue-50 py-2 rounded-lg hover:bg-blue-100 transition font-medium">
                                 <Edit className="mr-1 w-4 h-4" /> Edit
@@ -379,7 +403,7 @@ export function CommunityGroups() {
                                 <Eye className="mr-1 w-4 h-4" /> Manage
                               </button>
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </div>
