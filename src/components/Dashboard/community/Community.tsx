@@ -11,6 +11,7 @@ import showToast from '@/utils/showToast';
 import { RequestModal } from './RequestModeratorForm';
 import { ManagementModal } from './ManagingRequest';
 import { CreateGroupModal } from './CreateGroupFormModal';
+import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
 
 interface Group {
   id: number;
@@ -44,6 +45,7 @@ export function CommunityGroups() {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'groups' | 'requests'>('groups');
+  // const { data: AllGroupMembers } = useAllMembersGroup(groupId);
   
   const { 
     data, 
@@ -51,6 +53,9 @@ export function CommunityGroups() {
     refetch, 
     isRefetching 
   } = useGetAllGroups(session?.user?.id);
+
+  // const members= AllGroupMembers?.data?.length || 0;
+
   
   const { joinGroup: joinGroupSubmit } = useJoinGroup();
   const { exitGroup } = useExitGroup();
@@ -127,16 +132,13 @@ export function CommunityGroups() {
   };
 
   const handleApproveRequest = async (requestId: number) => {
-    // Implement approve request logic
     showToast('Request approved successfully!', 'success');
   };
 
   const handleRejectRequest = async (requestId: number) => {
-    // Implement reject request logic
     showToast('Request rejected', 'error');
   };
 
-  // Skeleton Components
   const YourGroupsSkeleton = () => (
     <section className="mb-12">
       <div className="flex items-center mb-6">

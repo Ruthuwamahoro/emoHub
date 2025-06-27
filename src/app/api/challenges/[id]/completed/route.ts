@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         const challengeId = id;
 
 
-        await db.update(ChallengeElements).set({
+        const updateResult = await db.update(ChallengeElements).set({
             is_completed: completed,
             completed_at: completed ? new Date() : null,
             completed_by: completed ? userId : null,
@@ -31,11 +31,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             )
         );
 
-        await db.select()
+        const allElementsDebug = await db.select()
             .from(ChallengeElements)
             .where(eq(ChallengeElements.challenge_id, challengeId));
         
-        console.log("jjjjjjsjdjsdjf")
+
         const elementsStats = await db.select({
             total: sql<number>`count(*)`.as('total'),
             completed: sql<number>`count(case when ${ChallengeElements.is_completed} = true then 1 end)`.as('completed'),
@@ -48,7 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         const completionPercentage = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
         const isWeekCompleted = stats.completed === stats.total && stats.total > 0;
 
-        await db.update(Challenges).set({
+        const challengeUpdateResult = await db.update(Challenges).set({
             total_elements: stats.total,
             completed_elements: stats.completed,
             completed_percentage: completionPercentage.toFixed(2),
@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         }).where(eq(Challenges.id, challengeId));
 
 
-        await db.select()
+        const updatedChallenge = await db.select()
             .from(Challenges)
             .where(eq(Challenges.id, challengeId))
             .limit(1);
