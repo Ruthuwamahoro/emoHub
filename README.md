@@ -146,6 +146,16 @@ Before setting up the project, ensure that there is the following installed:
 ![Screenshot](./public/images/design/singleresources-quiz.png)
 ![Screenshot](./public/images/design/design8.png)
 ![Screenshot](./public/images/design/allsavedresources.png)
+![Screenshot](./public/images/design/challenge.png)
+![Screenshot](./public/images/design/usermanagement.png)
+![Screenshot](./public/images/design/reflection.png)
+![Screenshot](./public/images/design/group.png)
+![Screenshot](./public/images/design/groupdiscussion.png)
+![Screenshot](./public/images/design/groupchallenge.png)
+![Screenshot](./public/images/design/groupmember.png)
+
+
+
 
 
 
@@ -189,7 +199,7 @@ Before setting up the project, ensure that there is the following installed:
    npm run build
    vercel --prod
    ```
-
+  open URL[https://emo-hub.vercel.app](https://emo-hub.vercel.app) in the browser for production
 
 
 ### Security Considerations
