@@ -139,15 +139,15 @@ Before setting up the project, ensure that there is the following installed:
 
 ### Screenshots
 
-![Screenshot](./images/design/signuppage.png)
-![Screenshot](./images/design/signinpage.png)
-![Screenshot](./images/design/dashboard.png)
-![Screenshot](./images/design/emotionentries.png)
-![Screenshot](./images/design/todos.png)
-![Screenshot](./images/design/resources.png)
-![Screenshot](./images/design/singleresources-quiz.png)
-![Screenshot](./images/design/design8.png)
-![Screenshot](./images/design/allsavedresources.png)
+![Screenshot](./public/images/design/signuppage.png)
+![Screenshot](./public/images/design/signinpage.png)
+![Screenshot](./public/images/design/dashboard.png)
+![Screenshot](./public/images/design/emotionentries.png)
+![Screenshot](./public/images/design/todos.png)
+![Screenshot](./public/images/design/resources.png)
+![Screenshot](./public/images/design/singleresources-quiz.png)
+![Screenshot](./public/images/design/design8.png)
+![Screenshot](./public/images/design/allsavedresources.png)
 
 
 
