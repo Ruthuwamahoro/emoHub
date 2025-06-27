@@ -13,12 +13,13 @@ import CreatePostModal from '@/components/Dashboard/CreatePostModal';
 import PostsList from '@/components/Dashboard/Posts/PostsList';
 import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
 import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
-import { measureMemory } from 'vm';
+import Link  from "next/link"
 import GroupMembersDisplay from '@/components/Dashboard/community/GroupMembers';
 import { useSession } from 'next-auth/react';
 import { List } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import WeeklyChallengesCard from '@/components/Dashboard/challenge/ChallengesPage';
+import { useGetPosts } from '@/hooks/users/groups/posts/useGetAllPosts';
+import { usegetChallenges } from '@/hooks/challenges/useGetChallenges';
 
 
 
@@ -30,8 +31,20 @@ function GroupDetailPage() {
   const {data: session } = useSession();
 
 
+
+
   const params = useParams();
   const groupId = params?.id as string;
+  const { posts } = useGetPosts(groupId);
+  const { data: getAllChallenges } = usegetChallenges(groupId);
+  const { data: AllGroupMembers } = useAllMembersGroup(groupId);
+
+
+
+  const postsNumber = posts?.length || 0;
+  const challengesNumber = getAllChallenges?.data?.length || 0;
+  const members= AllGroupMembers?.data?.length || 0;
+
 
 
   const canManageMembers = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
@@ -133,6 +146,16 @@ function GroupDetailPage() {
       ) : (
         <>
           <div className="relative mb-8">
+            <Link 
+              href="/dashboard/community" 
+              className="inline-flex items-center gap-2 bg-white hover:bg-gray-50 font-bold text-gray-700 py-2 px-6 rounded-lg shadow-sm border border-gray-200 transition-colors duration-200 mb-4"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </Link>
+
             <div className="h-64 overflow-hidden rounded-xl relative">
               <Image 
                 src={data?.group?.image || data?.data?.group.image} 
@@ -141,6 +164,7 @@ function GroupDetailPage() {
                 height={300}
                 className="w-full h-full object-cover"
               />
+
               <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-6">
                 <h1 className="text-3xl font-bold text-white">
                   {data?.group?.name || "Loading group..."}
@@ -154,9 +178,9 @@ function GroupDetailPage() {
 
           <div className="flex border-b mb-6">
             {[
-              { key: 'discussions', label: 'Discussions', icon: BookOpen },
-              { key: 'challenges', label: 'challenges', icon: List},
-              { key: 'members', label: 'Members', icon: Users }
+              { key: 'discussions', label: 'Discussions', icon: BookOpen, length: postsNumber },
+              { key: 'challenges', label: 'challenges', icon: List, length: challengesNumber},
+              { key: 'members', label: 'Members', icon: Users, length: members}
             ].map(tab => (
               <button
                 key={tab.key}
@@ -168,7 +192,7 @@ function GroupDetailPage() {
                     : 'text-gray-600 hover:text-gray-800'}
                 `}
               >
-                <tab.icon className="mr-2" /> {tab.label}
+                <tab.icon className="mr-2" /> {tab.label} <span className="">({ tab.length && tab.length })</span>
               </button>
             ))}
           </div>

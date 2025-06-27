@@ -121,7 +121,6 @@ export const GroupChallenges: React.FC<GroupChallengesProps> = ({ groupId }) => 
     });
   };
 
-  // Check if a challenge is active (current date is between start and end dates)
   const isActiveChallengeDate = (startDate: string, endDate: string): boolean => {
     const now = new Date();
     const start = new Date(startDate);

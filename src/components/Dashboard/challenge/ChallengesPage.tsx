@@ -31,10 +31,6 @@ const WeeklyChallengesCard: React.FC = () => {
   const { data, isPending } = usegetChallenges(groupId);
   const { isPendingCreateChallenge, formData, setFormData, handleChange, handleSubmit } = useCreateChallenge(groupId);
 
-
-
-
-
   const queryClient = useQueryClient(); 
 
   const [deletingWeek, setDeletingWeek] = useState<string | null>(null);
@@ -51,6 +47,7 @@ const WeeklyChallengesCard: React.FC = () => {
   const updateElementMutation = useUpdateElementChallenge();
 
   const [updatingElement, setUpdatingElement] = useState<string | null>(null);
+
 
   const [weeklyCards, setWeeklyCards] = useState<WeeklyCard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

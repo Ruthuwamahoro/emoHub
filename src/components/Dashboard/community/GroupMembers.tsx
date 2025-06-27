@@ -252,7 +252,6 @@ export const GroupMembersDisplay: React.FC<GroupMembersDisplayProps> = ({
   const { data, isPending, error } = useAllMembersGroup(groupId);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Handle member actions
   const handleMemberAction = (memberId: string, action: 'promote' | 'demote' | 'remove') => {
     console.log(`Action: ${action} for member: ${memberId}`);
   };

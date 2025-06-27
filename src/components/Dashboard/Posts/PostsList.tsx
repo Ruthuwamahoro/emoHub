@@ -12,13 +12,12 @@ interface PostsListProps {
 const PostsList: React.FC<PostsListProps> = ({ groupId, onCreatePost }) => {
   const { posts, isPending, error } = useGetPosts(groupId);
 
+
   if (isPending) {
     return (
       <div className="space-y-4">
-        {/* Skeleton for multiple posts */}
         {[...Array(3)].map((_, index) => (
           <div key={index} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
-            {/* User info skeleton */}
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
               <div className="ml-3 flex-1">
