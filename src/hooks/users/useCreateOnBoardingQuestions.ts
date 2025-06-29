@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
-// Define the onboarding data structure based on your backend schema
 interface OnboardingFormData {
   impression: string;
   currentEmotions: string;

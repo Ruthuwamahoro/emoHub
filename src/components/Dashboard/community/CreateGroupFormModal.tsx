@@ -161,7 +161,6 @@ export function CreateGroupModal({
             )}
           </div>
 
-          {/* Category Selection */}
           <div className="">
             <Label className="text-sm font-medium text-gray-700">
               Category *
@@ -206,7 +205,6 @@ export function CreateGroupModal({
 
           </div>
 
-          {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium text-gray-700">
               Description *
@@ -230,7 +228,6 @@ export function CreateGroupModal({
             )}
           </div>
 
-          {/* Group Image Upload */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
               Group Image (Optional)
@@ -306,7 +303,6 @@ export function CreateGroupModal({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"

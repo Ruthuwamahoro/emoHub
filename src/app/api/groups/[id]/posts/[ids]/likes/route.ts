@@ -27,7 +27,6 @@ export async function POST(
       );
     }
 
-    // Check if user already liked this post
     const existingLike = await db
       .select()
       .from(PostLikes)
@@ -51,7 +50,6 @@ export async function POST(
         );
       liked = false;
     } else {
-      // Like the post
       await db
         .insert(PostLikes)
         .values({
@@ -61,7 +59,6 @@ export async function POST(
       liked = true;
     }
 
-    // Get the updated likes count
     const likesCountResult = await db
       .select({ count: count() })
       .from(PostLikes)

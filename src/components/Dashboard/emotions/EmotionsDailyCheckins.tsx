@@ -162,7 +162,6 @@ export function EmotionsCheckIns() {
         </div>
     );
 
-    // Determine which entries to show
     const displayedEntries = showAllEntries ? dataEmotions : dataEmotions.slice(0, 2);
     const hasMoreEntries = dataEmotions.length > 2;
 
@@ -229,7 +228,6 @@ export function EmotionsCheckIns() {
                                     </div>
                                 </div>
 
-                                {/* Context & Activities */}
                                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                                     <div className="flex items-center gap-2 mb-4">
                                         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -322,9 +320,7 @@ export function EmotionsCheckIns() {
                     </div>
                 </div>
 
-                {/* Sidebar */}
                 <div className="space-y-6">
-                    {/* Recent Entries */}
                     <div className="bg-white rounded-lg p-6 shadow-sm border">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -346,7 +342,6 @@ export function EmotionsCheckIns() {
                         
                         <div className={`space-y-4 ${showAllEntries ? 'max-h-96 overflow-y-auto pr-2' : ''}`}>
                             {isPendingEmotionsData ? (
-                                // Show skeleton loading state
                                 <>
                                     <EntrySkeleton />
                                     <EntrySkeleton />
@@ -396,9 +391,7 @@ export function EmotionsCheckIns() {
                         )}
                     </div>
 
-                    {/* AI Reflection Section - Only show if there are emotions submitted today */}
                     {todayEmotions.length > 0 && (() => {
-                        // Get the latest emotion entry from today
                         const latestEmotion = todayEmotions.sort((a, b) => 
                             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                         )[0];

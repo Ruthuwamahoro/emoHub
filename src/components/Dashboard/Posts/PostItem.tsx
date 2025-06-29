@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Share2, ExternalLink, Send, MoreHorizontal, Bookmark, Eye, Play, X, ChevronDown, Reply, ThumbsUp } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { Post } from '@/types/posts';
 import { useCreateComment } from '@/hooks/users/groups/posts/comments/usePostComments';
 import { useParams } from 'next/navigation';
 import { Avatar as AvatarImages } from "@/utils/genderAvatar";
@@ -51,12 +50,9 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const COMMENTS_PER_PAGE = 3;
 
   const {
-    mutate,
     formData,
     setFormData,
     isPending,
-    errors,
-    setErrors,
     handleSubmit,
     handleInputField
   } = useCreateComment(groupId);
@@ -410,19 +406,16 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
           </div>
         </div>
 
-        {/* Post Title */}
         {post.title && (
           <div className="px-5 pb-2">
             <h3 className="font-semibold text-gray-900 text-base leading-tight">{post.title}</h3>
           </div>
         )}
 
-        {/* Post Content */}
         <div className="px-5 pb-3">
           {renderPostContent()}
         </div>
 
-        {/* Post Actions */}
         <div className={`px-5 py-3 border-t transition-all duration-300`}>
           <div className="flex items-center space-x-6">
             <button
@@ -454,10 +447,8 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         </div>
       </article>
 
-      {/* Comments Panel */}
       {showComments && (
         <div className="absolute top-0 left-full ml-4 w-96 bg-white rounded-2xl shadow-lg border border-gray-200 flex flex-col max-h-[calc(100vh-120px)] z-10">
-          {/* Comments Header */}
           <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
             <div>
               <h3 className="font-semibold text-gray-900 text-base">Comments</h3>
@@ -471,7 +462,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
             </button>
           </div>
 
-          {/* Comment Input */}
           <div className="p-4 border-b border-gray-100">
             <div className="flex space-x-3">
               {getCurrentUserAvatar()}
@@ -496,7 +486,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
             </div>
           </div>
 
-          {/* Comments List */}
           <div className="flex-1 overflow-y-auto">
             {displayedComments.map((comment, index) => (
               <div key={comment.id} className="group p-4 border-b border-gray-50 last:border-b-0">
@@ -529,11 +518,10 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
                       </button>
                     </div>
 
-                    {/* CommentReplies Component - Fixed props */}
                     <CommentReplies
                       groupId={groupId}
                       postId={post.id}
-                      commentReplies={comment.replies || []} // Pass the actual comment replies
+                      commentReplies={comment.replies || []} 
                       commentId={comment.id.toString()}
                       commentAuthorName={getCommentUserDisplayName(comment)}
                       initialRepliesCount={comment.repliesCount || (comment.replies?.length || 0)}
@@ -543,7 +531,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
               </div>
             ))}
 
-            {/* Load More Comments */}
             {hasMoreComments && (
               <div className="p-4 text-center">
                 <button

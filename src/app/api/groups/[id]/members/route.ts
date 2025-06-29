@@ -7,9 +7,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const groupId = id;
     const users = await getAllUsersInGroup(groupId);
-
-    
-
     return sendResponse(200, users, 'Members returned successfully')
   } catch (error) {
 

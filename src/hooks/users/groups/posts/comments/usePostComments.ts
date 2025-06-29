@@ -45,7 +45,6 @@ export const useCreateComment = (ids: string) => {
             });
         },
         onError: (error: any) => {
-            // Handle error
             const errorMessage = error?.response?.data?.message || 
                               error?.message || 
                               'Failed to post comment. Please try again.';

@@ -151,10 +151,9 @@ function generateFallbackSummary(
 
 export async function generateDailySummary(
   userId: string, 
-  targetDate: string // YYYY-MM-DD format
+  targetDate: string 
 ): Promise<boolean> {
   try {
-    // Check if summary already exists for this date
     const existingSummary = await db
       .select()
       .from(UserEmotionSummary)
@@ -166,7 +165,6 @@ export async function generateDailySummary(
       )
       .limit(1);
 
-    // Get all emotions for the target date
     const startOfDay = new Date(`${targetDate}T00:00:00.000Z`);
     const endOfDay = new Date(`${targetDate}T23:59:59.999Z`);
 
@@ -183,7 +181,6 @@ export async function generateDailySummary(
       .orderBy(desc(UserEmotion.createdAt));
 
     if (dailyEmotions.length === 0) {
-      console.log(`No emotions found for ${userId} on ${targetDate}`);
       return false;
     }
 
@@ -222,7 +219,6 @@ export async function generateDailySummary(
         );
     } else {
       await db.insert(UserEmotionSummary).values(summaryData);
-      console.log(`Daily summary created for ${userId} on ${targetDate}`);
     }
 
     return true;

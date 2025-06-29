@@ -72,14 +72,11 @@ const CommentComponent: React.FC<CommentProps> = ({
           </span>
         </div>
 
-        {/* Comment Text */}
         <p className="text-gray-800 text-sm mb-2 break-words">
           {comment.content}
         </p>
 
-        {/* Actions */}
         <div className="flex items-center space-x-4">
-          {/* Like Button */}
           <button
             onClick={handleLikeClick}
             disabled={isPending}
@@ -102,13 +99,11 @@ const CommentComponent: React.FC<CommentProps> = ({
             </span>
           </button>
 
-          {/* Reply Button */}
           <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-600 transition-colors duration-200">
             <MessageCircle className="w-4 h-4" />
             <span>Reply</span>
           </button>
 
-          {/* More Options */}
           <button className="text-gray-400 hover:text-gray-600 transition-colors duration-200">
             <MoreHorizontal className="w-4 h-4" />
           </button>

@@ -95,7 +95,7 @@ export default function CompleteProfilePage() {
             <div>
               <label 
                 htmlFor="bio" 
-                className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
+                className="text-sm font-medium text-gray-700 mb-2 flex items-center"
               >
                 <User className="mr-2 text-purple-500" />
                 Professional Bio
@@ -122,7 +122,7 @@ export default function CompleteProfilePage() {
             <div>
               <label 
                 htmlFor="expertise" 
-                className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
+                className="text-sm font-medium text-gray-700 mb-2 flex items-center"
               >
                 <Briefcase className="mr-2 text-purple-500" />
                 Area of Expertise
@@ -160,7 +160,7 @@ export default function CompleteProfilePage() {
             <div>
               <label 
                 htmlFor="location" 
-                className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
+                className="text-sm font-medium text-gray-700 mb-2 flex items-center"
               >
                 <MapPin className="mr-2 text-purple-500" />
                 Location

@@ -11,11 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreVertical } from 'lucide-react';
 import { X } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
-import { LearningResource, SingleResource } from '@/types/resources';
+import { SingleResource } from '@/types/resources';
 import { LearningResourcesPageSkeleton, PaginationComponentSkeleton, ResourceSkeleton } from './resourcesSkeleton';
 import { CATEGORY_OPTIONS, DIFFICULTY_OPTIONS } from '@/constants/resources';
 
-// Define types for better type safety
 interface QueryParams {
   search: string;
   page: number;

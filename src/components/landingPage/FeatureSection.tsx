@@ -47,7 +47,6 @@ export const FeaturesSection = () => {
         <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-br from-emerald-300/15 to-rose-300/15 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
       <div className="absolute inset-0">
-        {/* Traditional African textile patterns as background */}
         <div className="absolute inset-0 opacity-5">
           <svg width="100%" height="100%" className="absolute inset-0">
             <defs>
@@ -67,7 +66,6 @@ export const FeaturesSection = () => {
           </svg>
         </div>
 
-        {/* Warm African sunset colors floating orbs */}
         <div 
           className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-amber-400/20 to-orange-500/20 rounded-full blur-3xl animate-pulse transition-transform duration-1000 ease-out"
           style={{
@@ -87,20 +85,17 @@ export const FeaturesSection = () => {
           }}
         ></div>
         
-        {/* African traditional symbols */}
         <div className="absolute top-1/4 right-1/4 w-20 h-20 animate-spin-slow">
           <div className="w-full h-full border-3 border-amber-600/30 rounded-full"></div>
           <div className="absolute inset-2 border-2 border-orange-500/40 rounded-full"></div>
           <div className="absolute inset-4 w-12 h-12 bg-gradient-to-br from-red-500/30 to-amber-500/30 rounded-full"></div>
         </div>
         
-        {/* Adinkra-inspired symbols */}
         <div className="absolute bottom-1/4 left-1/5 w-16 h-16 border-3 border-amber-500/40 rotate-45 animate-pulse delay-500">
           <div className="absolute inset-2 border-2 border-red-500/50 rotate-45"></div>
           <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-orange-600/60 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
         </div>
         
-        {/* Traditional African shield/spear patterns */}
         <div className="absolute top-1/3 left-1/6 w-12 h-24 border-2 border-red-500/40 animate-float delay-300" style={{
           clipPath: 'polygon(50% 0%, 90% 20%, 100% 80%, 50% 100%, 0% 80%, 10% 20%)'
         }}>

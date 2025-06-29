@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 
-// Validation schema for challenge elements
 const challengeElementSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
   description: z.string().min(1, "Description is required").max(1000, "Description must be less than 1000 characters"),
@@ -66,15 +65,9 @@ export const useCreateChallengeElement = (challengeId: string) => {
     if (e) {
       e.preventDefault();
     }
-
     try {
-      // Validate form data
       const validatedData = challengeElementSchema.parse(formData);
-      
-      // Clear any existing errors
       setErrors({});
-      
-      // Submit the data
       await mutate(validatedData);
       
       return { success: true };

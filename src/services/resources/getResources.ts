@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Types for the API response
 export interface LearningResource {
   id: string;
   title: string;
@@ -59,27 +58,23 @@ export interface ResourcesQueryParams {
   sortBy?: 'newest' | 'oldest';
 }
 
-// Service function to fetch resources with query parameters
 export const getResources = async (params: ResourcesQueryParams = {}): Promise<ApiResponse> => {
   try {
-    // Set default values for pagination
     const {
       search,
-      page = 1,        // Default to page 1
-      pageSize = 4,    // Default to pageSize 4
+      page = 1,        
+      pageSize = 4,    
       category,
       difficultyLevel,
       sortBy
     } = params;
 
-    // Build query string from parameters
     const queryParams = new URLSearchParams();
     
     if (search && search.trim()) {
       queryParams.append('search', search.trim());
     }
     
-    // Always append page and pageSize (with defaults if not provided)
     queryParams.append('page', page.toString());
     queryParams.append('pageSize', pageSize.toString());
     
@@ -97,16 +92,13 @@ export const getResources = async (params: ResourcesQueryParams = {}): Promise<A
 
     const url = `/api/learning-resources?${queryParams.toString()}`;
     
-    console.log('Fetching resources from:', url);
     
     const response = await axios.get<ApiResponse>(url);
     
-    console.log('API Response:', response.data);
     
     return response.data;
     
   } catch (error) {
-    console.error('Error fetching resources:', error);
     
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || error.message || 'Failed to fetch resources');

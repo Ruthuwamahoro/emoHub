@@ -1,5 +1,5 @@
 import db from "@/server/db";
-import { ChallengeElements, Challenges } from "@/server/db/schema";
+import { Challenges } from "@/server/db/schema";
 import { sendResponse } from "@/utils/Responses";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";

@@ -118,11 +118,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
     try {
       const formDataObj = new FormData();
       
-      // Add basic fields
       formDataObj.append('title', formData.title);
       formDataObj.append('contentType', activeTab);
       
-      // Add content based on type
       switch (activeTab) {
         case 'text':
           formDataObj.append('textContent', formData.textContent || '');
@@ -434,7 +432,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                   Content Review Required
                 </h4>
                 
-                {/* Compact status indicators */}
                 <div className="flex flex-wrap gap-2 mb-3">
                   {moderationData.riskLevel && (
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -487,7 +484,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                   )}
                 </div>
 
-                {/* Compact concerns and suggestions */}
                 <div className="space-y-2">
                   {moderationData.concerns && moderationData.concerns.length > 0 && (
                     <div className="bg-red-50 rounded p-2 border border-red-100">
@@ -528,7 +524,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                   )}
                 </div>
 
-                {/* Action required or additional info */}
                 {moderationData.message && (
                   <div className="mt-2 p-2 bg-rose-50 border border-rose-200 rounded">
                     <p className="text-xs text-rose-800 font-medium">
@@ -553,7 +548,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
                   </div>
                 )}
 
-                {/* Confidence indicator if available */}
                 {moderationData.confidence !== undefined && (
                   <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
                     <span>Confidence:</span>

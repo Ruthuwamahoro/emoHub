@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
       { status: HttpStatusCode.Ok }
     );
   } catch (error) {
-    console.error("Error joining group:", error);
     return NextResponse.json(
       {
         status: HttpStatusCode.InternalServerError,

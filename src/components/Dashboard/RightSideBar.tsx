@@ -1,17 +1,12 @@
 import React from 'react';
 import { 
-  Phone, 
   Search, 
   Calendar, 
   BookOpen, 
   MessageCircle, 
   Activity, 
   Bell, 
-  Users, 
   Heart, 
-  Bookmark, 
-  Trophy, 
-  MessageSquarePlus,
   Brain,
   Timer as TimerIcon,
   Pencil as PencilIcon,
@@ -43,7 +38,6 @@ export const RightSidebar = () => {
   return (
     <div className="w-80 bg-gray-900 text-white h-screen overflow-y-auto p-4 border-l border-gray-800 flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-hidden">
-        {/* Quick Links */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Search className="w-5 h-5 text-purple-400" />
@@ -61,7 +55,6 @@ export const RightSidebar = () => {
           </div>
         </div>
 
-        {/* Chat with Professionals */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <MessageCircle className="w-5 h-5 text-blue-400" />
@@ -83,7 +76,6 @@ export const RightSidebar = () => {
           </div>
         </div>
 
-        {/* Mood Tracker */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Activity className="w-5 h-5 text-green-400" />
@@ -108,7 +100,6 @@ export const RightSidebar = () => {
           </div>
         </div>
 
-        {/* Self-Care Activities */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Heart className="w-5 h-5 text-pink-400" />
@@ -130,7 +121,6 @@ export const RightSidebar = () => {
           </div>
         </div>
 
-        {/* Notifications */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Bell className="w-5 h-5 text-yellow-400" />

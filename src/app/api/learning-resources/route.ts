@@ -56,12 +56,6 @@ export const POST = async (req: NextRequest) => {
 };
 
 
-
-// searching, paginating and filtering by category, updatedAt and difficulty level
-
-
-
-
 function sanitizeSearchQuery(query: string): string {
   return query.replace(/[^\w\s]/gi, '').trim();
 }

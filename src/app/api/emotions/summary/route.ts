@@ -6,7 +6,6 @@ import { UserEmotionSummary } from "@/server/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { generateDailySummary } from "@/services/emotions/emotionSummaryService";
 
-// GET - Retrieve user's emotion summaries
 export async function GET(req: NextRequest) {
     try {
         const userId = await getUserIdFromSession();
@@ -15,7 +14,7 @@ export async function GET(req: NextRequest) {
         }
 
         const { searchParams } = new URL(req.url);
-        const date = searchParams.get('date'); // Optional: specific date
+        const date = searchParams.get('date'); 
         const limit = parseInt(searchParams.get('limit') || '30');
 
         let query = db

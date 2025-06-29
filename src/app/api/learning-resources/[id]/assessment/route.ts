@@ -15,7 +15,6 @@ export async function POST(request: NextRequest,     {params}: {params: Promise<
     }
 
     const body = await request.json();
-    console.log('Creating quiz with body:', body);
     const { title, description, passingScore, maxAttempts, questions } = body;
 
 
@@ -23,7 +22,6 @@ export async function POST(request: NextRequest,     {params}: {params: Promise<
       return sendResponse(400, null, 'Missing required fields');
     }
 
-    // Create quiz first
     const [quiz] = await db.insert(quizzes).values({
       resourceId,
       creatorId: userId,
@@ -34,7 +32,6 @@ export async function POST(request: NextRequest,     {params}: {params: Promise<
     }).returning();
 
     try {
-      // Create questions and options
       for (let i = 0; i < questions.length; i++) {
         const questionData = questions[i];
         
@@ -71,7 +68,6 @@ export async function POST(request: NextRequest,     {params}: {params: Promise<
     }
 
   } catch (error) {
-    console.error('Error creating quiz:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

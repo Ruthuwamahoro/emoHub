@@ -38,7 +38,12 @@ export const ROLE_BASED_LINKS = {
         icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "Weekly challenges",
+        label: "Daily Reflections",
+        href: "/dashboard/dailyreflection",
+        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
+      },
+      {
+        label: "Challenges",
         href: "/dashboard/challenges",
         icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
       },

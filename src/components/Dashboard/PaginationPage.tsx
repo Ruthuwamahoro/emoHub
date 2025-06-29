@@ -17,9 +17,8 @@ import {
     currentPages: number;
     totalPages: number;
     onPageChange: (page: number) => void;
-    disabled?: boolean; // Make this optional with default
+    disabled?: boolean; 
   }) {
-    // Prevent page changes when disabled
     const handlePageChange = (page: number) => {
       if (disabled) return;
       onPageChange(page);
