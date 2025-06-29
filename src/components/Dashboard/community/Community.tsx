@@ -390,19 +390,19 @@ export default function CommunityGroups() {
             <div className="flex gap-3">
               {canManageGroups && (
                 <>
-                  <button 
+                  <Button 
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <PlusCircle className="mr-2" size={20} /> Create Group
-                  </button>
+                  </Button>
 
-                  <button 
+                  <Button 
                     onClick={() => setIsManageModalOpen(true)}
-                    className="flex items-center bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-full hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="flex items-center bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <Settings className="mr-2" size={20} /> Manage
-                  </button>
+                  </Button>
                 </>
               )}
               {isRegularUser && (

@@ -264,21 +264,6 @@ export const EmoHubOnboarding = () => {
         />
       </div>
 
-      {/* Floating icons */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/8 animate-float delay-100">
-          <Brain className="w-6 h-6 text-rose-300/50 animate-pulse" fill="currentColor" />
-        </div>
-        <div className="absolute top-2/3 right-1/8 animate-float delay-700">
-          <Sparkles className="w-5 h-5 text-emerald-300/50 animate-pulse delay-500" />
-        </div>
-        <div className="absolute top-1/6 right-1/4 animate-float delay-300">
-          <Heart className="w-7 h-7 text-rose-300/50 animate-pulse delay-200" fill="currentColor" />
-        </div>
-        <div className="absolute bottom-1/5 left-1/3 animate-float delay-900">
-          <Sparkles className="w-4 h-4 text-amber-400/60 animate-pulse delay-800" />
-        </div>
-      </div>
 
       <div className={`w-full max-w-4xl transition-all duration-1000 ${
         isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -305,9 +290,9 @@ export const EmoHubOnboarding = () => {
               <React.Fragment key={step.id}>
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-500 ${
                   step.id === currentStep 
-                    ? 'bg-gradient-to-r from-rose-500 to-amber-500 border-transparent text-white transform scale-110' 
+                    ? 'bg-amber-500 border-transparent text-white transform scale-110' 
                     : step.id < currentStep
-                    ? 'bg-slate-600 border-transparent text-white'
+                    ? 'bg-emerald-400 border-transparent text-white'
                     : 'bg-white/80 backdrop-blur-sm border-slate-300 text-slate-600'
                 }`}>
                   {step.id < currentStep ? (
@@ -320,7 +305,7 @@ export const EmoHubOnboarding = () => {
                   <div className="flex-1 mx-4">
                     <div className={`h-1 rounded-full transition-all duration-500 ${
                       step.id < currentStep 
-                        ? 'bg-gradient-to-r from-emerald-400 to-teal-400' 
+                        ? 'bg-amber-500' 
                         : 'bg-slate-200'
                     }`} />
                   </div>

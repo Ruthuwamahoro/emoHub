@@ -10,19 +10,11 @@ export async function POST(req: NextRequest){
   try {
     const userId = await getUserIdFromSession()
 
-    const [isModerator, isRegularUser] = await Promise.all([
-      checkIfUserIsModerator(),
-      checkIfIsRegularUser(),
-    ]);
 
     if (!userId) {
       return sendResponse(401, null, "User not authenticated");
     }
 
-    const isUser = (isModerator || isRegularUser);
-    if (!isUser) {
-      return sendResponse(401, null, "Unauthorized");
-    }
 
     const body = await req.json();
 
