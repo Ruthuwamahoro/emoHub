@@ -2,15 +2,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { 
   Pagination,
   PaginationContent,
@@ -20,24 +15,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { X, Plus, Eye, Trash2, Brain, Target, Users, Calendar, Clock } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import {Eye, Trash2, Users, Calendar, Clock } from 'lucide-react';
 import { useGetAllEmotionsInputs } from '@/hooks/emotions/useGetAllEmotionsInsights';
 
-// Types
-type MoodType = 'happy' | 'annoyed' | 'angry' | 'tired' | 'neutral' | 'loved';
-type UserRole = 'User' | 'Admin' | 'Specialist' | 'SuperAdmin';
 
-interface MoodEntry {
-  id: string;
-  userId: string;
-  userName: string;
-  mood: MoodType;
-  intensity: number;
-  timestamp: Date;
-  notes?: string;
-  tags?: string[];
-}
 
 interface User {
   id: string;
@@ -61,12 +42,10 @@ const EmotionTrackingApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  const { data: session } = useSession();
   const {
     data,
     isLoading,
-    isPending,
-    isFetching,
+    isPending
   } = useGetAllEmotionsInputs();
 
   const moodEmojis: Record<string, string> = {
@@ -116,7 +95,6 @@ const EmotionTrackingApp: React.FC = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  // Pagination logic
   const emotionEntries = data?.data || [];
   const totalPages = Math.ceil(emotionEntries.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -154,7 +132,6 @@ const EmotionTrackingApp: React.FC = () => {
         );
       }
     } else {
-      // Always show first page
       items.push(
         <PaginationItem key={1}>
           <PaginationLink
@@ -167,7 +144,6 @@ const EmotionTrackingApp: React.FC = () => {
         </PaginationItem>
       );
 
-      // Show ellipsis if needed
       if (currentPage > 3) {
         items.push(
           <PaginationItem key="ellipsis1">
@@ -194,7 +170,6 @@ const EmotionTrackingApp: React.FC = () => {
         );
       }
 
-      // Show ellipsis if needed
       if (currentPage < totalPages - 2) {
         items.push(
           <PaginationItem key="ellipsis2">
@@ -203,7 +178,6 @@ const EmotionTrackingApp: React.FC = () => {
         );
       }
 
-      // Always show last page if there are multiple pages
       if (totalPages > 1) {
         items.push(
           <PaginationItem key={totalPages}>
@@ -381,7 +355,6 @@ const EmotionTrackingApp: React.FC = () => {
             </Table>
           </div>
           
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50/30">
               <div className="text-sm text-gray-700">
@@ -411,7 +384,6 @@ const EmotionTrackingApp: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
@@ -459,7 +431,6 @@ const EmotionTrackingApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/30">
-      {/* Header */}
       <header className="border-b bg-white shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -471,7 +442,6 @@ const EmotionTrackingApp: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <AdminDashboard />
       </main>

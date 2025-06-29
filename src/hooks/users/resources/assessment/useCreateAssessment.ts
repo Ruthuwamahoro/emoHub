@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 
-// Updated interface to match backend expectations
 export interface QuestionInput {
   questionText: string;
   questionType: 'multiple-choice' | 'true-false' | 'short-answer';
@@ -55,7 +54,6 @@ export const useCreateAssessment = () => {
       console.log('Assessment created successfully:', response);
       showToast(response.message || "Assessment created successfully", "success");
       queryClient.invalidateQueries({ queryKey: ["Assessment"] });
-      // Reset form after successful submission
       setFormData(initialData);
       setErrors({});
     },
@@ -81,13 +79,10 @@ export const useCreateAssessment = () => {
     }
   };
 
-  // Updated handleSubmit to return a Promise
   const handleSubmit = async (id: string, e?: React.FormEvent): Promise<{ success: boolean; error?: string; data?: any }> => {
     if (e) {
       e.preventDefault();
     }
-
-    // Basic validation
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";

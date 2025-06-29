@@ -5,7 +5,6 @@ export const getReflection = async () => {
         const response = await axios.get(`/api/reflection`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch reflection:", error);
         throw error;
     }
 }

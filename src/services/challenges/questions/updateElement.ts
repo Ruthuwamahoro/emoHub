@@ -1,4 +1,3 @@
-// import { Challenge } from "@/components/Dashboard/challenge/ChallengesPage";
 import { Challenge } from "@/types/challenges";
 import axios from "axios";
 

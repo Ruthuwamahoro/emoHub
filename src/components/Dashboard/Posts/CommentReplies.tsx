@@ -29,9 +29,7 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
   const [page, setPage] = useState(1);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
-  console.log("_________", commentReplies);
 
-  // Create reply hook
   const {
     formData: replyFormData,
     setformData: setReplyFormData,
@@ -44,7 +42,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
   const replies = commentReplies || [];
   const totalCount = commentReplies?.length || initialRepliesCount;
 
-  // Ensure replies are shown when starting to reply
   useEffect(() => {
     if (replyingTo === commentId && !showReplies) {
       setShowReplies(true);
@@ -121,9 +118,7 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
     }
   };
 
-  const loadMoreReplies = () => {
-    setPage(prev => prev + 1);
-  };
+
 
   const submitReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,9 +134,7 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
   };
 
   const startReply = () => {
-    console.log('Starting reply for commentId:', commentId);
     setReplyingTo(commentId);
-    // Always show replies when starting to reply
     setShowReplies(true);
   };
 
@@ -149,14 +142,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
     setReplyingTo(null);
     setReplyFormData({ commentReplies: '' });
   };
-
-  // Debug logging
-  console.log('Render state:', {
-    commentId,
-    replyingTo,
-    showReplies,
-    shouldShowTextarea: replyingTo === commentId
-  });
 
   if (totalCount === 0) {
     return (
@@ -169,7 +154,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
           <span className="font-medium">Reply</span>
         </button>
 
-        {/* Reply form for comments with no existing replies */}
         {replyingTo === commentId && (
           <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
             <form onSubmit={submitReply}>
@@ -216,7 +200,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
 
   return (
     <div className="ml-3 mt-2">
-      {/* Toggle Replies Button */}
       <div className="flex items-center space-x-3">
         <button
           onClick={toggleReplies}
@@ -241,7 +224,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
         </button>
       </div>
 
-      {/* Replies List */}
       {showReplies && (
         <div className="mt-3 space-y-3 animate-in slide-in-from-top-2 duration-200">
           {replies.map((reply: any) => (
@@ -275,7 +257,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
             </div>
           ))}
 
-          {/* Reply Form */}
           {replyingTo === commentId && (
             <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
               <form onSubmit={submitReply}>

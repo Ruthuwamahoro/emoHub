@@ -50,7 +50,6 @@ export const EmoHubHero: React.FC = () => {
     return () => clearTimeout(timer);
   }, [isLoaded]);
 
-  // Cursor blinking effect
   useEffect(() => {
     if (!showCursor) return;
 
@@ -146,7 +145,6 @@ export const EmoHubHero: React.FC = () => {
           <div className="w-2 h-2 bg-[#fb923c] rounded-full animate-ping"></div>
         </div>
 
-        {/* Animated title with writing finger effect */}
         <div className="relative mb-8">
           <h1 
             ref={titleRef}

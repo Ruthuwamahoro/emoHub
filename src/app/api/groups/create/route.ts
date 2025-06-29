@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
       { status: HttpStatusCode.Created }
     );
   } catch (error) {
-    console.error("Error creating group:", error);
     return NextResponse.json(
       {
         status: HttpStatusCode.InternalServerError,

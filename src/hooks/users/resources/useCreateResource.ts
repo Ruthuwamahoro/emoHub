@@ -49,9 +49,7 @@ export const useCreateResource = () => {
     const { id, value } = e.target;
     
     setFormData(prev => {
-      // Handle different field types
       if (id === 'tags') {
-        // If tags is a comma-separated string, convert to array
         return { ...prev, [id]: value.split(',').map(tag => tag.trim()) };
       }
       if (id === 'isSaved') {

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Users, Clock, Mic, MicOff, Send, X, MoreHorizontal, ArrowLeft } from 'lucide-react';
+import { Users, Clock, Mic, MicOff, Send, X, MoreHorizontal, ArrowLeft } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -58,7 +58,7 @@ const DialogueSession: React.FC = () => {
     { id: '6', name: 'Alex Rivera', role: 'Participant', isActive: false }
   ]);
   
-  const [timeRemaining, setTimeRemaining] = useState<number>(42); // minutes remaining
+  const [timeRemaining, setTimeRemaining] = useState<number>(42); 
   const [isInfoPanelOpen, setIsInfoPanelOpen] = useState<boolean>(false);
   
   const handleSendMessage = (): void => {
@@ -112,7 +112,6 @@ const DialogueSession: React.FC = () => {
   
   return (
     <div className="flex flex-col h-screen bg-slate-50">
-      {/* Header */}
       <div className="bg-white border-b border-slate-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -179,7 +178,6 @@ const DialogueSession: React.FC = () => {
             ))}
           </div>
           
-          {/* Input area */}
           <div className="p-4 bg-white border-t border-slate-200">
             <div className="flex items-center">
               <button 
@@ -215,7 +213,6 @@ const DialogueSession: React.FC = () => {
           </div>
         </div>
         
-        {/* Participants panel - conditionally visible */}
         {isInfoPanelOpen && (
           <div className="w-64 bg-white border-l border-slate-200 overflow-y-auto">
             <div className="p-4">

@@ -99,10 +99,7 @@ interface User {
 const UserManagementTable = () => {
   const {
     data,
-    isLoading,
-    isPending,
-    isFetching,
-    error,
+    isPending
   } = usegetAllUsers();
   
 
@@ -114,7 +111,6 @@ const UserManagementTable = () => {
   const [itemsPerPage] = useState(4);
   const [localUsers, setLocalUsers] = useState<User[]>(data?.data);
 
-  console.log('Users Data:', data?.data);
 
   const roles = ['All', 'Admin', 'Moderator', 'SuperAdmin', 'Specialist', 'User'];
   const statuses = ['All', 'Active', 'Disabled'];

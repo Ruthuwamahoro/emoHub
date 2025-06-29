@@ -77,7 +77,7 @@ export const CustomSiderbarLink = ({
         onClick={handleClick} 
         data-tour={dataTour} 
         className={cn(
-          "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md hover:bg-slate-800 transition-colors w-full text-left",
+          "flex items-center justify-start gap-2 group/sidebar py-2 rounded-md hover:bg-slate-800 transition-colors w-full text-left",
           className
         )}
       >
@@ -338,10 +338,10 @@ export function SidebarDemo() {
               {open ? <Logo /> : <LogoIcon />}
               
               <div className="fixed top-3 left-6 z-50 transition-all duration-300"
-      style={{ 
-        transform: open ? 'translateX(940px)' : 'translateX(940px)' 
-      }}
-      data-tour="take-tour">
+              style={{ 
+                transform: open ? 'translateX(940px)' : 'translateX(940px)' 
+              }}
+              data-tour="take-tour">
                 <VibratingHelpButton onClick={startTour} />
               </div>
               

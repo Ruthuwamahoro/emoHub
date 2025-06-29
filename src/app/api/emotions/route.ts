@@ -8,11 +8,9 @@ import { NextRequest } from "next/server";
 
 
 
-// Google Gemini API configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAHhG6PbKolivMLTM4Sexl3MckLPqJvXbg";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-// Helper function to ensure arrays are properly formatted
 function ensureArray(value: any): string[] {
     if (!value) return [];
     if (Array.isArray(value)) return value.map(item => String(item));
@@ -27,7 +25,6 @@ function ensureArray(value: any): string[] {
     return [String(value)];
 }
 
-// Fallback emotion analysis when Gemini API is unavailable
 function analyzeEmotionFallback(feelings: string, intensity: number): string {
     const feelingsLower = feelings.toLowerCase();
     
@@ -50,7 +47,6 @@ function analyzeEmotionFallback(feelings: string, intensity: number): string {
     return intensity > 6 ? 'intense emotions' : intensity > 3 ? 'moderate emotions' : 'mild emotions';
 }
 
-// Get comprehensive AI analysis with recommendations
 async function getComprehensiveAnalysis(feelings: string, intensity: number, activities: string[], notes: string): Promise<any> {
     try {
         const prompt = `You are an expert emotional wellness coach and therapist. Analyze the user's emotional state and provide comprehensive insights.
@@ -156,14 +152,11 @@ async function getComprehensiveAnalysis(feelings: string, intensity: number, act
     }
 }
 
-// Parse Gemini response and extract JSON or create structured response
 function parseGeminiResponse(text: string): any {
     try {
-        // Try to extract JSON from the response
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            // Ensure all array fields are properly formatted
             return {
                 ...parsed,
                 recommendations: ensureArray(parsed.recommendations),
@@ -173,7 +166,7 @@ function parseGeminiResponse(text: string): any {
             };
         }
     } catch (error) {
-        console.log("Failed to parse JSON, creating structured response from text");
+        return error;
     }
     
     return {
@@ -313,8 +306,7 @@ export async function POST(req: NextRequest) {
         
         const result = await db.insert(UserEmotion).values(insertData).returning();
         
-        // **UPDATE DAILY SUMMARY AFTER EACH EMOTION CHECK-IN**
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0]; 
         generateDailySummary(userId, today).catch(error => {
             console.error("Error updating daily summary:", error);
         });

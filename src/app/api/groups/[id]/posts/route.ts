@@ -19,17 +19,16 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemi
 
 interface ContentModerationResult {
   isAppropriate: boolean;
-  isMeaningful: boolean; // New field for meaningful content check
+  isMeaningful: boolean;
   riskLevel: "low" | "medium" | "high";
   concerns: string[];
   suggestions: string[];
   emotionalImpact: "positive" | "neutral" | "negative";
   confidence: number;
-  meaningfulnessScore: number; // New field (0-1 scale)
-  contentQuality: "spam" | "low" | "medium" | "high"; // New field
+  meaningfulnessScore: number; 
+  contentQuality: "spam" | "low" | "medium" | "high"; 
 }
 
-// New interface for storing moderated content
 interface ModeratorData {
   id: string;
   userId: string;
@@ -45,12 +44,6 @@ interface ModeratorData {
   status: "pending" | "reviewed" | "approved" | "rejected";
   reviewerNotes?: string;
 }
-
-// You'll need to create this table in your schema
-const ModeratedContent = {
-  // This would be your actual database table for storing moderated content
-  // For now, we'll use a simple logging mechanism
-};
 
 async function moderateContentWithGemini(
   title: string,
@@ -233,7 +226,6 @@ Examples of non-meaningful content:
 
     const isMeaningful = !isMeaninglessPattern && !isSpamKeyword && contentToCheck.length > 2;
     
-    // Safety keyword detection (unchanged)
     const rudeKeywords = [
       "stupid", "idiot", "hate", "kill", "die", "ugly", "worthless",
       "loser", "pathetic", "disgusting", "terrible", "awful", "dumb",
@@ -276,14 +268,12 @@ Examples of non-meaningful content:
   }
 }
 
-// Function to save non-meaningful content to moderator data
 async function saveToModeratorData(
   userId: string,
   groupId: string,
   originalContent: any,
   moderationResult: ContentModerationResult
 ): Promise<string> {
-  // Generate a unique ID for the moderated content
   const moderatedContentId = `mod_${Date.now()}_${userId}`;
   
   const moderatorData: ModeratorData = {
@@ -295,22 +285,6 @@ async function saveToModeratorData(
     timestamp: new Date(),
     status: "pending",
   };
-
-  // Log to console for now (in production, save to database)
-  console.log("=== CONTENT SAVED TO MODERATOR DATA ===");
-  console.log("Moderated Content ID:", moderatedContentId);
-  console.log("User ID:", userId);
-  console.log("Group ID:", groupId);
-  console.log("Reason:", moderationResult.isMeaningful ? "Inappropriate" : "Non-meaningful");
-  console.log("Content Quality:", moderationResult.contentQuality);
-  console.log("Meaningfulness Score:", moderationResult.meaningfulnessScore);
-  console.log("Original Content:", originalContent);
-  console.log("Concerns:", moderationResult.concerns);
-  console.log("Suggestions:", moderationResult.suggestions);
-  console.log("=========================================");
-
-  // TODO: In production, save to your ModeratedContent table
-  // await db.insert(ModeratedContent).values(moderatorData);
 
   return moderatedContentId;
 }
@@ -345,12 +319,6 @@ export async function POST(
     const linkUrl = formData.get("linkUrl") as string | null;
     const linkDescription = formData.get("linkDescription") as string | null;
 
-    console.log("=== DEBUG FORM DATA ===");
-    console.log("title:", title);
-    console.log("contentTypeInput:", contentTypeInput);
-    console.log("textContent:", textContent);
-    console.log("========================");
-
     if (!title || title.trim() === "") {
       return sendResponse(400, null, "Title is required");
     }
@@ -361,18 +329,11 @@ export async function POST(
 
     const normalizedContentType = contentTypeInput.toString().trim().toLowerCase();
     if (!validContentTypes.includes(normalizedContentType)) {
-      console.log("Invalid content type received:", {
-        received: contentTypeInput,
-        normalized: normalizedContentType,
-        valid: validContentTypes
-      });
       return sendResponse(400, null, `Invalid content type. Must be one of: ${validContentTypes.join(", ")}`);
     }
 
     const contentType = normalizedContentType as "text" | "image" | "video" | "audio" | "link";
 
-    // ENHANCED CONTENT MODERATION CHECK
-    console.log("Starting enhanced content moderation...");
     const moderationResult = await moderateContentWithGemini(
       title,
       textContent,
@@ -380,9 +341,7 @@ export async function POST(
       linkDescription
     );
 
-    console.log("Moderation result:", moderationResult);
 
-    // Store original content for potential moderator review
     const originalContent = {
       title,
       contentType,
@@ -390,7 +349,6 @@ export async function POST(
       linkDescription,
     };
 
-    // Enhanced blocking logic - check both appropriateness AND meaningfulness
     const shouldBlockForPolicy = !moderationResult.isAppropriate;
     const shouldBlockForMeaning = !moderationResult.isMeaningful;
     const shouldBlockForEmotionalImpact =
@@ -400,7 +358,6 @@ export async function POST(
     const shouldBlock = shouldBlockForPolicy || shouldBlockForMeaning || shouldBlockForEmotionalImpact;
 
     if (shouldBlock) {
-      // Save to moderator data instead of rejecting outright
       const moderatedContentId = await saveToModeratorData(
         userId,
         groupId,
@@ -422,17 +379,6 @@ export async function POST(
         userMessage = "Your post may have a negative emotional impact and has been submitted for moderator review.";
       }
 
-      console.log(`Post saved to moderator data for user ${userId}:`, {
-        moderatedContentId,
-        reason,
-        concerns: moderationResult.concerns,
-        riskLevel: moderationResult.riskLevel,
-        emotionalImpact: moderationResult.emotionalImpact,
-        meaningfulnessScore: moderationResult.meaningfulnessScore,
-        contentQuality: moderationResult.contentQuality,
-        confidence: moderationResult.confidence
-      });
-
       return sendResponse(400, {
         moderationResult,
         moderatedContentId,
@@ -442,23 +388,12 @@ export async function POST(
       }, userMessage);
     }
 
-    // Log concerning content that was allowed through
     if (moderationResult.riskLevel === "medium" ||
         moderationResult.emotionalImpact === "negative" ||
         moderationResult.meaningfulnessScore < 0.7 ||
         moderationResult.concerns.length > 0) {
-      console.log(`Concerning content allowed for user ${userId}:`, {
-        riskLevel: moderationResult.riskLevel,
-        emotionalImpact: moderationResult.emotionalImpact,
-        meaningfulnessScore: moderationResult.meaningfulnessScore,
-        contentQuality: moderationResult.contentQuality,
-        concerns: moderationResult.concerns,
-        suggestions: moderationResult.suggestions,
-        confidence: moderationResult.confidence
-      });
     }
 
-    // Continue with file upload logic (unchanged from your original code)
     let mediaUrl = null;
     if (["image", "video", "audio"].includes(contentType)) {
       const mediaFile = formData.get("media") as File;
@@ -527,7 +462,6 @@ export async function POST(
       }
     }
 
-    // Create the post
     const newPost = await db
       .insert(Post)
       .values({
@@ -544,16 +478,6 @@ export async function POST(
       })
       .returning();
 
-    console.log(`Post created successfully with enhanced moderation assessment:`, {
-      postId: newPost[0].id,
-      userId,
-      riskLevel: moderationResult.riskLevel,
-      emotionalImpact: moderationResult.emotionalImpact,
-      meaningfulnessScore: moderationResult.meaningfulnessScore,
-      contentQuality: moderationResult.contentQuality,
-      confidence: moderationResult.confidence,
-      concerns: moderationResult.concerns
-    });
 
     return sendResponse(200, {
       post: newPost[0],
@@ -569,7 +493,6 @@ export async function POST(
   } catch (error) {
     const err =
       error instanceof Error ? error.message : "Unexpected error occurred";
-    console.error("Post creation error:", err);
     return sendResponse(500, null, err);
   }
 }

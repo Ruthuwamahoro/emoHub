@@ -20,13 +20,6 @@ export const useCreateRepliesComment = (id: string) => {
       ids: string;
       commentId: string
     }) => {
-      console.log('Sending reply data:', {
-        id,
-        ids,
-        commentId,
-        data: formData.commentReplies
-      });
-
       return createCommentReplies({
         id,
         ids,

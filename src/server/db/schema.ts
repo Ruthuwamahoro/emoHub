@@ -147,12 +147,6 @@ const Event = pgTable("events", {
 });
 
 
-
-
-
-
-
-
 const Message = pgTable("messages", {
   id: uuid("id").defaultRandom().primaryKey(),
   senderId: uuid("sender_id").references(() => User.id, {
@@ -420,9 +414,9 @@ const quizQuestions = pgTable('quiz_questions', {
   quizId: uuid('quiz_id').notNull().references(() => quizzes.id, { onDelete: 'cascade' }),
   questionText: text('question_text').notNull(),
   questionType: questionTypeEnum('question_type').notNull().default('multiple_choice'),
-  points: integer('points').notNull().default(1), // Points for this question
-  orderIndex: integer('order_index').notNull(), // Order of questions in quiz
-  explanation: text('explanation'), // Optional explanation for the answer
+  points: integer('points').notNull().default(1), 
+  orderIndex: integer('order_index').notNull(),
+  explanation: text('explanation'), 
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -431,7 +425,7 @@ const questionOptions = pgTable('question_options', {
   questionId: uuid('question_id').notNull().references(() => quizQuestions.id, { onDelete: 'cascade' }),
   optionText: text('option_text').notNull(),
   isCorrect: boolean('is_correct').notNull().default(false),
-  orderIndex: integer('order_index').notNull(), // Order of options
+  orderIndex: integer('order_index').notNull(), 
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -566,11 +560,11 @@ const UserEmotionSummary = pgTable("user_emotion_summaries", {
   userId: uuid("user_id")
     .references(() => User.id, { onDelete: "cascade" })
     .notNull(),
-  summaryDate: date("summary_date").notNull(), // yyyy-mm-dd
-  emotionalState: varchar("emotional_state", { length: 50 }).notNull(), // e.g., Positive, Neutral, Negative
-  emotionalScore: integer("emotional_score").notNull(), // range: -100 to +100
-  colorCode: varchar("color_code", { length: 20 }).notNull(), // e.g., "green", "yellow", "red"
-  totalEntries: integer("total_entries").notNull(), // number of entries for that day
+  summaryDate: date("summary_date").notNull(),
+  emotionalState: varchar("emotional_state", { length: 50 }).notNull(), 
+  emotionalScore: integer("emotional_score").notNull(),
+  colorCode: varchar("color_code", { length: 20 }).notNull(),
+  totalEntries: integer("total_entries").notNull(), 
   aiAnalysis: varchar("ai_analysis", { length: 1000 }),
   aiInsights: text("ai_insights").array(),
   aiRecommendations: text("ai_recommendations").array(),

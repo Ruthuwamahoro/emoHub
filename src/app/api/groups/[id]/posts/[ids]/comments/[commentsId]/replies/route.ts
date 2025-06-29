@@ -122,7 +122,6 @@ export async function GET(
     const params = await segmentedData.params;
     const { id, ids, commentsId } = params;
     
-    // Get query parameters
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -181,7 +180,6 @@ export async function GET(
       );
     }
 
-    // Get total count of replies
     const totalCountResult = await db
       .select({ count: count() })
       .from(CommentReplies)
@@ -189,7 +187,6 @@ export async function GET(
 
     const totalCount = totalCountResult[0]?.count || 0;
 
-    // Get replies with author information
     const replies = await db
       .select({
         id: CommentReplies.id,
@@ -245,7 +242,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching comment replies:', error);
     const errorMessage = error instanceof Error
       ? `Error fetching replies: ${error.message}`
       : 'Internal server error';

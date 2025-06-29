@@ -50,7 +50,6 @@ export async function GET (req: NextRequest){
       }
       return sendResponse(200, userResponse, 'Reflections retrieved successfully');
     } catch (error) {
-      console.error("Error fetching reflections overview:", error);
       return sendResponse(500, null, error instanceof Error ? error.message : 'An unexpected error occurred');
     }
 

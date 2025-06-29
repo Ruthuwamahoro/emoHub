@@ -111,7 +111,6 @@ export const useCommentLikes = () => {
         'Failed to update like. Please try again.';
       
       showToast(errorMessage, 'error');
-      console.error('Comment like error:', error);
     },
 
     onSettled: (data, error, variables) => {
@@ -122,7 +121,6 @@ export const useCommentLikes = () => {
   });
 
   const toggleCommentLike = (commentId: string, groupId: string, postId: string) => {
-    console.log('👆 toggleCommentLike called with:', { commentId, groupId, postId });
     mutate({ commentId, groupId, postId });
   };
   

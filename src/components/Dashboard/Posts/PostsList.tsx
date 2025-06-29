@@ -26,14 +26,12 @@ const PostsList: React.FC<PostsListProps> = ({ groupId, onCreatePost }) => {
               </div>
             </div>
             
-            {/* Post content skeleton */}
             <div className="space-y-3 mb-4">
               <div className="h-4 bg-gray-300 rounded w-full"></div>
               <div className="h-4 bg-gray-300 rounded w-4/5"></div>
               <div className="h-4 bg-gray-300 rounded w-3/5"></div>
             </div>
             
-            {/* Action buttons skeleton */}
             <div className="flex items-center space-x-6 pt-4 border-t border-gray-100">
               <div className="h-8 bg-gray-200 rounded w-16"></div>
               <div className="h-8 bg-gray-200 rounded w-20"></div>
@@ -58,12 +56,6 @@ const PostsList: React.FC<PostsListProps> = ({ groupId, onCreatePost }) => {
       <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
         <h3 className="text-xl font-medium text-gray-600 mb-2">No posts yet</h3>
         <p className="text-gray-500 mb-4">Be the first to start a discussion in this group</p>
-        <button
-          onClick={onCreatePost}
-          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-        >
-          <PlusCircle className="mr-2 w-5 h-5" /> Create a Post
-        </button>
       </div>
     );
   }

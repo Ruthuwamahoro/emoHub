@@ -19,15 +19,12 @@ export const usePostLikes = () => {
     },
 
     onMutate: async ({ groupId, postId }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ["Posts", groupId]
       });
 
-      // Snapshot the previous value
       const previousData = queryClient.getQueryData(["Posts", groupId]);
 
-      // Optimistically update the cache
       queryClient.setQueryData(["Posts", groupId], (old: any) => {
         if (!old?.data?.posts) return old;
 
@@ -55,7 +52,6 @@ export const usePostLikes = () => {
     },
 
     onSuccess: (response, variables, context) => {
-      // Update with server response data
       queryClient.setQueryData(["Posts", variables.groupId], (old: any) => {
         if (!old?.data?.posts) return old;
 
@@ -77,7 +73,6 @@ export const usePostLikes = () => {
         };
       });
 
-      // Show success message
       const message = response.data.liked ? 'Post liked!' : 'Post unliked!';
       showToast(message, 'success');
       queryClient.invalidateQueries({ queryKey: ["Posts"] });
@@ -85,7 +80,6 @@ export const usePostLikes = () => {
     },
 
     onError: (error: any, variables, context) => {
-      // Revert optimistic update on error
       if (context?.previousData) {
         queryClient.setQueryData(
           ["Posts", context.groupId],
@@ -98,10 +92,8 @@ export const usePostLikes = () => {
         'Failed to update post like. Please try again.';
       
       showToast(errorMessage, 'error');
-      console.error('Post like error:', error);
     },
 
-    // Remove onSettled to avoid double invalidation
   });
 
   const togglePostLike = (groupId: string, postId: string) => {

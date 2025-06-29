@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ReactSpeedometer from 'react-d3-speedometer';
 import { 
@@ -12,12 +12,27 @@ import {
   ArrowUp,
   ArrowDown,
   Activity,
-  CheckCircle
+  CheckCircle,
+  MessageSquare,
+  BarChart3,
+  Zap,
+  Info
 } from 'lucide-react';
-import { EmotionAnalysisResult } from '@/services/emotions/emotionSummaryService';
 
+interface EmotionAnalysisResult {
+  id?: string;
+  emotionalScore: number;
+  emotionalState: string;
+  colorCode: string;
+  aiAnalysis: string;
+  aiMotivationalMessage?: string;
+  aiRecommendations?: string[];
+  totalEntries: number;
+  summaryDate: string;
+}
 
 function EnhancedEmotionGauge() {
+ 
   const { data: summaries, isLoading } = useQuery({
     queryKey: ['emotion-summaries'],
     queryFn: async () => {
@@ -29,20 +44,30 @@ function EnhancedEmotionGauge() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="h-48 bg-gray-100 rounded-xl"></div>
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-20 bg-gray-100 rounded"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse"></div>
+          </div>
+
+          {/* Main Dashboard Skeleton */}
+          <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded-lg w-1/4 mb-4"></div>
+                <div className="h-48 bg-gray-100 rounded-xl"></div>
+              </div>
             </div>
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-2/3 mb-3"></div>
+                <div className="space-y-2">
+                  <div className="h-12 bg-gray-100 rounded-lg"></div>
+                  <div className="h-12 bg-gray-100 rounded-lg"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -54,185 +79,322 @@ function EnhancedEmotionGauge() {
   const previousSummary = summaries?.data?.[1];
   const weekData = summaries?.data?.slice(0, 7) || [];
 
-  // Calculate trend
   const trend = todaySummary && previousSummary 
     ? todaySummary.emotionalScore - previousSummary.emotionalScore 
     : 0;
 
   const getScoreColor = (score: number) => {
-    if (score >= 60) return 'text-green-600';
-    if (score >= 20) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 60) return 'text-emerald-600';
+    if (score >= 20) return 'text-amber-600';
+    return 'text-rose-600';
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 60) return 'bg-green-50 border-green-200';
-    if (score >= 20) return 'bg-yellow-50 border-yellow-200';
-    return 'bg-red-50 border-red-200';
+    if (score >= 60) return 'bg-emerald-50 border-emerald-200';
+    if (score >= 20) return 'bg-amber-50 border-amber-200';
+    return 'bg-rose-50 border-rose-200';
+  };
+
+  const getGradientColor = (colorCode: string) => {
+    if (colorCode === 'green') return 'from-emerald-500 to-teal-600';
+    if (colorCode === 'yellow') return 'from-amber-500 to-orange-600';
+    return 'from-rose-500 to-pink-600';
+  };
+
+  const getColorMeaning = (colorCode: string) => {
+    if (colorCode === 'green') return 'Positive emotions, joy, contentment';
+    if (colorCode === 'yellow') return 'Neutral emotions, balanced state';
+    return 'Challenging emotions, stress, sadness';
   };
 
   return (
-    <div className="space-y-6 mb-8">
-      {todaySummary && (
-        <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-xl border border-purple-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Heart className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Today's Emotional Journey</h2>
-                  <p className="text-purple-100 text-sm">Real-time emotional intelligence tracking</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="flex items-center gap-2 mb-1">
-                  {trend > 0 ? (
-                    <ArrowUp className="w-4 h-4 text-green-300" />
-                  ) : trend < 0 ? (
-                    <ArrowDown className="w-4 h-4 text-red-300" />
-                  ) : null}
-                  <span className="text-sm">
-                    {trend > 0 ? `+${trend}` : trend < 0 ? trend : 'No change'} from yesterday
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm">{todaySummary.totalEntries} check-ins today</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-8">
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Speedometer Section */}
-              <div className="flex flex-col items-center">
-                <div className="relative">
-                  <ReactSpeedometer
-                    maxValue={100}
-                    minValue={-100}
-                    value={todaySummary.emotionalScore}
-                    needleColor="#8B5CF6"
-                    startColor="#EF4444"
-                    segments={5}
-                    endColor="#10B981"
-                    textColor="#374151"
-                    valueTextFontSize="18px"
-                    labelFontSize="12px"
-                    width={280}
-                    height={200}
-                    ringWidth={47}
-                    currentValueText={`${todaySummary.emotionalScore}`}
-                  />
-                  <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
-                    <div className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${
-                      todaySummary.colorCode === 'green' ? 'bg-green-50 text-green-700 border-green-200' :
-                      todaySummary.colorCode === 'yellow' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                      'bg-red-50 text-red-700 border-red-200'
-                    }`}>
-                      {todaySummary.emotionalState}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-violet-600" />
-                    AI Analysis
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-xl">
-                    {todaySummary.aiAnalysis}
-                  </p>
-                </div>
-
-                {todaySummary.aiMotivationalMessage && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-5 h-5 text-blue-600" />
-                      <h4 className="font-semibold text-blue-800">Motivation Boost</h4>
-                    </div>
-                    <p className="text-blue-700">{todaySummary.aiMotivationalMessage}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                {todaySummary.aiRecommendations?.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                      <Target className="w-5 h-5 text-violet-600" />
-                      Growth Actions
-                    </h3>
-                    <div className="space-y-3">
-                      {todaySummary.aiRecommendations.map((rec: number, index: number) => (
-                        <div key={index} className="flex items-start gap-3 p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg border border-violet-100">
-                          <div className="w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                            {index + 1}
-                          </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">{rec}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h4 className="font-semibold text-gray-800 mb-3">Today's Impact</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-violet-600">{todaySummary.totalEntries}</div>
-                      <div className="text-xs text-gray-500">Check-ins</div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`text-2xl font-bold ${getScoreColor(todaySummary.emotionalScore)}`}>
-                        {todaySummary.emotionalScore > 0 ? '+' : ''}{todaySummary.emotionalScore}
-                      </div>
-                      <div className="text-xs text-gray-500">Score</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-200 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Hero Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl text-left font-medium bg-slate-700 bg-clip-text text-transparent mb-2">
+            Your Emotional Journey
+          </h1>
+          <p className="text-base text-left text-slate-600 max-w-xl">
+            Track, understand, and nurture your emotional well-being with AI-powered insights
+          </p>
         </div>
-      )}
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-violet-600" />
-            Recent Emotional Patterns
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Calendar className="w-4 h-4" />
-            Last 7 days
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Info className="w-4 h-4 text-indigo-600" />
+            <h3 className="font-semibold text-slate-900" style={{ fontSize: '18px' }}>Emotional Score Color Guide</h3>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {weekData.slice(0, 7).map((day: EmotionAnalysisResult, index: number) => (
-            <div key={day.id || index} className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${getScoreBg(day.emotionalScore)}`}>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+            <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl border border-red-200">
+              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
               <div className="text-center">
-                <div className="text-xs font-medium text-gray-600 mb-2">
-                  {new Date(day.summaryDate).toLocaleDateString('en-US', { weekday: 'short' })}
+                <div className="text-slate-700 font-bold text-xs">-100 to -60</div>
+                <div className="text-slate-600 text-xs">Very Low</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
+              <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+              <div className="text-center">
+                <div className="text-slate-700 font-bold text-xs">-60 to -20</div>
+                <div className="text-slate-600 text-xs">Low</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+              <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
+              <div className="text-center">
+                <div className="text-slate-700 font-bold text-xs">-20 to +20</div>
+                <div className="text-slate-600 text-xs">Neutral</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-lime-50 rounded-xl border border-lime-200">
+              <div className="w-4 h-4 bg-lime-500 rounded-full"></div>
+              <div className="text-center">
+                <div className="text-slate-700 font-bold text-xs">+20 to +60</div>
+                <div className="text-slate-600 text-xs">Good</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+              <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+              <div className="text-center">
+                <div className="text-slate-700 font-bold text-xs">+60 to +100</div>
+                <div className="text-slate-600 text-xs">Excellent</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 text-center">
+            <p className="text-slate-600 text-sm">Your emotional score ranges from -100 (most challenging) to +100 (most positive)</p>
+          </div>
+        </div>
+
+        {/* Main Dashboard Grid - Updated with equal heights */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 grid grid-rows-2 gap-4 max-h-[800px]">
+            {/* Today's Emotional Score */}
+            {todaySummary && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div className="p-6 flex-1 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl bg-gradient-to-r ${getGradientColor(todaySummary.colorCode)}`}>
+                        <Heart className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-slate-900" style={{ fontSize: '18px' }}>Today's Score</h2>
+                        <p className="text-slate-600" style={{ fontSize: '14px' }}>Your current emotional state</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right">
+                      <div className="flex items-center gap-2 mb-1">
+                        {trend > 0 ? (
+                          <div className="flex items-center gap-1 text-emerald-600">
+                            <ArrowUp className="w-3 h-3" />
+                            <span className="font-medium" style={{ fontSize: '12px' }}>+{trend}</span>
+                          </div>
+                        ) : trend < 0 ? (
+                          <div className="flex items-center gap-1 text-rose-600">
+                            <ArrowDown className="w-3 h-3" />
+                            <span className="font-medium" style={{ fontSize: '12px' }}>{trend}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500" style={{ fontSize: '12px' }}>No change</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <CheckCircle className="w-3 h-3" />
+                        <span style={{ fontSize: '12px' }}>{todaySummary.totalEntries} check-ins</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col lg:flex-row items-center gap-6">
+                    <div className="flex-shrink-0">
+                      <ReactSpeedometer
+                        maxValue={100}
+                        minValue={-100}
+                        value={todaySummary.emotionalScore}
+                        needleColor="#6366f1"
+                        startColor="#ef4444"
+                        segments={5}
+                        endColor="#10b981"
+                        textColor="#1e293b"
+                        valueTextFontSize="16px"
+                        labelFontSize="10px"
+                        width={200}
+                        height={130}
+                        ringWidth={25}
+                        currentValueText={`${todaySummary.emotionalScore}`}
+                      />
+                    </div>
+                    
+                    <div className="flex-1 space-y-3">
+                      <div className={`inline-flex px-4 py-2 rounded-full font-semibold ${
+                        todaySummary.colorCode === 'green' ? 'bg-emerald-100 text-emerald-800' :
+                        todaySummary.colorCode === 'yellow' ? 'bg-amber-100 text-amber-800' :
+                        'bg-rose-100 text-rose-800'
+                      }`} style={{ fontSize: '16px' }}>
+                        {todaySummary.emotionalState}
+                      </div>
+                      
+                      <div className="bg-slate-50 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Activity className="w-4 h-4 text-indigo-600" />
+                          <h3 className="font-semibold text-slate-900" style={{ fontSize: '14px' }}>AI Analysis</h3>
+                        </div>
+                        <p className="text-slate-700 leading-relaxed" style={{ fontSize: '13px' }}>
+                          {todaySummary.aiAnalysis}
+                        </p>
+                      </div>
+                      
+                      <div className="bg-slate-50 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-3 h-3 rounded-full ${
+                            todaySummary.colorCode === 'green' ? 'bg-emerald-500' :
+                            todaySummary.colorCode === 'yellow' ? 'bg-amber-500' :
+                            'bg-rose-500'
+                          }`}></div>
+                          <span className="text-slate-700 font-medium" style={{ fontSize: '13px' }}>
+                            {getColorMeaning(todaySummary.colorCode)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className={`text-lg font-bold ${getScoreColor(day.emotionalScore)}`}>
-                  {day.emotionalScore > 0 ? '+' : ''}{day.emotionalScore}
+              </div>
+            )}
+
+            {/* Recent Patterns */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+              <div className="p-6 flex-1 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-indigo-100 rounded-lg">
+                      <TrendingUp className="w-4 h-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900" style={{ fontSize: '18px' }}>Weekly Overview</h3>
+                      <p className="text-slate-600" style={{ fontSize: '14px' }}>Your emotional patterns</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-slate-500 bg-slate-50 px-2 py-1 rounded-full">
+                    <Calendar className="w-3 h-3" />
+                    <span className="font-medium" style={{ fontSize: '12px' }}>Last 7 days</span>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">{day.emotionalState}</div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                  <div 
-                    className={`h-1.5 rounded-full ${day.colorCode === 'green' ? 'bg-green-500' : day.colorCode === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`}
-                    style={{ width: `${Math.max(10, Math.abs(day.emotionalScore))}%` }}
-                  ></div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                  {weekData.slice(0, 7).map((day: EmotionAnalysisResult, index: number) => (
+                    <div key={day.id || index} className={`p-3 rounded-xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5 ${getScoreBg(day.emotionalScore)}`}>
+                      <div className="text-center">
+                        <div className="text-slate-600 mb-1 uppercase tracking-wider font-semibold" style={{ fontSize: '10px' }}>
+                          {new Date(day.summaryDate).toLocaleDateString('en-US', { weekday: 'short' })}
+                        </div>
+                        <div className={`font-bold ${getScoreColor(day.emotionalScore)} mb-1`} style={{ fontSize: '18px' }}>
+                          {day.emotionalScore > 0 ? '+' : ''}{day.emotionalScore}
+                        </div>
+                        <div className="text-slate-500 mb-2 font-medium" style={{ fontSize: '10px' }}>{day.emotionalState}</div>
+                        <div className="w-full bg-slate-200 rounded-full h-1.5">
+                          <div 
+                            className={`h-1.5 rounded-full transition-all ${
+                              day.colorCode === 'green' ? 'bg-emerald-500' : 
+                              day.colorCode === 'yellow' ? 'bg-amber-500' : 
+                              'bg-rose-500'
+                            }`}
+                            style={{ width: `${Math.max(20, Math.abs(day.emotionalScore))}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Right Column - Sidebar with matching height */}
+          <div className="grid grid-rows-3 gap-4 max-h-[800px]">
+            {/* Motivational Message */}
+            {todaySummary?.aiMotivationalMessage && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                <div className="p-4 flex-1 overflow-y-auto">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="p-1.5 bg-amber-100 rounded-lg">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <h3 className="font-bold text-slate-900" style={{ fontSize: '16px' }}>Daily Inspiration</h3>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                    <p className="text-slate-700 leading-relaxed" style={{ fontSize: '14px' }}>
+                      {todaySummary.aiMotivationalMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Growth Actions */}
+            {todaySummary?.aiRecommendations?.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                <div className="p-4 flex-1 overflow-y-auto">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-1.5 bg-emerald-100 rounded-lg">
+                      <Target className="w-4 h-4 text-violet-600" />
+                    </div>
+                    <h3 className="font-bold text-slate-900" style={{ fontSize: '16px' }}>Growth Actions</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {todaySummary.aiRecommendations.slice(0, 3).map((rec: string, index: number) => (
+                      <div key={index} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                        <div className="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0" style={{ fontSize: '12px' }}>
+                          {index + 1}
+                        </div>
+                        <p className="text-slate-700 leading-relaxed" style={{ fontSize: '13px' }}>{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+              <div className="p-4 flex-1 overflow-y-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <BarChart3 className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-bold text-slate-900" style={{ fontSize: '16px' }}>Today's Impact</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-100 rounded-lg">
+                        <CheckCircle className="w-3 h-3 text-indigo-600" />
+                      </div>
+                      <span className="text-slate-700 font-medium" style={{ fontSize: '14px' }}>Check-ins</span>
+                    </div>
+                    <span className="font-bold text-indigo-600" style={{ fontSize: '18px' }}>
+                      {todaySummary?.totalEntries || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-rose-100 rounded-lg">
+                        <Zap className="w-3 h-3 text-purple-600" />
+                      </div>
+                      <span className="text-slate-700 font-medium" style={{ fontSize: '14px' }}>Score</span>
+                    </div>
+                    <span className={`font-bold ${getScoreColor(todaySummary?.emotionalScore || 0)}`} style={{ fontSize: '18px' }}>
+                      {todaySummary?.emotionalScore > 0 ? '+' : ''}{todaySummary?.emotionalScore || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -20,11 +20,9 @@ export const createAssessment = async(id: string, quizData: {
   }) => {
     try {
         const response = await axios.post(`/api/learning-resources/${id}/assessment`, quizData)
-        console.log("ppspspspypypypypypypypypypypypypyp",response.data);
         return response.data
         
     } catch (error) {
-        console.log(error);
         return error;
     }
 }

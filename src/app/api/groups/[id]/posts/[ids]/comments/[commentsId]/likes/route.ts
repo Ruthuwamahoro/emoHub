@@ -27,7 +27,6 @@ export async function POST(
       );
     }
 
-    // Check if user already liked this comment
     const existingLike = await db
       .select()
       .from(CommentLikes)
@@ -41,7 +40,6 @@ export async function POST(
     let liked = false;
 
     if (existingLike.length > 0) {
-      // Unlike the comment
       await db
         .delete(CommentLikes)
         .where(
@@ -52,7 +50,6 @@ export async function POST(
         );
       liked = false;
     } else {
-      // Like the comment
       await db
         .insert(CommentLikes)
         .values({
@@ -62,7 +59,6 @@ export async function POST(
       liked = true;
     }
 
-    // Get the updated likes count
     const likesCountResult = await db
       .select({ count: count() })
       .from(CommentLikes)
@@ -80,7 +76,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error("Comment like error:", error);
     return NextResponse.json(
       {
         message: error instanceof Error ? error.message : 'Internal server error',

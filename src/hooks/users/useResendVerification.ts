@@ -8,9 +8,7 @@ interface ResendVerificationData {
 
 const resendVerificationEmail = async (email: string) => {
   try {
-    console.log('Resending verification email to----------------:', email);
     const response = await axios.post('/api/resend-verification', { email });
-    console.log('Resend verification response:', response.data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -27,12 +25,10 @@ export const useResendVerification = () => {
     mutationFn: resendVerificationEmail,
     onSuccess: (response) => {
       setErrors({});
-      console.log('Verification email sent successfully');
     },
     onError: (error: any) => {
       const errorMessage = error?.message || 'Failed to resend verification email';
       setErrors({ general: errorMessage });
-      console.error('Resend verification error:', error);
     }
   });
 

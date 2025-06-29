@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Heart, Users, BookOpen, TrendingUp, Star, Menu, X, ArrowRight, Brain, Target, MessageCircle, Shield, Lightbulb, BarChart3, Calendar, GraduationCap, ChevronDown, Plus, Minus, Sparkles } from 'lucide-react';
+import { Star, Menu, X, ArrowRight, Brain, Sparkles } from 'lucide-react';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
