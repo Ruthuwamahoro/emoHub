@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { CircleUser } from "lucide-react";
 import { COMMON_LINKS, ROLE_BASED_LINKS } from "@/constants/roles";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
 import VibratingHelpButton from "./HelperButton";
 import { Avatar as AvatarImages } from "@/utils/genderAvatar";
@@ -55,6 +56,9 @@ export const CustomSiderbarLink = ({
   dataTour?: string;
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  
+  const isActive = pathname === link.href;
   
   const handleClick = async (e: React.MouseEvent) => {
     if (link.href === '/auth/logout') {
@@ -77,12 +81,14 @@ export const CustomSiderbarLink = ({
         onClick={handleClick} 
         data-tour={dataTour} 
         className={cn(
-          "flex items-center justify-start gap-2 group/sidebar py-2 rounded-md hover:bg-slate-800 transition-colors w-full text-left",
+          "flex items-center justify-start gap-3 py-2 px-3 rounded-md transition-colors duration-200 w-full text-left",
+          "text-slate-300 hover:bg-slate-800 hover:text-white",
+          "focus:outline-none focus:bg-slate-800 focus:text-white",
           className
         )}
       >
         {link.icon}
-        <span className="text-white text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
+        <span className="text-sm whitespace-pre inline-block !p-0 !m-0">
           {link.label}
         </span>
       </button>
@@ -91,7 +97,33 @@ export const CustomSiderbarLink = ({
   
   return (
     <div className={className} data-tour={dataTour}>
-      <SidebarLink link={link} />
+      <Link 
+        href={link.href}
+        onClick={handleClick}
+        className={cn(
+          "flex items-center justify-start gap-3 py-2 px-3 rounded-md transition-colors duration-200 w-full",
+          // Base styles
+          "text-slate-300",
+          // Active state
+          isActive && "bg-slate-800 text-white",
+          // Hover styles (only when not active)
+          !isActive && "hover:bg-slate-800/50 hover:text-white",
+          // Focus styles
+          "focus:outline-none focus:bg-slate-800 focus:text-white"
+        )}
+      >
+        <div className={cn(
+          isActive && "text-blue-400"
+        )}>
+          {link.icon}
+        </div>
+        <span className={cn(
+          "text-sm whitespace-pre inline-block !p-0 !m-0",
+          isActive && "font-medium"
+        )}>
+          {link.label}
+        </span>
+      </Link>
     </div>
   );
 };
@@ -359,8 +391,8 @@ export function SidebarDemo() {
             
             <div className="relative" data-tour="profile">
               {open ? (
-                <Button className="p-[3px] relative w-full bg-transparent hover:bg-transparent">
-                  <div className="absolute inset-0 bg-gray-400 rounded-lg border-none" />
+                <Button className="p-[3px] relative w-full bg-transparent hover:bg-slate-800 transition-colors duration-200">
+                  <div className="absolute inset-0 bg-gray-400/20 rounded-lg border-none" />
                   <div className="px-8 py-2 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent border-none w-full">
                     {session ? (
                       <Avatar className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200 rounded-full">
@@ -385,8 +417,8 @@ export function SidebarDemo() {
                   </div>
                 </Button>
               ) : (
-                <Link href="/profile" className="flex justify-center">
-                  <div className="p-10 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Link href="/profile" className="flex justify-center focus:outline-none rounded-lg">
+                  <div className="p-10 rounded-lg hover:bg-slate-800/50 transition-colors duration-200">
                     {session ? (
                       <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
                         {/* <AvatarImage
@@ -485,7 +517,7 @@ export const Logo = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-3 items-center text-sm py-1 relative z-20 group"
+      className="font-normal flex space-x-3 items-center text-sm py-1 relative z-20 group focus:outline-none rounded-lg"
       data-tour="logo"
     >
       <div className="relative">
@@ -510,7 +542,7 @@ export const LogoIcon = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20 group"
+      className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20 group focus:outline-none rounded-lg"
       data-tour="logo"
     >
       <div className="relative">
