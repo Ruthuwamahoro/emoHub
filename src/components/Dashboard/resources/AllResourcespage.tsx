@@ -1,10 +1,15 @@
 "use client"
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, BookOpen, Heart, ChevronDown, AlertCircle } from 'lucide-react';
+import { Search, Plus, BookOpen, Heart, ChevronDown, AlertCircle, Play, FileText, Video, Book, Globe } from 'lucide-react';
 import { useGetAllResources } from '@/hooks/users/resources/usegetallresources';
 import { PaginationComponent } from '../PaginationPage';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Edit } from 'lucide-react';
 import { Eye } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -15,6 +20,7 @@ import { SingleResource } from '@/types/resources';
 import { LearningResourcesPageSkeleton, PaginationComponentSkeleton, ResourceSkeleton } from './resourcesSkeleton';
 import { CATEGORY_OPTIONS, DIFFICULTY_OPTIONS } from '@/constants/resources';
 import {CreateResourceDialog }from "./CreateResourceDialog";
+import { useRouter } from 'next/navigation';
 
 interface QueryParams {
   search: string;
@@ -64,12 +70,43 @@ const ErrorState: React.FC<{ error: Error; onRetry: () => void }> = ({ error, on
     <p className="text-gray-600 text-center mb-4">
       {error.message || 'Failed to load learning resources. Please try again.'}
     </p>
-    <button
-      onClick={onRetry}
-      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-    >
+    <Button onClick={onRetry} className="bg-blue-600 hover:bg-blue-700">
       Try Again
-    </button>
+    </Button>
+  </div>
+);
+
+// Resource type icon component
+const ResourceTypeIcon: React.FC<{ type: string; className?: string }> = ({ type, className = "w-5 h-5" }) => {
+  const getIcon = () => {
+    switch (type?.toLowerCase()) {
+      case 'video':
+        return <Video className={className} />;
+      case 'article':
+        return <FileText className={className} />;
+      case 'blog':
+        return <FileText className={className} />;
+      case 'guide':
+        return <Book className={className} />;
+      case 'module':
+        return <BookOpen className={className} />;
+      case 'website':
+      case 'link':
+        return <Globe className={className} />;
+      default:
+        return <FileText className={className} />;
+    }
+  };
+
+  return getIcon();
+};
+
+// Video overlay component
+const VideoOverlay: React.FC = () => (
+  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+    <div className="bg-white bg-opacity-90 rounded-full p-3 shadow-lg">
+      <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
+    </div>
   </div>
 );
 
@@ -85,6 +122,7 @@ const LearningResourcesUI: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
 
   const { data: session } = useSession();
+  const router = useRouter();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
 
   useEffect(() => {
@@ -157,6 +195,10 @@ const LearningResourcesUI: React.FC = () => {
     refetch();
   };
 
+  const handleResourceClick = (resourceId: string): void => {
+    router.push(`/dashboard/resources/${resourceId}`);
+  };
+
   const savedResourcesCount = useMemo(() => {
     if (!resources?.data || !Array.isArray(resources.data)) return 0;
     return resources.data.filter((r: SingleResource) => r.isSaved).length;
@@ -165,8 +207,8 @@ const LearningResourcesUI: React.FC = () => {
   const isInitialLoading = isInitialLoad && (isLoading || isPending);
   const isFilteringLoading = !isInitialLoad && (isLoading || isFetching);
 
-  const handleSortByChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSortBy(e.target.value as 'newest' | 'oldest');
+  const handleSortByChange = (value: string): void => {
+    setSortBy(value as 'newest' | 'oldest');
   };
 
   const handleClearAllFilters = (): void => {
@@ -198,17 +240,17 @@ const LearningResourcesUI: React.FC = () => {
             </div>
             <div className="flex items-center gap-4">
               {canCreateResources && (
-                <button
+                <Button
                   onClick={handleOpenCreateModal}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 bg-orange-500 text-white hover:bg-blue-700"
                 >
                   <Plus size={20} />
                   Create Resource
-                </button>
+                </Button>
               )}
-              <button 
+              <Button 
                 onClick={() => setShowSavedOnly(!showSavedOnly)}
-                className={`relative flex items-center gap-2 px-6 py-2 rounded-lg transition-colors font-medium ${
+                className={`relative flex items-center gap-2 font-medium ${
                     showSavedOnly 
                     ? 'bg-blue-600 text-white hover:bg-blue-700' 
                     : 'bg-gray-800 text-white hover:bg-gray-900'
@@ -222,7 +264,7 @@ const LearningResourcesUI: React.FC = () => {
                       </span>
                     )}
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -231,128 +273,154 @@ const LearningResourcesUI: React.FC = () => {
       <div className="max-w-8xl mx-auto px-6 py-8">
         <div className="flex gap-8">
           <div className="w-80 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
-              <h2 className="text-lg font-semibold mb-6">Filter Resources</h2>
-              
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    placeholder="Search Resources"
-                    value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isFilteringLoading}
-                  />
-                  {isFetching && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    </div>
-                  )}
+            <Card className="sticky top-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Filter Resources</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Search Section */}
+                <div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Input
+                      type="text"
+                      placeholder="Search Resources"
+                      value={searchTerm}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                      disabled={isFilteringLoading}
+                    />
+                    {isFetching && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="mb-6">
-                <h3 className="font-medium text-gray-900 mb-4">Category</h3>
-                <div className="space-y-3">
-                  {(CATEGORY_OPTIONS as CategoryOption[]).map((category) => (
-                    <label key={category.value} className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === category.value}
-                        onChange={() => handleCategoryChange(category.value)}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        disabled={isFilteringLoading}
-                      />
-                      <span className={`ml-3 ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}>
-                        {category.label}
-                      </span>
-                    </label>
-                  ))}
+                <Separator />
+
+                <div>
+                  <Label className="text-base text-gray-900 mb-4 block">Category</Label>
+                  <RadioGroup 
+                    value={selectedCategory} 
+                    onValueChange={handleCategoryChange}
+                    disabled={isFilteringLoading}
+                    className="space-y-3"
+                  >
+                    {(CATEGORY_OPTIONS as CategoryOption[]).map((category) => (
+                      <div key={category.value} className="flex items-center space-x-2">
+                        <RadioGroupItem 
+                          value={category.value} 
+                          id={`category-${category.value}`}
+                          disabled={isFilteringLoading}
+                        />
+                        <Label 
+                          htmlFor={`category-${category.value}`}
+                          className={`cursor-pointer ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}
+                        >
+                          {category.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                   {selectedCategory && (
-                    <button
+                    <Button
+                      variant="link"
                       onClick={() => setSelectedCategory('')}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-sm text-blue-600 hover:text-blue-700 p-0 h-auto mt-2"
                       disabled={isFilteringLoading}
                     >
                       Clear Category Filter
-                    </button>
+                    </Button>
                   )}
                 </div>
-              </div>
 
-              <div className="mb-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center">
-                  Difficulty Level
-                  <ChevronDown size={16} className="ml-2 text-gray-500" />
-                </h3>
-                <div className="space-y-3">
-                  {(DIFFICULTY_OPTIONS as DifficultyOption[]).map((difficulty) => (
-                    <label key={difficulty.value} className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        name="difficulty"
-                        checked={selectedDifficulty === difficulty.value}
-                        onChange={() => handleDifficultyChange(difficulty.value)}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        disabled={isFilteringLoading}
-                      />
-                      <span className={`ml-3 ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}>
-                        {difficulty.label}
-                      </span>
-                    </label>
-                  ))}
+                <Separator />
+
+                <div>
+                  <Label className="text-base font-medium text-gray-900 mb-4 flex items-center">
+                    Difficulty Level
+                    <ChevronDown size={16} className="ml-2 text-gray-500" />
+                  </Label>
+                  <RadioGroup 
+                    value={selectedDifficulty} 
+                    onValueChange={handleDifficultyChange}
+                    disabled={isFilteringLoading}
+                    className="space-y-3"
+                  >
+                    {(DIFFICULTY_OPTIONS as DifficultyOption[]).map((difficulty) => (
+                      <div key={difficulty.value} className="flex items-center space-x-2">
+                        <RadioGroupItem 
+                          value={difficulty.value} 
+                          id={`difficulty-${difficulty.value}`}
+                          disabled={isFilteringLoading}
+                        />
+                        <Label 
+                          htmlFor={`difficulty-${difficulty.value}`}
+                          className={`cursor-pointer ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}
+                        >
+                          {difficulty.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                   {selectedDifficulty && (
-                    <button
+                    <Button
+                      variant="link"
                       onClick={() => setSelectedDifficulty('')}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-sm text-blue-600 hover:text-blue-700 p-0 h-auto mt-2"
                       disabled={isFilteringLoading}
                     >
                       Clear Difficulty Filter
-                    </button>
+                    </Button>
                   )}
                 </div>
-              </div>
 
-              <div>
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center">
-                  Sort By
-                  <ChevronDown size={16} className="ml-2 text-gray-500" />
-                </h3>
-                <div className="space-y-3">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="sortBy"
-                      value="newest"
-                      checked={sortBy === 'newest'}
-                      onChange={handleSortByChange}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      disabled={isFilteringLoading}
-                    />
-                    <span className={`ml-3 ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}>
-                      Newest
-                    </span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="sortBy"
-                      value="oldest"
-                      checked={sortBy === 'oldest'}
-                      onChange={handleSortByChange}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      disabled={isFilteringLoading}
-                    />
-                    <span className={`ml-3 ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}>
-                      Oldest
-                    </span>
-                  </label>
+                <Separator />
+
+                {/* Sort By Section */}
+                <div>
+                  <Label className="text-base font-medium text-gray-900 mb-4 flex items-center">
+                    Sort By
+                    <ChevronDown size={16} className="ml-2 text-gray-500" />
+                  </Label>
+                  <RadioGroup 
+                    value={sortBy} 
+                    onValueChange={handleSortByChange}
+                    disabled={isFilteringLoading}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="newest" 
+                        id="sort-newest"
+                        disabled={isFilteringLoading}
+                      />
+                      <Label 
+                        htmlFor="sort-newest"
+                        className={`cursor-pointer ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}
+                      >
+                        Newest
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="oldest" 
+                        id="sort-oldest"
+                        disabled={isFilteringLoading}
+                      />
+                      <Label 
+                        htmlFor="sort-oldest"
+                        className={`cursor-pointer ${isFilteringLoading ? 'text-gray-400' : 'text-gray-700'}`}
+                      >
+                        Oldest
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="flex-1">
@@ -386,15 +454,32 @@ const LearningResourcesUI: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                   {displayedResources.map((resource: SingleResource) => (
-                    <div key={resource.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 flex flex-col h-full">
+                    <div 
+                      key={resource.id} 
+                      className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-100 flex flex-col h-full cursor-pointer group"
+                      onClick={() => handleResourceClick(resource.id)}
+                    >
                       <div className="relative">
                         <img
-                          src={resource.coverImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop'}
+                          src={resource?.thumbnailUrl || resource?.coverImage}
                           alt={resource.title}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
+                        
+                        {/* Video overlay for video resources */}
+                        {resource.resourceType.toLowerCase() === 'video' && <VideoOverlay />}
+                        
+                        {/* Resource type indicator in top-left */}
+                        <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-full p-2 shadow-sm">
+                          <ResourceTypeIcon type={resource.resourceType} className="w-4 h-4 text-gray-700" />
+                        </div>
+                        
+                        {/* Save button */}
                         <button
-                          onClick={() => toggleSaveResource(resource.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSaveResource(resource.id);
+                          }}
                           className={`absolute top-4 right-4 p-2 rounded-full ${resource.isSaved ? 'bg-red-500 text-white' : 'bg-white text-gray-600'} hover:scale-110 transition-transform shadow-sm`}
                         >
                           <Heart size={16} fill={resource.isSaved ? 'white' : 'none'} />
@@ -402,7 +487,14 @@ const LearningResourcesUI: React.FC = () => {
                       </div>
                       
                       <div className="p-6 flex flex-col flex-grow">
-                        <h3 className="font-semibold text-gray-900 mb-3 text-lg leading-tight line-clamp-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ResourceTypeIcon type={resource.resourceType} className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-500 capitalize font-medium">
+                            {resource.resourceType || 'Article'}
+                          </span>
+                        </div>
+                        
+                        <h3 className="font-semibold text-gray-900 mb-3 text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
                           {resource.title}
                         </h3>
                         <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 flex-grow">
@@ -420,20 +512,35 @@ const LearningResourcesUI: React.FC = () => {
                         
                         <div className="flex items-center justify-between">
                           <button className="text-orange-600 hover:text-blue-700 font-medium text-sm uppercase tracking-wide transition-colors">
-                            READ MORE
+                            {resource.resourceType?.toLowerCase() === 'video' ? 'WATCH NOW' : 'READ MORE'}
                           </button>
                           
                           {canCreateResources && (
                             <div className="flex items-center space-x-1">
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <Eye className="w-4 h-4" />
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -479,12 +586,13 @@ const LearningResourcesUI: React.FC = () => {
                   }
                 </p>
                 {(debouncedSearchTerm || selectedCategory || selectedDifficulty) && (
-                  <button
+                  <Button
+                    variant="link"
                     onClick={handleClearAllFilters}
-                    className="mt-4 px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
+                    className="mt-4 text-blue-600 hover:text-blue-700"
                   >
                     Clear all filters
-                  </button>
+                  </Button>
                 )}
               </div>
             )}

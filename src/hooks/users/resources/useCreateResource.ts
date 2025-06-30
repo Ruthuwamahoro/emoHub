@@ -71,7 +71,10 @@ export const useCreateResource = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     try {
       mutate(formData);
     } catch (error) {
