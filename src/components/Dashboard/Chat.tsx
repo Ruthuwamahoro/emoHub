@@ -3,11 +3,10 @@ import { Search, Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import React, { useState, useEffect } from 'react';
-import { User, MessageCircle, Send, Image, Mic, AlertCircle, ThumbsUp } from 'lucide-react';
+import { User, MessageCircle, Send, Image, Mic, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedChat } from './Chat2';
 
 interface Message {
   id: string;
