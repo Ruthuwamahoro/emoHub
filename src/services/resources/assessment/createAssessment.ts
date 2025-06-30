@@ -1,4 +1,3 @@
-import { QuestionInput } from "@/hooks/users/resources/assessment/useCreateAssessment";
 import axios from "axios";
 
 export const createAssessment = async(id: string, quizData: {
