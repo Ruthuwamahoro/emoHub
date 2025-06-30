@@ -117,6 +117,20 @@ const Post = pgTable("Post", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+const ReportPost = pgTable("ReportPost", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  post_id: uuid("post_id").references(() => Post.id, {
+    onDelete: "set null"
+  }),
+  userId: uuid("user_id").references(() => User.id, {
+    onDelete: "set null"
+  }),
+  reason:varchar("reason", {length: 1024}).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+})
+
 
 const PostLikes = pgTable("PostLikes", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -658,6 +672,7 @@ export {
   Event,
   Message,
   Group,
+  ReportPost,
   GroupMember,
   Notification,
   GroupCategories,

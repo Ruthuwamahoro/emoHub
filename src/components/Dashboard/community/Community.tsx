@@ -424,7 +424,6 @@ export default function CommunityGroups() {
           </div>
             
           </div>
-        {/* Search and Filter */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl  p-6 mb-8">
           <div className="flex flex-col md:flex-row justify-between gap-4">
             <div className="relative w-full md:w-[500px]">

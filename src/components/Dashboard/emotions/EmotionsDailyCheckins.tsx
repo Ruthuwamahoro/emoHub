@@ -321,7 +321,7 @@ export function EmotionsCheckIns() {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm border">
+                    <div className="rounded-lg p-6 shadow-sm border bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
@@ -357,11 +357,11 @@ export function EmotionsCheckIns() {
                                 </div>
                             ) : (
                                 displayedEntries.map((entry) => (
-                                    <div key={entry.id} className="border-b border-gray-100 pb-4 mb-4 last:border-b-0">
+                                    <div key={entry.id} className="border border-gray-300 p-8 rounded-xl pb-4 mb-4 last:border-b-0 bg-white">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-lg">{handleEmojis(entry.feelings)}</span>
-                                                <span className="font-medium text-gray-900">{entry.feelings}</span>
+                                                <span className="text-sm font-medium text-gray-900">{entry.feelings}</span>
                                             </div>
                                             <span className="text-xs text-gray-500">{getDatesInSeconds(entry.createdAt)}</span>
                                         </div>
