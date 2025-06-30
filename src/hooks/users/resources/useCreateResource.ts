@@ -33,8 +33,9 @@ export const useCreateResource = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: createResources,
     onSuccess: (response) => {
-      queryClient.invalidateQueries();
       setFormData(initialData);
+      queryClient.invalidateQueries({queryKey: ["resources"]});
+
       setErrors({});
       showToast(response.message, "success");
     },

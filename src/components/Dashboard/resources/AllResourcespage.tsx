@@ -14,6 +14,7 @@ import { Trash2 } from 'lucide-react';
 import { SingleResource } from '@/types/resources';
 import { LearningResourcesPageSkeleton, PaginationComponentSkeleton, ResourceSkeleton } from './resourcesSkeleton';
 import { CATEGORY_OPTIONS, DIFFICULTY_OPTIONS } from '@/constants/resources';
+import {CreateResourceDialog }from "./CreateResourceDialog";
 
 interface QueryParams {
   search: string;
@@ -491,11 +492,11 @@ const LearningResourcesUI: React.FC = () => {
         </div>
       </div>
 
-      {/* <CreateResourceDialog
+      <CreateResourceDialog
         isOpen={showCreateModal}
         onClose={handleCloseCreateModal}
         onSuccess={handleResourceCreated}
-      /> */}
+      />
     </div>
   );
 };
