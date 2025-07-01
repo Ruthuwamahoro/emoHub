@@ -10,7 +10,7 @@ export const Footer = () => {
 
 
               <div className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+                <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
                   <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
@@ -23,7 +23,7 @@ export const Footer = () => {
             </div>
   
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-orange-500">Platform</h3>
+              <h3 className="text-lg font-semibold mb-6 text-amber-500">Platform</h3>
               <ul className="space-y-3">
                 <li><a href="#about" className="text-slate-300 hover:text-indigo-300 transition-colors duration-200">About Us</a></li>
                 <li><a href="#community" className="text-slate-300 hover:text-indigo-300 transition-colors duration-200">Community</a></li>
@@ -32,7 +32,7 @@ export const Footer = () => {
             </div>
   
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-orange-500">Support</h3>
+              <h3 className="text-lg font-semibold mb-6 text-amber-500">Support</h3>
               <ul className="space-y-3">
                 <li><a href="#contact" className="text-slate-300 hover:text-indigo-300 transition-colors duration-200">Contact Us</a></li>
                 <li><a href="#privacy" className="text-slate-300 hover:text-indigo-300 transition-colors duration-200">Privacy Policy</a></li>
@@ -52,7 +52,7 @@ export const Footer = () => {
                 <a href="#cookies" className="text-slate-400 hover:text-indigo-300 transition-colors">Cookies</a>
               </div>
               <div className="flex items-center space-x-2 text-slate-400 text-sm">
-                <Heart className="h-4 w-4 text-red-400 fill-current" />
+                <Heart className="h-4 w-4 text-amber-600 fill-current" />
                 <span>Spreading emotional wellness</span>
               </div>
             </div>

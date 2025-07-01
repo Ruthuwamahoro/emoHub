@@ -276,7 +276,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
   const addQuestion = () => {
     if (!currentQuestion.questionText?.trim()) return;
   
-    // Create new question matching backend schema
     const newQuestion: QuizQuestion = {
       id: Date.now().toString(),
       questionText: currentQuestion.questionText,
@@ -285,10 +284,9 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       explanation: currentQuestion.explanation || '',
     };
   
-    // Handle options based on question type
     if (currentQuestion.questionType === 'multiple-choice' && currentQuestion.options) {
         newQuestion.options = currentQuestion.options
-          .filter(opt => opt.optionText?.trim()) // Remove empty options
+          .filter(opt => opt.optionText?.trim())
           .map((option, index) => ({
             optionText: option.optionText,
             isCorrect: index === currentQuestion.correctAnswer,
@@ -303,7 +301,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       newQuestion.correctAnswer = currentQuestion.correctAnswer;
     } else if (currentQuestion.questionType === 'short-answer') {
       newQuestion.correctAnswer = currentQuestion.correctAnswer;
-      // No options for short answer
     }
   
     setExtendedFormData(prev => ({
@@ -311,10 +308,9 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       questions: [...prev.questions, newQuestion]
     }));
   
-    // Reset current question - fix property names to match your interface
     setCurrentQuestion({
-      questionText: '', // Changed from 'question' to 'questionText'
-      questionType: 'multiple-choice', // Changed from 'type' to 'questionType'
+      questionText: '',
+      questionType: 'multiple-choice',
       options: [
         { optionText: '', isCorrect: false, orderIndex: 0 },
         { optionText: '', isCorrect: false, orderIndex: 1 },
@@ -322,7 +318,7 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
         { optionText: '', isCorrect: false, orderIndex: 3 }
       ],
       correctAnswer: 0,
-      points: 1, // Changed from 'marks' to 'points'
+      points: 1,
       explanation: ''
     });
   };
@@ -353,10 +349,9 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
 
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // Create a proper synthetic event that matches what handleChange expects
     const syntheticEvent = {
       target: {
-        id: e.target.id || 'content',  // Use id instead of name
+        id: e.target.id || 'content', 
         value: e.target.value
       }
     } as React.ChangeEvent<HTMLInputElement>;
@@ -376,7 +371,7 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl  bg-slate-500 bg-clip-text text-transparent">
             Create Learning Resource
           </DialogTitle>
           <p className="text-sm text-gray-600 mt-1">

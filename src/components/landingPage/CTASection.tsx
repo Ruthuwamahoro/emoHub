@@ -3,7 +3,7 @@ import React from 'react';
 import { ArrowRight} from 'lucide-react';
 export const FinalCTASection = () => {
     return (
-      <section className=" max-w-7xl mx-auto py-24 bg-slate-900 relative overflow-hidden mb-20">
+      <section className=" max-w-4xl mx-auto py-10 bg-slate-900 relative overflow-hidden mb-20 mt-20">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -11,9 +11,9 @@ export const FinalCTASection = () => {
         </div>
   
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
             Ready to Transform Your{' '}
-            <span className="bg-orange-500 bg-clip-text text-transparent">
+            <span className="bg-amber-600 bg-clip-text text-transparent font-light">
               Emotional Life?
             </span>
           </h2>
@@ -24,7 +24,7 @@ export const FinalCTASection = () => {
           </p>
   
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <button className="group bg-white text-orange-500 px-10 py-4 rounded-2xl text-lg font-bold hover:shadow-2xl hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 flex items-center gap-3">
+            <button className="group bg-white text-slate-700 px-10 py-4 rounded-2xl text-lg hover:shadow-2xl hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 flex items-center gap-3" onClick={() => window.location.href="/register"}>
               Start Growing Today
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>

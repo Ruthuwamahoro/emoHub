@@ -59,18 +59,18 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3 group">
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+              <div className="w-10 h-10 bg-orange-400 to-emerald-400 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
                 <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
               <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full animate-pulse delay-500"></div>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 bg-clip-text text-transparent hover:from-rose-600 hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
+            <span className="text-xl font-medium bg-slate-700 bg-clip-text text-transparent hover:from-rose-600 hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
               emoHub
             </span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-1 text-sm">
             {[
               { name: 'Home', href: '#home' },
               { name: 'About', href: '#about' },
@@ -83,16 +83,13 @@ export const Navbar = () => {
                 href={item.href}
                 className="relative group px-4 py-2 text-body-medium font-medium transition-all duration-300 hover:scale-105"
               >
-                <span className="relative z-10 text-slate-700 group-hover:text-white transition-colors duration-300">
+                <span className="relative z-10 text-slate-700 transition-colors duration-300">
                   {item.name}
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-400 rounded-lg opacity-0 group-hover:opacity-50 blur transition-all duration-300"></div>
               </a>
             ))}
           </div>
 
-          {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <a
               href="/login"
@@ -132,7 +129,7 @@ export const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white/95 backdrop-blur-lg border-t border-gradient-to-r from-rose-100 via-amber-100 to-emerald-100">
           <div className="px-4 pt-2 pb-4 space-y-2 relative">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-amber-200/20 rounded-full blur-xl"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-amber-200/20 rounded-full blur-xl text-sm"></div>
             
             {[
               { name: 'Home', href: '#home' },
@@ -144,7 +141,7 @@ export const Navbar = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className="relative group block px-4 py-3 text-slate-700 hover:text-white text-base font-medium rounded-lg transition-all duration-300 hover:scale-105"
+                className="relative group block px-4 py-3 hover:font-bold text-slate-700 hover:text-white text-base font-medium rounded-lg transition-all duration-300 hover:scale-105"
               >
                 <span className="relative z-10">{item.name}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100"></div>

@@ -40,24 +40,19 @@ export const FAQContactSection = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40">
+    <div className="bg-gray-100">
       <section className="py-24 relative overflow-hidden">
-
-        <div className="absolute inset-0">
-          <div className="absolute top-20 right-1/4 w-64 h-64 bg-gradient-to-br from-rose-300/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-gradient-to-br from-emerald-300/15 to-teal-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-white/50 mb-8">
-              <HelpCircle className="w-5 h-5 text-rose-500" />
+              <HelpCircle className="w-5 h-5 text-orange-500" />
               <span className="text-slate-700 font-semibold">FAQ</span>
             </div>
             
-            <h3 className="text-5xl md:text-6xl font-bold text-slate-800 mb-8 leading-tight">
+            <h3 className="text-5xl md:text-4xl font-bold text-slate-800 mb-8 leading-tight">
               Frequently Asked{' '}
-              <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-amber-500 font-bold bg-clip-text text-transparent">
                 Questions
               </span>
             </h3>
