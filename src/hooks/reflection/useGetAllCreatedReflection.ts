@@ -1,10 +1,10 @@
-import { getReflectionsSummary } from "@/services/reflection/getAllReflectionSummary";
+import { getCreatedReflectionOfUser } from "@/services/reflection/getCreatedReflection";
 import { useQuery } from "@tanstack/react-query";
 
-export const usegetReflectionsSummary = () => {
+export const usegetAllCreatedReflection = () => {
     const { data, isLoading, isPending, isFetching, error } = useQuery({
-      queryKey: ["ReflectionsSummary"],
-      queryFn: getReflectionsSummary,
+      queryKey: ["AllCreatedReflection"],
+      queryFn: getCreatedReflectionOfUser,
       staleTime: 0,
       gcTime: 10 * 60 * 1000, 
       refetchOnWindowFocus: true,      

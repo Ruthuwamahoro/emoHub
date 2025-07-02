@@ -115,7 +115,7 @@ export const ROLE_BASED_LINKS = {
     admin: [
       {
         label: "Admin Dashboard",
-        href: "/admin/dashboard",
+        href: "/dashboard/admin",
         icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {

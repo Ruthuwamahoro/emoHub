@@ -26,6 +26,7 @@ export const useCreateDailyReflection = () => {
 
             showToast(response.message, "success");
             queryClient.invalidateQueries({ queryKey: ["Reflection"] });
+            queryClient.invalidateQueries({ queryKey: ["AllCreatedReflection"] });
         },
         onError: (err: unknown) => {
             const error = err as Error;

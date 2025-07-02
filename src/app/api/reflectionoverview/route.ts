@@ -31,7 +31,8 @@ export async function GET (req: NextRequest){
           .from(DailyReflections)  
           .innerJoin(DailyReflectionsResponse, eq(DailyReflections.id, DailyReflectionsResponse.reflectionId))
           .innerJoin(User, eq(DailyReflectionsResponse.userId, User.id))          
-          .where(eq(DailyReflections.userId, userId));
+          .where(eq(DailyReflections.userId, userId))
+          .orderBy(desc(DailyReflectionsResponse.createdAt));
           if (reflections.length === 0) {
               return sendResponse(404, null, 'No reflections found for the user');
             }

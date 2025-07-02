@@ -25,15 +25,15 @@ export const useCreateResponseReflection = (ReflectionId: string) => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: ResponseFormat) => createResponseReflection(ReflectionId, data),
-    onSuccess: (response) => {
-      console.log('Reflection created successfully:', response);
+    onSuccess: async (response) => {
       setFormData(initialData);
       setErrors({});
       showToast(response.message || "Reflection saved successfully", "success");
       
-      // Invalidate and refetch related queries
+      await queryClient.invalidateQueries({ queryKey: ["ReflectionsSummary"] });
+      await queryClient.refetchQueries({ queryKey: ["ReflectionsSummary"] });
       queryClient.invalidateQueries({ queryKey: ["Reflection"] });
-      queryClient.invalidateQueries({ queryKey: ["ReflectionsSummary"] });
+
     },
     onError: (err: unknown) => {
       const error = err as Error;
@@ -66,7 +66,6 @@ export const useCreateResponseReflection = (ReflectionId: string) => {
 
     return new Promise((resolve) => {
       try {
-        // Validate form data
         if (!formData.response.trim()) {
           const error = "Please write your reflection before saving.";
           setErrors({ response: error });

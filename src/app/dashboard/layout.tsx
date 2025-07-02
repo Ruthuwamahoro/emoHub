@@ -1,7 +1,6 @@
 
 import type { Metadata } from "next";
 import HeaderDashboard from "@/components/Dashboard/TopNav";
-// import { SidebarDemo } from "@/components/Dashboard/SideBar";
 import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
 import { SessionProvider } from "@/utils/providers/sessionProvider";
 import { Toaster } from "react-hot-toast";

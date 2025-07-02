@@ -15,7 +15,8 @@ export async function POST(req: NextRequest, {params}: {params: Promise<{id: str
         const responseData = {
             ...body,
             userId,
-            reflectionId: id
+            reflectionId: id,
+            is_completed: true
         };
         await db.insert(DailyReflectionsResponse).values(responseData);
         return sendResponse(200, responseData, 'Response created successfully');
