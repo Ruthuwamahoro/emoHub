@@ -956,7 +956,6 @@ const WeeklyChallengesCard: React.FC = () => {
                           } ${isUpdating ? 'scale-105 ring-2 ring-blue-300' : ''}`}
                         >
                           {editingChallenge?.cardId === card.id && editingChallenge?.challengeId === challenge.id ? (
-                            // Edit Mode
                             <div className="space-y-3">
                               <input
                                 type="text"
