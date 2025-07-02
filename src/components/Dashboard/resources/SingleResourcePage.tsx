@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,8 +14,7 @@ import {
   BookmarkCheck,
   Award,
   FileText,
-  Video,
-  Pause
+  Video
 } from 'lucide-react';
 
 import { useGetSingleResource } from "@/hooks/users/resources/useGetSingleResource";
@@ -76,7 +75,7 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
           <div className="relative">
             <iframe
               src={embedUrl}
-              className="w-full h-64 sm:h-80 md:h-96"
+              className="w-full h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -101,7 +100,7 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
     return (
       <Card className="overflow-hidden">
         <div 
-          className="relative h-64 sm:h-80 cursor-pointer group"
+          className="relative h-48 sm:h-56 md:h-64 lg:h-80 cursor-pointer group"
           onClick={() => setIsVideoPlaying(true)}
         >
           <img 
@@ -111,9 +110,9 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
           />
           
           <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
-            <div className="bg-red-600 hover:bg-red-700 transition-colors duration-200 rounded-full p-4 shadow-lg">
+            <div className="bg-red-600 hover:bg-red-700 transition-colors duration-200 rounded-full p-3 sm:p-4 shadow-lg">
               <svg 
-                className="w-8 h-8 text-white ml-1" 
+                className="w-6 h-6 sm:w-8 sm:h-8 text-white ml-1" 
                 fill="currentColor" 
                 viewBox="0 0 24 24"
               >
@@ -122,15 +121,15 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
             </div>
           </div>
 
-          <div className="absolute bottom-4 right-4">
-            <Badge className="bg-black bg-opacity-80 text-white">
+          <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4">
+            <Badge className="bg-black bg-opacity-80 text-white text-xs sm:text-sm">
               <Clock className="h-3 w-3 mr-1" />
               {formatDuration(singleData?.duration || 0)}
             </Badge>
           </div>
 
-          <div className="absolute top-4 right-4">
-            <Badge className="bg-red-600 text-white font-semibold">
+          <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
+            <Badge className="bg-red-600 text-white font-semibold text-xs sm:text-sm">
               YouTube
             </Badge>
           </div>
@@ -143,21 +142,22 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
+          <CardTitle className="flex items-center text-lg sm:text-xl">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Article Content
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="prose max-w-none">
-            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
               {singleData?.content || 'No content available'}
             </div>
           </div>
           {singleData?.url && (
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-4 sm:mt-6 pt-4 border-t">
               <Button 
                 variant="outline" 
+                className="w-full sm:w-auto"
                 onClick={() => window.open(singleData.url, '_blank')}
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
@@ -170,20 +170,157 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
     );
   };
 
+  const SidebarContent = () => (
+    <div className="space-y-4 sm:space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {isVideo ? (
+            <>
+              <Button 
+                className="w-full text-sm sm:text-base" 
+                onClick={() => setIsVideoPlaying(true)}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Watch Video
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full text-sm sm:text-base" 
+                onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in YouTube
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                className="w-full text-sm sm:text-base" 
+                onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Read Article
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full text-sm sm:text-base" 
+                onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in New Tab
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg">Resource Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isVideo && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-600">Duration</span>
+              <Badge variant="secondary" className="text-xs sm:text-sm">
+                <Clock className="h-3 w-3 mr-1" />
+                {formatDuration(singleData?.duration || 0)}
+              </Badge>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-sm text-gray-600">Difficulty</span>
+            <Badge 
+              variant="outline" 
+              className={`capitalize text-xs sm:text-sm ${getDifficultyColor(singleData?.difficultyLevel || 'beginner')}`}
+            >
+              {singleData.difficultyLevel || 'beginner'}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-sm text-gray-600">Type</span>
+            <Badge variant="secondary" className="capitalize text-xs sm:text-sm">
+              {isVideo ? (
+                <>
+                  <Video className="h-3 w-3 mr-1" />
+                  Video
+                </>
+              ) : (
+                <>
+                  <FileText className="h-3 w-3 mr-1" />
+                  Article
+                </>
+              )}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-sm text-gray-600">Category</span>
+            <Badge variant="secondary" className="capitalize text-xs sm:text-sm">
+              {singleData?.category?.replace('-', ' ')}
+            </Badge>
+          </div>
+          
+          {singleData?.hasQuiz && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-600">Quiz Available</span>
+              <Badge className="bg-green-100 text-green-800 text-xs sm:text-sm">Yes</Badge>
+            </div>
+          )}
+          
+          <div className="pt-4 border-t">
+            <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-2">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+              Created: {singleData?.createdAt ? formatDate(singleData.createdAt) : 'Unknown'}
+            </div>
+            {singleData?.updatedAt && singleData?.createdAt && singleData.updatedAt !== singleData.createdAt && (
+              <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                Updated: {formatDate(singleData.updatedAt)}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {singleData?.tags && singleData.tags.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base sm:text-lg">Tags</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {singleData.tags.map((tag: string, index: number) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   if (isLoading || isPending || isFetching) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 sm:h-8 w-3/4" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-72 w-full rounded-lg" />
+            <Skeleton className="h-48 sm:h-64 lg:h-72 w-full rounded-lg" />
           </div>
           <div className="space-y-4">
-            <Skeleton className="h-40 w-full rounded-lg" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-32 sm:h-40 w-full rounded-lg" />
+            <Skeleton className="h-10 sm:h-12 w-full" />
+            <Skeleton className="h-32 sm:h-40 w-full" />
           </div>
         </div>
       </div>
@@ -192,13 +329,13 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
 
   if (!singleData) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6">
         <Card>
-          <CardContent className="flex items-center justify-center py-12">
+          <CardContent className="flex items-center justify-center py-8 sm:py-12">
             <div className="text-center">
-              <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Resource not found</h3>
-              <p className="text-gray-600">The learning resource you're looking for doesn't exist or has been removed.</p>
+              <BookOpen className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Resource not found</h3>
+              <p className="text-sm sm:text-base text-gray-600">The learning resource you're looking for doesn't exist or has been removed.</p>
             </div>
           </CardContent>
         </Card>
@@ -210,37 +347,54 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
   const isArticle = singleData.resourceType === 'article';
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-white border border-gray-200">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 bg-white border border-gray-200">
+      <div className="block lg:hidden">
+        <Button 
+          variant="secondary"
+          size="sm"
+          className="bg-slate-600 hover:bg-slate-400 text-white w-full sm:w-auto"
+          onClick={() => window.location.href = "/dashboard/resources"}
+        >
+          ← Back
+        </Button>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="block lg:hidden">
+        <SidebarContent />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="hidden lg:block">
             <Button 
               variant="secondary"
               size="sm"
-              className="top-2 left-2 z-10 bg-slate-600 hover:bg-slate-400 text-white"
+              className="bg-slate-600 hover:bg-slate-400 text-white"
               onClick={() => window.location.href = "/dashboard/resources"}
             >
               ← Back
             </Button>
+          </div>
+
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                   {singleData?.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <Badge 
                     variant="outline" 
-                    className={`capitalize ${getDifficultyColor(singleData?.difficultyLevel || 'beginner')}`}
+                    className={`capitalize text-xs sm:text-sm ${getDifficultyColor(singleData?.difficultyLevel || 'beginner')}`}
                   >
                     <Award className="h-3 w-3 mr-1" />
                     {singleData?.difficultyLevel || 'beginner'}
                   </Badge>
-                  <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 text-xs sm:text-sm">
                     <Users className="h-3 w-3 mr-1" />
                     {singleData?.category?.replace('-', ' ')}
                   </Badge>
-                  <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+                  <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 text-xs sm:text-sm">
                     {isVideo ? (
                       <Video className="h-3 w-3 mr-1" />
                     ) : (
@@ -253,7 +407,7 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
               <Button 
                 variant="outline" 
                 size="sm"
-                className="ml-4"
+                className="w-full sm:w-auto sm:ml-4 text-sm"
               >
                 {singleData.isSaved ? (
                   <>
@@ -269,38 +423,36 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
               </Button>
             </div>
             
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-gray-600 text-sm sm:text-base lg:text-lg leading-relaxed">
               {singleData?.description || 'No description available'}
             </p>
 
-            <div className="text-gray-600 text-lg leading-relaxed">
+            <div className="text-gray-600 text-sm sm:text-base lg:text-lg leading-relaxed">
               {isArticle && singleData?.coverImage && (
                 <Image
                   src={singleData.coverImage}
                   alt="Cover image"
                   width={400}
                   height={300}
-                  className="rounded-lg"
+                  className="rounded-lg w-full sm:w-auto max-w-full h-auto"
                 />
               )}
             </div>
           </div>
 
-          {/* Dynamic Content Based on Type */}
           {isVideo && renderVideoContent()}
           {isArticle && renderArticleContent()}
 
-          {/* Additional Content Section for Videos */}
           {isVideo && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center font-medium text-lg">
-                  <BookOpen className="h-5 w-5 mr-2" />
+                <CardTitle className="flex items-center font-medium text-base sm:text-lg">
+                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   About This Video
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {singleData?.content || 'No additional content available'}
                 </p>
               </CardContent>
@@ -308,139 +460,8 @@ export const SingleLearningResourcesUI = ({ id }: SingleLearningResourcesUIProps
           )}
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {isVideo ? (
-                <>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => setIsVideoPlaying(true)}
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    Watch Video
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in YouTube
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Read Article
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={() => singleData?.url && window.open(singleData.url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in New Tab
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Resource Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isVideo && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Duration</span>
-                  <Badge variant="secondary">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {formatDuration(singleData?.duration || 0)}
-                  </Badge>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Difficulty</span>
-                <Badge 
-                  variant="outline" 
-                  className={`capitalize ${getDifficultyColor(singleData?.difficultyLevel || 'beginner')}`}
-                >
-                  {singleData.difficultyLevel || 'beginner'}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Type</span>
-                <Badge variant="secondary" className="capitalize">
-                  {isVideo ? (
-                    <>
-                      <Video className="h-3 w-3 mr-1" />
-                      Video
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="h-3 w-3 mr-1" />
-                      Article
-                    </>
-                  )}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Category</span>
-                <Badge variant="secondary" className="capitalize">
-                  {singleData?.category?.replace('-', ' ')}
-                </Badge>
-              </div>
-              
-              {singleData?.hasQuiz && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Quiz Available</span>
-                  <Badge className="bg-green-100 text-green-800">Yes</Badge>
-                </div>
-              )}
-              
-              <div className="pt-4 border-t">
-                <div className="flex items-center text-sm text-gray-500 mb-2">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Created: {singleData?.createdAt ? formatDate(singleData.createdAt) : 'Unknown'}
-                </div>
-                {singleData?.updatedAt && singleData?.createdAt && singleData.updatedAt !== singleData.createdAt && (
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Updated: {formatDate(singleData.updatedAt)}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {singleData?.tags && singleData.tags.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Tags</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {singleData.tags.map((tag: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        <div className="hidden lg:block">
+          <SidebarContent />
         </div>
       </div>
     </div>

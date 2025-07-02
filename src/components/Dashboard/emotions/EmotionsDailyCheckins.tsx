@@ -19,9 +19,6 @@ interface EmotionEntry {
     aiPositiveAspects?: string[];
 }
 
-
-
-
 export const getDatesInSeconds = (date: string): string => {
     const givenDate = new Date(date);
     const now = new Date();
@@ -115,7 +112,6 @@ export function EmotionsCheckIns() {
     
     const dataEmotions: EmotionEntry[] = data?.data || [];
 
-    // Helper function to check if a date is today
     const isToday = (dateString: string): boolean => {
         const today = new Date();
         const checkDate = new Date(dateString);
@@ -125,10 +121,7 @@ export function EmotionsCheckIns() {
                today.getDate() === checkDate.getDate();
     };
 
-    // Filter emotions submitted today
     const todayEmotions = dataEmotions.filter(emotion => isToday(emotion.createdAt));
-
-    
 
     const handleEmojis = (feeling: string): string => {
         const emojiMap: { [key: string]: string } = {
@@ -166,45 +159,49 @@ export function EmotionsCheckIns() {
     const hasMoreEntries = dataEmotions.length > 2;
 
     return (
-        <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <div className="space-y-10">
-                        <form onSubmit={onSubmit} className="space-y-9">
-                            <div className="bg-white rounded-lg p-6 shadow-sm border">
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">How are you feeling today?</h2>
+        <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 bg-gray-50 min-h-screen">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="lg:col-span-2 order-1 lg:order-1">
+                    <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+                        <form onSubmit={onSubmit} className="space-y-6 sm:space-y-8 lg:space-y-9">
+                            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                <h2 className="text-lg sm:text-xl lg:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
+                                    How are you feeling today?
+                                </h2>
                                 {errors.feelings && (
                                     <p className="text-red-500 text-sm mb-2">{errors.feelings}</p>
                                 )}
-                                <div className="flex flex-wrap gap-16">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-3 sm:gap-4 lg:gap-16">
                                     {FeelingEmotions.map((emotion) => (
                                         <button
                                             key={emotion.label}
                                             type="button"
                                             onClick={() => handleEmotionSelect(emotion.label)}
-                                            className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${
+                                            className={`flex flex-col items-center p-3 sm:p-4 lg:p-3 rounded-lg border-2 transition-all ${
                                                 formData.feelings === emotion.label
                                                     ? 'border-blue-500 bg-blue-50'
                                                     : 'border-gray-200 hover:border-gray-300'
                                             }`}
                                         >
-                                            <span className="text-2xl mb-1">{emotion.emoji}</span>
-                                            <span className="text-sm font-medium text-gray-700">{emotion.label}</span>
+                                            <span className="text-xl sm:text-2xl mb-1">{emotion.emoji}</span>
+                                            <span className="text-xs sm:text-sm font-medium text-gray-700">{emotion.label}</span>
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sm">🧠</span>
+                            {/* Intensity and Activities - Mobile stacks, desktop side-by-side */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                                {/* Emotional Intensity Card */}
+                                <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                            <span className="text-xs sm:text-sm">🧠</span>
                                         </div>
-                                        <span className="font-medium text-gray-900">Emotional intensity:</span>
-                                        <span className="text-pink-500 font-semibold">{formData.emotionIntensity}%</span>
+                                        <span className="font-medium text-gray-900 text-sm sm:text-base">Emotional intensity:</span>
+                                        <span className="text-pink-500 font-semibold text-sm sm:text-base">{formData.emotionIntensity}%</span>
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-4">How strongly do you feel this emotion?</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">How strongly do you feel this emotion?</p>
                                     <div className="space-y-2">
                                         <input
                                             type="range"
@@ -219,24 +216,27 @@ export function EmotionsCheckIns() {
                                             }}
                                         />
                                         <div className="flex justify-between text-xs text-gray-500">
-                                            <span>Very Low</span>
-                                            <span>Low</span>
-                                            <span>Moderate</span>
-                                            <span>High</span>
-                                            <span>Very High</span>
+                                            <span className="hidden sm:inline">Very Low</span>
+                                            <span className="sm:hidden">Low</span>
+                                            <span className="hidden sm:inline">Low</span>
+                                            <span className="hidden sm:inline">Moderate</span>
+                                            <span className="sm:hidden">Med</span>
+                                            <span className="hidden sm:inline">High</span>
+                                            <span className="sm:hidden">High</span>
+                                            <span className="hidden sm:inline">Very High</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sm">📝</span>
+                                <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                            <span className="text-xs sm:text-sm">📝</span>
                                         </div>
-                                        <span className="font-medium text-gray-900">Context & Activities</span>
+                                        <span className="font-medium text-gray-900 text-sm sm:text-base">Context & Activities</span>
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-4">Add tags to describe what influenced your mood</p>
-                                    <div className="flex gap-2 mb-3">
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Add tags to describe what influenced your mood</p>
+                                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
                                         <input
                                             type="text"
                                             value={newTag}
@@ -248,7 +248,7 @@ export function EmotionsCheckIns() {
                                         <button
                                             type="button"
                                             onClick={addTag}
-                                            className="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                                            className="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors w-full sm:w-auto"
                                         >
                                             Add tags
                                         </button>
@@ -266,19 +266,21 @@ export function EmotionsCheckIns() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-lg p-6 shadow-sm border">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <span className="text-sm">📋</span>
+
+                            {/* Notes Card */}
+                            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <span className="text-xs sm:text-sm">📋</span>
                                     </div>
-                                    <span className="font-medium text-gray-900">Additional notes</span>
+                                    <span className="font-medium text-gray-900 text-sm sm:text-base">Additional notes</span>
                                 </div>
-                                <p className="text-sm text-gray-600 mb-4">Describe what happened or why do you feel this way?</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Describe what happened or why do you feel this way?</p>
                                 <textarea
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleChange}
-                                    className="w-full p-4 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     rows={4}
                                     placeholder="Have wonderful day exploring new concepts at work, felt energized and focused. Feeling grateful for supportive colleagues"
                                 />
@@ -320,27 +322,27 @@ export function EmotionsCheckIns() {
                     </div>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="rounded-lg p-6 shadow-sm border bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+                <div className="space-y-4 sm:space-y-6 order-2 lg:order-2">
+                    <div className="rounded-lg p-4 sm:p-6 shadow-sm border bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
+                                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded flex items-center justify-center">
                                     <span className="text-xs">📊</span>
                                 </div>
-                                <h3 className="font-semibold text-gray-900">Recent Entries</h3>
+                                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Recent Entries</h3>
                             </div>
                             {hasMoreEntries && (
                                 <button 
                                     onClick={() => setShowAllEntries(!showAllEntries)}
-                                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors"
                                 >
                                     {showAllEntries ? 'Show Less' : 'View All'}
                                 </button>
                             )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">A quick look at your emotional journey</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">A quick look at your emotional journey</p>
                         
-                        <div className={`space-y-4 ${showAllEntries ? 'max-h-96 overflow-y-auto pr-2' : ''}`}>
+                        <div className={`space-y-3 sm:space-y-4 ${showAllEntries ? 'max-h-64 sm:max-h-96 overflow-y-auto pr-2' : ''}`}>
                             {isPendingEmotionsData ? (
                                 <>
                                     <EntrySkeleton />
@@ -348,20 +350,20 @@ export function EmotionsCheckIns() {
                                     <EntrySkeleton />
                                 </>
                             ) : dataEmotions.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-2xl">📝</span>
+                                <div className="text-center py-6 sm:py-8">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span className="text-xl sm:text-2xl">📝</span>
                                     </div>
-                                    <p className="text-sm text-gray-500">No entries found</p>
+                                    <p className="text-xs sm:text-sm text-gray-500">No entries found</p>
                                     <p className="text-xs text-gray-400 mt-1">Start by adding your first emotion check-in</p>
                                 </div>
                             ) : (
                                 displayedEntries.map((entry) => (
-                                    <div key={entry.id} className="border border-gray-300 p-8 rounded-xl pb-4 mb-4 last:border-b-0 bg-white">
+                                    <div key={entry.id} className="border border-gray-300 p-4 sm:p-6 lg:p-8 rounded-xl bg-white">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-lg">{handleEmojis(entry.feelings)}</span>
-                                                <span className="text-sm font-medium text-gray-900">{entry.feelings}</span>
+                                                <span className="text-base sm:text-lg">{handleEmojis(entry.feelings)}</span>
+                                                <span className="text-xs sm:text-sm font-medium text-gray-900">{entry.feelings}</span>
                                             </div>
                                             <span className="text-xs text-gray-500">{getDatesInSeconds(entry.createdAt)}</span>
                                         </div>
@@ -370,13 +372,18 @@ export function EmotionsCheckIns() {
                                                 Intensity: {entry.emotionIntensity}%
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-700 mb-2">{entry.notes}</p>
+                                        <p className="text-xs sm:text-sm text-gray-700 mb-2 line-clamp-2 sm:line-clamp-none">{entry.notes}</p>
                                         <div className="flex gap-2 flex-wrap">
-                                            {entry.activities.map((tag, index) => (
+                                            {entry.activities.slice(0, 3).map((tag, index) => (
                                                 <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
                                                     {tag}
                                                 </span>
                                             ))}
+                                            {entry.activities.length > 3 && (
+                                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                                                    +{entry.activities.length - 3} more
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 ))
@@ -384,7 +391,7 @@ export function EmotionsCheckIns() {
                         </div>
 
                         {!isPendingEmotionsData && !showAllEntries && hasMoreEntries && (
-                            <div className="flex items-center justify-center gap-1 mt-4 text-sm text-gray-500">
+                            <div className="flex items-center justify-center gap-1 mt-4 text-xs sm:text-sm text-gray-500">
                                 <span>Scroll for more</span>
                                 <span>●●●</span>
                             </div>
@@ -397,32 +404,32 @@ export function EmotionsCheckIns() {
                         )[0];
 
                         return (
-                            <div className="bg-white rounded-lg p-6 shadow-sm border">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
+                            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded flex items-center justify-center">
                                         <span className="text-xs">🤔</span>
                                     </div>
-                                    <span className="font-semibold text-gray-900">Reflection on Your emotions</span>
+                                    <span className="font-semibold text-gray-900 text-sm sm:text-base">Reflection on Your emotions</span>
                                 </div>
-                                <div className="space-y-4 overflow-y-auto max-h-48">
+                                <div className="space-y-3 sm:space-y-4 overflow-y-auto max-h-40 sm:max-h-48">
                                     {latestEmotion.aiAnalysis && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-gray-800 mb-1">AI Analysis:</h4>
-                                            <p className="text-sm text-gray-700">{latestEmotion.aiAnalysis}</p>
+                                            <h4 className="text-xs sm:text-sm font-medium text-gray-800 mb-1">AI Analysis:</h4>
+                                            <p className="text-xs sm:text-sm text-gray-700">{latestEmotion.aiAnalysis}</p>
                                         </div>
                                     )}
                                     
                                     {latestEmotion.aiMotivationalMessage && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-gray-800 mb-1">Motivational Message:</h4>
-                                            <p className="text-sm text-gray-700 italic">"{latestEmotion.aiMotivationalMessage}"</p>
+                                            <h4 className="text-xs sm:text-sm font-medium text-gray-800 mb-1">Motivational Message:</h4>
+                                            <p className="text-xs sm:text-sm text-gray-700 italic">"{latestEmotion.aiMotivationalMessage}"</p>
                                         </div>
                                     )}
 
                                     {latestEmotion.aiRecommendations && latestEmotion.aiRecommendations.length > 0 && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-gray-800 mb-1">Recommendations:</h4>
-                                            <ul className="text-sm text-gray-700 space-y-1">
+                                            <h4 className="text-xs sm:text-sm font-medium text-gray-800 mb-1">Recommendations:</h4>
+                                            <ul className="text-xs sm:text-sm text-gray-700 space-y-1">
                                                 {latestEmotion.aiRecommendations.slice(0, 2).map((rec, index) => (
                                                     <li key={index} className="flex items-start gap-1">
                                                         <span className="text-blue-500 mt-1">•</span>
@@ -435,15 +442,15 @@ export function EmotionsCheckIns() {
 
                                     {latestEmotion.aiDailyTips && latestEmotion.aiDailyTips.length > 0 && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-gray-800 mb-1">Daily Tips:</h4>
-                                            <p className="text-sm text-gray-700">{latestEmotion.aiDailyTips[0]}</p>
+                                            <h4 className="text-xs sm:text-sm font-medium text-gray-800 mb-1">Daily Tips:</h4>
+                                            <p className="text-xs sm:text-sm text-gray-700">{latestEmotion.aiDailyTips[0]}</p>
                                         </div>
                                     )}
                                 </div>
                                 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                    <p className="text-sm text-gray-600 mb-2">Take a moment to reflect on this:</p>
-                                    <p className="text-sm text-gray-700 italic">
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-2">Take a moment to reflect on this:</p>
+                                    <p className="text-xs sm:text-sm text-gray-700 italic">
                                         "Emotions are data, not directives. They provide valuable information about our experiences and needs, helping us navigate life with greater awareness and intention."
                                     </p>
                                 </div>
