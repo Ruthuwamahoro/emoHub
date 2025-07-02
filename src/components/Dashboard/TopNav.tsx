@@ -56,7 +56,6 @@ export default function HeaderDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-
   const handleSignOut = async () => {
     try {
       console.log('Attempting to sign out...');
@@ -65,8 +64,13 @@ export default function HeaderDashboard() {
         redirect: true 
       });
     } catch (error) {
-
       window.location.href = '/login';
+    }
+  };
+
+  const toggleMobileSidebar = () => {
+    if (typeof window !== 'undefined' && (window as any).toggleMobileSidebar) {
+      (window as any).toggleMobileSidebar();
     }
   };
 
@@ -120,7 +124,6 @@ export default function HeaderDashboard() {
     setNotificationCount(0);
   };
 
-  // Get last login text based on session login time
   const getLastLoginText = () => {
     return getTimeAgo(session?.loginTime);
   };
@@ -149,60 +152,63 @@ export default function HeaderDashboard() {
     <>
       <header className="relative w-full max-w-full top-0 bg-white border-b border-gray-200 z-40">
         <div className="w-full">
-          <div className="flex items-center justify-between px-4 py-3 h-[60px]">
+          <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 h-[60px]">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" className="p-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="p-2 md:hidden" 
+                onClick={toggleMobileSidebar}
+              >
+                <Menu className="h-5 w-5 text-gray-600" />
+              </Button>
+              <Button variant="ghost" size="icon" className="p-2 hidden md:block">
                 <Menu className="h-5 w-5 text-gray-600" />
               </Button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-0 rounded-full hover:ring-2 hover:ring-blue-200 transition-all duration-200">
-
                     {session ? (
-                    <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                      <AvatarImage 
-                        src={session.user.profilePicUrl || ""} 
-                        alt={session.user.fullName || "User"}
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-medium">
-                        <AvatarImages
-                        gender={session?.user?.gender || 'other'} 
-                        name={session?.user?.username || 'Anonymous'} 
-                        size={48}
-                      />
-                      </AvatarFallback>
-
-
-                    </Avatar>
-                  ) : (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>
-                        <CircleUser className="h-6 w-6" />
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
+                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
+                        <AvatarImage 
+                          src={session.user.profilePicUrl || ""} 
+                          alt={session.user.fullName || "User"}
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs sm:text-sm font-medium">
+                          <AvatarImages
+                            gender={session?.user?.gender || 'other'} 
+                            name={session?.user?.username || 'Anonymous'} 
+                            size={32}
+                          />
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                        <AvatarFallback>
+                          <CircleUser className="h-5 w-5 sm:h-6 sm:w-6" />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[320px] p-0 border-0 shadow-xl rounded-xl bg-white">
-                  <div className="bg-slate-400 p-6 rounded-t-xl">
+                <DropdownMenuContent align="end" className="w-[280px] sm:w-[320px] p-0 border-0 shadow-xl rounded-xl bg-white">
+                  <div className="bg-slate-400 p-4 sm:p-6 rounded-t-xl">
                     <div className="flex flex-col items-center text-center text-white">
-                      <Avatar className="bg-gradient-to-br from-blue-500 to-purple-600 h-16 w-16 border-4 border-white shadow-lg mb-3">
+                      <Avatar className="bg-gradient-to-br from-blue-500 to-purple-600 h-12 w-12 sm:h-16 sm:w-16 border-4 border-white shadow-lg mb-3">
                         <AvatarImage src={session?.user?.profilePicUrl || ""} />
-                        <AvatarFallback className="text-blue-600 text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600">
-                        <AvatarImages
-                        gender={session?.user?.gender || 'other'} 
-                        name={session?.user?.username || 'Anonymous'} 
-                        size={48}
-                        />
+                        <AvatarFallback className="text-blue-600 text-lg sm:text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600">
+                          <AvatarImages
+                            gender={session?.user?.gender || 'other'} 
+                            name={session?.user?.username || 'Anonymous'} 
+                            size={48}
+                          />
                         </AvatarFallback>
-
-
                       </Avatar>
-                      <h3 className="text-lg font-bold">{session?.user?.fullName}</h3>
-                      <p className="text-blue-100 text-sm">{session?.user?.email}</p>
+                      <h3 className="text-base sm:text-lg font-bold truncate max-w-full">{session?.user?.fullName}</h3>
+                      <p className="text-blue-100 text-xs sm:text-sm truncate max-w-full">{session?.user?.email}</p>
                       <div className="mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full">
                         <span className="text-xs font-medium">{session?.user?.role}</span>
                       </div>
@@ -215,7 +221,7 @@ export default function HeaderDashboard() {
                         <div className="p-2 bg-blue-50 rounded-lg">
                           <CircleUser className="h-4 w-4 text-blue-600" />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <span className="font-medium text-gray-900">My Profile</span>
                           <p className="text-xs text-gray-500 mt-0.5">View and edit your profile</p>
                         </div>
@@ -224,13 +230,12 @@ export default function HeaderDashboard() {
 
                     <DropdownMenuSeparator className="my-2 bg-gray-100" />
 
-                    <DropdownMenuItem className="rounded-lg p-3 hover:bg-red-50 transition-colors duration-200 cursor-pointer group" onClick={handleSignOut}
-                    >
+                    <DropdownMenuItem className="rounded-lg p-3 hover:bg-red-50 transition-colors duration-200 cursor-pointer group" onClick={handleSignOut}>
                       <div className="w-full flex items-center gap-3">
                         <div className="p-2 bg-red-50 group-hover:bg-red-100 rounded-lg transition-colors duration-200">
                           <LogOut className="h-4 w-4 text-red-600" />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <span className="font-medium text-gray-900 group-hover:text-red-600 transition-colors duration-200">Sign Out</span>
                           <p className="text-xs text-gray-500 mt-0.5">Sign out of your account</p>
                         </div>
@@ -240,8 +245,8 @@ export default function HeaderDashboard() {
 
                   <div className="px-4 py-3 bg-gray-50 rounded-b-xl border-t">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Last login: {getLastLoginText()}</span>
-                      <span className="flex items-center gap-1">
+                      <span className="truncate">Last login: {getLastLoginText()}</span>
+                      <span className="flex items-center gap-1 flex-shrink-0 ml-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         Online
                       </span>
@@ -250,8 +255,8 @@ export default function HeaderDashboard() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button variant="ghost" size="icon" className="p-2">
-                <Settings className="h-5 w-5 text-gray-600" />
+              <Button variant="ghost" size="icon" className="p-2 hidden sm:flex">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
               </Button>
 
               <Button 
@@ -260,9 +265,9 @@ export default function HeaderDashboard() {
                 className="p-2 relative"
                 onClick={handleNotificationClick}
               >
-                <Bell className="h-5 w-5 text-gray-600" />
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
                 {notificationCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-medium min-w-[20px]">
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-xs font-medium min-w-[16px] sm:min-w-[20px]">
                     {notificationCount > 99 ? '99+' : notificationCount}
                   </div>
                 )}
@@ -270,13 +275,15 @@ export default function HeaderDashboard() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="px-2 py-1 text-sm text-gray-600 hover:bg-gray-100">
-                    ENG <span className="ml-1">▼</span>
+                  <Button variant="ghost" className="px-1 sm:px-2 py-1 text-xs sm:text-sm text-gray-600 hover:bg-gray-100">
+                    <span className="hidden xs:inline">ENG</span>
+                    <span className="xs:hidden">EN</span>
+                    <span className="ml-1">▼</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[120px]">
-                  <DropdownMenuItem>ENG</DropdownMenuItem>
-                  <DropdownMenuItem>KINY</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-[100px] sm:w-[120px]">
+                  <DropdownMenuItem className="text-xs sm:text-sm">ENG</DropdownMenuItem>
+                  <DropdownMenuItem className="text-xs sm:text-sm">KINY</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -301,13 +308,13 @@ export default function HeaderDashboard() {
         />
       )}
 
-      <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+      <div className={`fixed top-0 right-0 h-full w-full sm:w-96 lg:w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
         isNotificationPanelOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">Notifications</h2>
             {notificationCount > 0 && (
               <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs font-medium">
                 {notificationCount}
@@ -324,7 +331,7 @@ export default function HeaderDashboard() {
           </Button>
         </div>
 
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-3 sm:p-4 border-b border-gray-100">
           <Button 
             variant="outline" 
             size="sm" 
@@ -346,7 +353,7 @@ export default function HeaderDashboard() {
               {notifications.map((notification) => (
                 <div 
                   key={notification.id}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
+                  className={`p-3 sm:p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
                     notification.unread ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                   }`}
                 >
@@ -356,13 +363,13 @@ export default function HeaderDashboard() {
                     }`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className={`text-sm font-medium text-gray-900 ${
+                        <h3 className={`text-sm font-medium text-gray-900 break-words ${
                           notification.unread ? 'font-semibold' : ''
                         }`}>
                           {notification.title}
                         </h3>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words">
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 mt-2">
@@ -376,7 +383,7 @@ export default function HeaderDashboard() {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
           <Button 
             variant="ghost" 
             className="w-full text-blue-600 hover:bg-blue-50 text-sm"

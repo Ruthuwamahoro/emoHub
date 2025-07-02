@@ -1,25 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { Sidebar, SidebarBody } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useSession, signOut } from "next-auth/react";
-import { Brain } from "lucide-react";
+import { Brain, X } from "lucide-react";
 import { getInitials } from "./TopNav";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { CircleUser } from "lucide-react";
 import { COMMON_LINKS, ROLE_BASED_LINKS } from "@/constants/roles";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
 import VibratingHelpButton from "./HelperButton";
 import { Avatar as AvatarImages } from "@/utils/genderAvatar";
-// npm i react-joyride@next
 
-const SidebarSkeleton = ({ open }: { open: boolean }) => (
-  <div className={cn("h-screen")}>
+const SidebarSkeleton = ({ open, isMobile }: { open: boolean; isMobile?: boolean }) => (
+  <div className={cn(
+    "h-screen",
+    isMobile && "fixed inset-0 z-50 bg-slate-900"
+  )}>
     <Sidebar open={open} setOpen={() => {}}>
       <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
         <div className="flex flex-col flex-1 overflow-hidden">
@@ -49,11 +50,13 @@ const SidebarSkeleton = ({ open }: { open: boolean }) => (
 export const CustomSiderbarLink = ({ 
   link, 
   className, 
-  dataTour 
+  dataTour,
+  onMobileClick
 }: { 
   link: any; 
   className?: string;
   dataTour?: string;
+  onMobileClick?: () => void;
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -69,9 +72,13 @@ export const CustomSiderbarLink = ({
           callbackUrl: "/login"
         });
         router.push("/login");
+        onMobileClick?.(); 
       } catch (error) {
         return error;
       }
+    } else {
+
+      onMobileClick?.();
     }
   };
 
@@ -81,14 +88,17 @@ export const CustomSiderbarLink = ({
         onClick={handleClick} 
         data-tour={dataTour} 
         className={cn(
-          "flex items-center justify-start gap-3 py-2 px-3 rounded-md transition-colors duration-200 w-full text-left",
+          "flex items-center justify-start gap-3 py-3 px-4 md:py-2 md:px-3 rounded-md transition-colors duration-200 w-full text-left",
           "text-slate-300 hover:bg-slate-800 hover:text-white",
           "focus:outline-none focus:bg-slate-800 focus:text-white",
+          "text-base md:text-sm", 
           className
         )}
       >
-        {link.icon}
-        <span className="text-sm whitespace-pre inline-block !p-0 !m-0">
+        <div className="w-5 h-5 md:w-4 md:h-4">
+          {link.icon}
+        </div>
+        <span className="whitespace-pre inline-block !p-0 !m-0">
           {link.label}
         </span>
       </button>
@@ -101,24 +111,22 @@ export const CustomSiderbarLink = ({
         href={link.href}
         onClick={handleClick}
         className={cn(
-          "flex items-center justify-start gap-3 py-2 px-3 rounded-md transition-colors duration-200 w-full",
-          // Base styles
+          "flex items-center justify-start gap-3 py-3 px-4 md:py-2 md:px-3 rounded-md transition-colors duration-200 w-full",
           "text-slate-300",
-          // Active state
           isActive && "bg-slate-800 text-white",
-          // Hover styles (only when not active)
           !isActive && "hover:bg-slate-800/50 hover:text-white",
-          // Focus styles
-          "focus:outline-none focus:bg-slate-800 focus:text-white"
+          "focus:outline-none focus:bg-slate-800 focus:text-white",
+          "text-base md:text-sm"
         )}
       >
         <div className={cn(
+          "w-5 h-5 md:w-4 md:h-4",
           isActive && "text-blue-400"
         )}>
           {link.icon}
         </div>
         <span className={cn(
-          "text-sm whitespace-pre inline-block !p-0 !m-0",
+          "whitespace-pre inline-block !p-0 !m-0",
           isActive && "font-medium"
         )}>
           {link.label}
@@ -249,12 +257,36 @@ const getTourAttributeForLink = (link: any): string => {
 export function SidebarDemo() {
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
   const [allLinks, setAllLinks] = useState(ROLE_BASED_LINKS.user);
+  const [isMobile, setIsMobile] = useState(false);
   
   const [runTour, setRunTour] = useState(false);
   const [tourSteps, setTourSteps] = useState<Step[]>([]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileOpen]);
 
   useEffect(() => {
     setMounted(true);
@@ -327,35 +359,77 @@ export function SidebarDemo() {
     }, 500); 
   };
 
+  const handleMobileLinkClick = () => {
+    setMobileOpen(false);
+  };
+
+
+  useEffect(() => {
+    (window as any).toggleMobileSidebar = () => {
+      setMobileOpen(!mobileOpen);
+    };
+  }, [mobileOpen]);
+
   if (!mounted) {
     return null;
   }
 
   if (status === "loading") {
-    return <SidebarSkeleton open={open} />;
+    return <SidebarSkeleton open={open} isMobile={isMobile} />;
   }
 
   if (!session) {
     return (
-      <div className={cn("h-screen")}>
-        <Sidebar open={open} setOpen={setOpen}>
-          <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
-            <div className="flex flex-col flex-1 overflow-hidden">
-              {open ? <Logo /> : <LogoIcon />}
+      <>
+        {/* Desktop Sidebar */}
+        <div className={cn("h-screen hidden md:block")}>
+          <Sidebar open={open} setOpen={setOpen}>
+            <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
+              <div className="flex flex-col flex-1 overflow-hidden">
+                {open ? <Logo /> : <LogoIcon />}
+                
+                <div className="mt-8 flex flex-col items-center justify-center text-center text-slate-400">
+                  <p className="text-sm">Please log in to access the dashboard</p>
+                </div>
+              </div>
               
-              <div className="mt-8 flex flex-col items-center justify-center text-center text-slate-400">
-                <p className="text-sm">Please log in to access the dashboard</p>
+              <div className="flex justify-center">
+                <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+                  <span className="text-xs text-slate-400">?</span>
+                </div>
+              </div>
+            </SidebarBody>
+          </Sidebar>
+        </div>
+
+ 
+        {mobileOpen && (
+          <>
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <div className="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white md:hidden">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                  <Logo />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-white hover:bg-slate-800"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="flex-1 flex items-center justify-center text-center text-slate-400 p-4">
+                  <p className="text-sm">Please log in to access the dashboard</p>
+                </div>
               </div>
             </div>
-            
-            <div className="flex justify-center">
-              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                <span className="text-xs text-slate-400">?</span>
-              </div>
-            </div>
-          </SidebarBody>
-        </Sidebar>
-      </div>
+          </>
+        )}
+      </>
     );
   }
 
@@ -363,17 +437,18 @@ export function SidebarDemo() {
 
   return (
     <>
-      <div className={cn("h-screen")}>
+ 
+      <div className={cn("h-screen hidden md:block")}>
         <Sidebar open={open} setOpen={setOpen}>
           <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
-          <div className="flex flex-col flex-1 overflow-hidden relative">
+            <div className="flex flex-col flex-1 overflow-hidden relative">
               {open ? <Logo /> : <LogoIcon />}
               
               <div className="fixed top-3 left-6 z-50 transition-all duration-300"
-              style={{ 
-                transform: open ? 'translateX(940px)' : 'translateX(940px)' 
-              }}
-              data-tour="take-tour">
+                style={{ 
+                  transform: open ? 'translateX(940px)' : 'translateX(940px)' 
+                }}
+                data-tour="take-tour">
                 <VibratingHelpButton onClick={startTour} />
               </div>
               
@@ -394,50 +469,24 @@ export function SidebarDemo() {
                 <Button className="p-[3px] relative w-full bg-transparent hover:bg-slate-800 transition-colors duration-200">
                   <div className="absolute inset-0 bg-gray-400/20 rounded-lg border-none" />
                   <div className="px-8 py-2 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent border-none w-full">
-                    {session ? (
-                      <Avatar className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200 rounded-full">
-                        {/* <AvatarImage
-                          src={session?.user?.profilePicUrl || ""}
-                          alt={session?.user?.fullName || ""}
-                        /> */}
-                        <AvatarFallback className="text-white test-sm font-medium">
-                          {getInitials(session?.user?.username)}
-                        </AvatarFallback>
-
-                        
-                      </Avatar>
-                    ) : (
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          <CircleUser className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
+                    <Avatar className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200 rounded-full">
+                      <AvatarFallback className="text-white test-sm font-medium">
+                        {getInitials(session?.user?.username)}
+                      </AvatarFallback>
+                    </Avatar>
                     <span className="pl-5">{userName}</span>
                   </div>
                 </Button>
               ) : (
                 <Link href="/profile" className="flex justify-center focus:outline-none rounded-lg">
                   <div className="p-10 rounded-lg hover:bg-slate-800/50 transition-colors duration-200">
-                    {session ? (
-                      <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                        {/* <AvatarImage
-                          src={session?.user?.profilePicUrl || ""}
-                          alt={session?.user?.fullName || ""}
-                        /> */}
-                        <AvatarImages
+                    <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
+                      <AvatarImages
                         gender={session?.user?.gender || 'other'} 
                         name={session?.user?.username || 'Anonymous'} 
                         size={48}
                       />
-                      </Avatar>
-                    ) : (
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          <CircleUser className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
+                    </Avatar>
                   </div>
                 </Link>
               )}
@@ -445,6 +494,65 @@ export function SidebarDemo() {
           </SidebarBody>
         </Sidebar>
       </div>
+
+      {mobileOpen && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-50 w-80 bg-slate-900 text-white md:hidden">
+            <div className="flex flex-col h-full">
+           
+              <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <Logo />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-white hover:bg-slate-800"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex flex-col gap-1">
+                  {allLinks.map((link, idx) => (
+                    <CustomSiderbarLink 
+                      key={`mobile-${link.href}-${idx}`} 
+                      link={link} 
+                      className=""
+                      dataTour={getTourAttributeForLink(link)}
+                      onMobileClick={handleMobileLinkClick}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-slate-700">
+                <Link 
+                  href="/profile" 
+                  onClick={handleMobileLinkClick}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors duration-200"
+                >
+                  <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
+                    <AvatarImages
+                      gender={session?.user?.gender || 'other'} 
+                      name={session?.user?.username || 'Anonymous'} 
+                      size={40}
+                    />
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{userName}</p>
+                    <p className="text-xs text-slate-400 truncate">{session?.user?.role}</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       
       <Joyride
         steps={tourSteps}
