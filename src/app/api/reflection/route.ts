@@ -2,7 +2,7 @@ import db from "@/server/db";
 import { DailyReflections, DailyReflectionsResponse, User } from "@/server/db/schema";
 import { checkIfUserIsAdmin, checkIfUserIsSpecialists, checkIfUserIsSuperAdmin, getUserIdFromSession } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
-import { eq, lt, gte, and } from "drizzle-orm";
+import { eq, lt, gte, and, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 export async function POST (req: NextRequest){
@@ -51,7 +51,7 @@ export async function POST (req: NextRequest){
             .values(insertData)
             .returning();
 
-        return sendResponse(201, newReflection, 'Daily reflection created successfully');
+        return sendResponse(200, newReflection, 'Daily reflection created successfully');
       } catch (error) {
         return sendResponse(500, null, error instanceof Error ? error.message : 'An unexpected error occurred');
       }
@@ -66,8 +66,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    today.setHours(0, 0, 0, 0); 
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const dailyReflections = await db.select({
       id: DailyReflections.id,
@@ -76,18 +78,25 @@ export async function GET(req: NextRequest) {
         userName: User.username,
         profilePicUrl: User.profilePicUrl,
       },
+      isCompleted: sql`COALESCE(${DailyReflectionsResponse.is_completed}, false)`.as('isCompleted'),
       createdAt: DailyReflections.createdAt,
       updatedAt: DailyReflections.updatedAt,
     }).from(DailyReflections)
-      .innerJoin(User, eq(DailyReflections.userId, User.id))
-      .where(
-        and(
-          gte(DailyReflections.createdAt, startOfDay),
-          lt(DailyReflections.createdAt, endOfDay)
-        )
+    .innerJoin(User, eq(DailyReflections.userId, User.id))
+    .leftJoin(DailyReflectionsResponse, and(
+      eq(DailyReflectionsResponse.reflectionId, DailyReflections.id),
+      eq(DailyReflectionsResponse.userId, userId)
+    ))
+    .where(
+      and(
+        gte(DailyReflections.createdAt, today),
+        lt(DailyReflections.createdAt, tomorrow)
       )
-      .execute();
+    )
+    .limit(1) 
+    .execute();
 
+    
     return sendResponse(200, dailyReflections, 'Today\'s reflections retrieved successfully');
   } catch (error) {
     return sendResponse(500, null, error instanceof Error ? error.message : 'An unexpected error occurred');

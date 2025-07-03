@@ -159,7 +159,7 @@ export function EmotionsCheckIns() {
     const hasMoreEntries = dataEmotions.length > 2;
 
     return (
-        <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 min-h-screen">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="lg:col-span-2 order-1 lg:order-1">
                     <div className="space-y-6 sm:space-y-8 lg:space-y-10">
@@ -169,7 +169,7 @@ export function EmotionsCheckIns() {
                                     How are you feeling today?
                                 </h2>
                                 {errors.feelings && (
-                                    <p className="text-red-500 text-sm mb-2">{errors.feelings}</p>
+                                    <p className="text-amber-500 text-sm mb-2">{errors.feelings}</p>
                                 )}
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-3 sm:gap-4 lg:gap-16">
                                     {FeelingEmotions.map((emotion) => (
@@ -190,16 +190,14 @@ export function EmotionsCheckIns() {
                                 </div>
                             </div>
 
-                            {/* Intensity and Activities - Mobile stacks, desktop side-by-side */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                                {/* Emotional Intensity Card */}
                                 <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
                                     <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
                                             <span className="text-xs sm:text-sm">🧠</span>
                                         </div>
                                         <span className="font-medium text-gray-900 text-sm sm:text-base">Emotional intensity:</span>
-                                        <span className="text-pink-500 font-semibold text-sm sm:text-base">{formData.emotionIntensity}%</span>
+                                        <span className="text-orange-500 font-semibold text-sm sm:text-base">{formData.emotionIntensity}%</span>
                                     </div>
                                     <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">How strongly do you feel this emotion?</p>
                                     <div className="space-y-2">
@@ -212,7 +210,7 @@ export function EmotionsCheckIns() {
                                             onChange={handleChange}
                                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                             style={{
-                                                background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${formData.emotionIntensity}%, #e5e7eb ${formData.emotionIntensity}%, #e5e7eb 100%)`
+                                                background: `linear-gradient(to right, #f97316 0%, #f97316 ${formData.emotionIntensity}%, #e5e7eb ${formData.emotionIntensity}%, #e5e7eb 100%)`
                                             }}
                                         />
                                         <div className="flex justify-between text-xs text-gray-500">
@@ -267,7 +265,6 @@ export function EmotionsCheckIns() {
                                 </div>
                             </div>
 
-                            {/* Notes Card */}
                             <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
                                 <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">

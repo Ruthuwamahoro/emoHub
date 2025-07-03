@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ReactSpeedometer from 'react-d3-speedometer';
 import { 
@@ -13,11 +13,16 @@ import {
   ArrowDown,
   Activity,
   CheckCircle,
-  MessageSquare,
   BarChart3,
   Zap,
-  Info
+  Info,
+  PlusCircle,
+  BookOpen
 } from 'lucide-react';
+
+import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 
 interface EmotionAnalysisResult {
   id?: string;
@@ -42,17 +47,17 @@ function EnhancedEmotionGauge() {
     },
   });
 
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Header Skeleton */}
           <div className="mb-8">
             <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-2 animate-pulse"></div>
             <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse"></div>
           </div>
 
-          {/* Main Dashboard Skeleton */}
           <div className="grid lg:grid-cols-3 gap-6 mb-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-pulse">
@@ -78,6 +83,8 @@ function EnhancedEmotionGauge() {
   const todaySummary = summaries?.data?.[0];
   const previousSummary = summaries?.data?.[1];
   const weekData = summaries?.data?.slice(0, 7) || [];
+
+  const hasNoData = !summaries?.data || summaries.data.length === 0;
 
   const trend = todaySummary && previousSummary 
     ? todaySummary.emotionalScore - previousSummary.emotionalScore 
@@ -107,10 +114,171 @@ function EnhancedEmotionGauge() {
     return 'Challenging emotions, stress, sadness';
   };
 
+  if (hasNoData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl text-left font-medium bg-slate-700 bg-clip-text text-transparent mb-2">
+              Your Emotional Journey
+            </h1>
+            <p className="text-base text-left text-slate-600 max-w-xl">
+              Track, understand, and nurture your emotional well-being with AI-powered insights
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="w-4 h-4 text-indigo-600" />
+              <h3 className="font-semibold text-slate-900" style={{ fontSize: '18px' }}>Emotional Score Color Guide</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+              <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl border border-red-200">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <div className="text-center">
+                  <div className="text-slate-700 font-bold text-xs">-100 to -60</div>
+                  <div className="text-slate-600 text-xs">Very Low</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
+                <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                <div className="text-center">
+                  <div className="text-slate-700 font-bold text-xs">-60 to -20</div>
+                  <div className="text-slate-600 text-xs">Low</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
+                <div className="text-center">
+                  <div className="text-slate-700 font-bold text-xs">-20 to +20</div>
+                  <div className="text-slate-600 text-xs">Neutral</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-lime-50 rounded-xl border border-lime-200">
+                <div className="w-4 h-4 bg-lime-500 rounded-full"></div>
+                <div className="text-center">
+                  <div className="text-slate-700 font-bold text-xs">+20 to +60</div>
+                  <div className="text-slate-600 text-xs">Good</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                <div className="text-center">
+                  <div className="text-slate-700 font-bold text-xs">+60 to +100</div>
+                  <div className="text-slate-600 text-xs">Excellent</div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 text-center">
+              <p className="text-slate-600 text-sm">Your emotional score ranges from -100 (most challenging) to +100 (most positive)</p>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+              <div className="mb-6">
+                <div className="w-20 h-20 bg-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Heart className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Welcome to Your Emotional Journey</h2>
+                <p className="text-slate-600 text-lg">Start tracking your emotions to unlock personalized insights and AI-powered recommendations</p>
+              </div>
+              
+              <div className="space-y-4">
+                <Button className="w-full bg-gradient-to-r from-slate-600 to-slate-400 text-white  py-4 px-6 rounded-lg hover:from-slate-700 hover:to-slate-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3" onClick={() => router.push("/dashboard/emotioncheckins")}>
+                  <PlusCircle className="w-5 h-5" />
+                  Record Your First Emotion
+                </Button>
+                
+                <div className="flex items-center justify-center gap-2 text-slate-500">
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                  <span className="text-sm">And</span>
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                </div>
+                
+                <Button className="w-full bg-slate-50 text-slate-700 font-medium py-3 px-6 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2" onClick={() => router.push("/dashboard/learning-resources")}>
+                  <BookOpen className="w-4 h-4" />
+                  Explore resource
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Your Emotional Dashboard</h3>
+                <p className="text-slate-600">See how your emotions will be visualized</p>
+              </div>
+              
+              <div className="flex flex-col items-center">
+                <div className="mb-6">
+                  <ReactSpeedometer
+                    maxValue={100}
+                    minValue={-100}
+                    value={0}
+                    needleColor="#6366f1"
+                    startColor="#ef4444"
+                    segments={5}
+                    endColor="#10b981"
+                    textColor="#1e293b"
+                    valueTextFontSize="16px"
+                    labelFontSize="10px"
+                    width={220}
+                    height={140}
+                    ringWidth={25}
+                    currentValueText="Ready to Start"
+                  />
+                </div>
+                
+                <div className="text-center">
+                  <Badge className="inline-flex px-4 py-2 rounded-full font-semibold bg-slate-100 text-slate-700 mb-3">
+                    Awaiting Your First Check-in
+                  </Badge>
+                  <p className="text-slate-600 text-sm">Your emotional score will appear here once you start tracking</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">What You'll Get</h3>
+              <p className="text-slate-600">Powerful features to support your emotional well-being</p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">AI Analysis</h4>
+                <p className="text-slate-600 text-sm">Get personalized insights about your emotional patterns and triggers</p>
+              </div>
+              
+              <div className="text-center p-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">Growth Actions</h4>
+                <p className="text-slate-600 text-sm">Receive tailored recommendations to improve your emotional well-being</p>
+              </div>
+              
+              <div className="text-center p-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-slate-900 mb-2">Trend Tracking</h4>
+                <p className="text-slate-600 text-sm">Monitor your emotional journey over time with detailed analytics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-200 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Hero Header */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl text-left font-medium bg-slate-700 bg-clip-text text-transparent mb-2">
             Your Emotional Journey
@@ -167,11 +335,8 @@ function EnhancedEmotionGauge() {
           </div>
         </div>
 
-        {/* Main Dashboard Grid - Updated with equal heights */}
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
-          {/* Left Column - Main Content */}
           <div className="lg:col-span-2 grid grid-rows-2 gap-4 max-h-[800px]">
-            {/* Today's Emotional Score */}
             {todaySummary && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                 <div className="p-6 flex-1 overflow-y-auto">
@@ -266,7 +431,6 @@ function EnhancedEmotionGauge() {
               </div>
             )}
 
-            {/* Recent Patterns */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
               <div className="p-6 flex-1 overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
@@ -314,9 +478,7 @@ function EnhancedEmotionGauge() {
             </div>
           </div>
 
-          {/* Right Column - Sidebar with matching height */}
           <div className="grid grid-rows-3 gap-4 max-h-[800px]">
-            {/* Motivational Message */}
             {todaySummary?.aiMotivationalMessage && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                 <div className="p-4 flex-1 overflow-y-auto">
@@ -335,7 +497,6 @@ function EnhancedEmotionGauge() {
               </div>
             )}
 
-            {/* Growth Actions */}
             {todaySummary?.aiRecommendations?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                 <div className="p-4 flex-1 overflow-y-auto">
@@ -359,7 +520,6 @@ function EnhancedEmotionGauge() {
               </div>
             )}
 
-            {/* Quick Stats */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
               <div className="p-4 flex-1 overflow-y-auto">
                 <div className="flex items-center gap-2 mb-4">

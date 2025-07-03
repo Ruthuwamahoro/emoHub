@@ -13,6 +13,7 @@ import { usegetReflection } from '@/hooks/reflection/useGetReflection';
 import EmotionGauge from './emotions/EmotionsTracker';
 import SimpleReflectionPopup from './DailyReflectionPopUp';
 
+
 const EmoHubDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState('March 2020');
   const [currentQuestionId, setCurrentQuestionId] = useState<string>('');
@@ -82,6 +83,11 @@ const EmoHubDashboard = () => {
     [session?.user?.fullName]
   );
 
+
+  const {
+    data: checkIsReflectionCompleted,
+  } = usegetReflection();
+
   useEffect(() => {
     if (data?.data && data.data.length > 0 && !currentQuestionId) {
       const firstQuestionId = data.data[0].id;
@@ -127,7 +133,7 @@ const EmoHubDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         
         <div className="mb-8 sm:mb-10 lg:mb-12">
@@ -207,12 +213,11 @@ const EmoHubDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white border-l-4 rounded-xl lg:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-gray-600 text-xs sm:text-sm font-medium truncate">Reflection Streak</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl text-gray-900 mt-1 font-bold">7</p>
+                {/* <p className="text-xl sm:text-2xl lg:text-3xl text-gray-900 mt-1 font-bold">{reflectionData?.data?.length}</p> */}
               </div>
               <div className="p-2 sm:p-2.5 lg:p-3 bg-emerald-50 rounded-lg lg:rounded-xl flex-shrink-0">
                 <Target className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-600" />
@@ -246,7 +251,10 @@ const EmoHubDashboard = () => {
         </div>
 
         <div className="mb-16 sm:mb-20 lg:mb-28">
-          <SimpleReflectionPopup/>
+        {checkIsReflectionCompleted?.data?.find((check: { isCompleted: boolean; }) => 
+          check.isCompleted === false
+        ) && <SimpleReflectionPopup />}
+
         </div>
 
         <div className="mb-8 sm:mb-9 lg:mb-10">
@@ -330,7 +338,6 @@ const EmoHubDashboard = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

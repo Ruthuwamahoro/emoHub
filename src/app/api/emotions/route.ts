@@ -307,9 +307,7 @@ export async function POST(req: NextRequest) {
         const result = await db.insert(UserEmotion).values(insertData).returning();
         
         const today = new Date().toISOString().split('T')[0]; 
-        generateDailySummary(userId, today).catch(error => {
-            console.error("Error updating daily summary:", error);
-        });
+        await generateDailySummary(userId, today);
         
         return sendResponse(200, {
             message: "Emotion recorded and summary updated successfully! 🎉",

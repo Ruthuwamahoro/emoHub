@@ -17,10 +17,10 @@ const ReflectionQuestionsSkeleton = () => (
   <div className="space-y-4 sm:space-y-6">
     {[...Array(2)].map((_, index) => (
       <div key={index} className="animate-pulse">
-        <div className="h-3 bg-orange-200 rounded-full w-24 sm:w-32 mb-2 sm:mb-3"></div>
-        <div className="h-4 bg-emerald-200 rounded-lg w-full mb-3 sm:mb-4"></div>
-        <div className="h-24 sm:h-28 bg-orange-50 rounded-xl mb-3 sm:mb-4"></div>
-        <div className="h-8 sm:h-9 bg-emerald-200 rounded-lg w-24 sm:w-32"></div>
+        <div className="h-3 bg-gray-200 rounded-full w-24 sm:w-32 mb-2 sm:mb-3"></div>
+        <div className="h-4 bg-gray-200 rounded-lg w-full mb-3 sm:mb-4"></div>
+        <div className="h-24 sm:h-28 bg-gray-50 rounded-xl mb-3 sm:mb-4"></div>
+        <div className="h-8 sm:h-9 bg-gray-200 rounded-lg w-24 sm:w-32"></div>
       </div>
     ))}
   </div>
@@ -29,17 +29,17 @@ const ReflectionQuestionsSkeleton = () => (
 const ReflectionSummarySkeleton = () => (
   <div className="space-y-3 sm:space-y-4">
     {[...Array(3)].map((_, index) => (
-      <div key={index} className="p-3 sm:p-5 bg-emerald-50 rounded-xl border border-emerald-100 animate-pulse">
+      <div key={index} className="p-3 sm:p-5 bg-gray-50 rounded-xl border border-gray-100 animate-pulse">
         <div className="flex items-center justify-between mb-2 sm:mb-3">
-          <div className="h-3 bg-emerald-200 rounded-full w-12 sm:w-16"></div>
-          <div className="h-3 w-3 bg-emerald-200 rounded-full"></div>
+          <div className="h-3 bg-gray-200 rounded-full w-12 sm:w-16"></div>
+          <div className="h-3 w-3 bg-gray-200 rounded-full"></div>
         </div>
         <div className="space-y-1 sm:space-y-2">
-          <div className="h-4 bg-emerald-200 rounded-lg w-3/4"></div>
-          <div className="h-3 bg-emerald-150 rounded-lg w-1/2"></div>
+          <div className="h-4 bg-gray-200 rounded-lg w-3/4"></div>
+          <div className="h-3 bg-gray-150 rounded-lg w-1/2"></div>
         </div>
         <div className="mt-2 sm:mt-3">
-          <div className="h-4 sm:h-5 bg-orange-200 rounded-full w-20 sm:w-24"></div>
+          <div className="h-4 sm:h-5 bg-gray-200 rounded-full w-20 sm:w-24"></div>
         </div>
       </div>
     ))}
@@ -111,6 +111,7 @@ const ReflectionCard = ({
   setCurrentQuestionId, 
   handleChange, 
   handleSaveReflection 
+
 }: {
   question: { id: string; question: string };
   currentQuestionId: string;
@@ -129,6 +130,7 @@ const ReflectionCard = ({
       </span>
     </div>
     <p className="text-sm font-medium text-gray-800 mb-4 leading-relaxed">
+      
       {question.question}
     </p>
     <div className="relative">
@@ -152,7 +154,7 @@ const ReflectionCard = ({
       type="button"
       onClick={() => handleSaveReflection(question.id)}
       disabled={isPendingResponse || (currentQuestionId === question.id && !formData.response.trim())}
-      className="mt-3 sm:mt-4 w-full sm:w-auto bg-gradient-to-r from-orange-500 to-emerald-500 text-white py-2.5 px-6 rounded-xl text-sm font-medium hover:from-orange-600 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center sm:justify-start shadow-lg"
+      className="mt-3 sm:mt-4 w-full sm:w-auto bg-amber-500 text-white py-2.5 px-6 rounded-xl text-sm font-medium hover:from-orange-600 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center sm:justify-start shadow-lg"
     >
       {isPendingResponse && currentQuestionId === question.id ? (
         <>
@@ -207,6 +209,7 @@ export function DailyReflection() {
     isFetching,
   } = usegetReflection();
 
+
   const { data: session } = useSession();
   const [currentQuestionId, setCurrentQuestionId] = useState<string>('');
   
@@ -214,6 +217,7 @@ export function DailyReflection() {
     data: reflectionSummaryss,
     isPending: isPendingSummary,
   } = usegetReflectionsSummary();
+
 
   const {
     formData,

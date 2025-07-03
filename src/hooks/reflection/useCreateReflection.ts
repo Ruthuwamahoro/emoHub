@@ -24,15 +24,15 @@ export const useCreateDailyReflection = () => {
             setFormData(initialData); 
             setErrors({});
 
-            showToast(response.message, "success");
             queryClient.invalidateQueries({ queryKey: ["Reflection"] });
             queryClient.invalidateQueries({ queryKey: ["AllCreatedReflection"] });
+            showToast(response.message, "success");
         },
         onError: (err: unknown) => {
             const error = err as Error;
 
             const errorMessage = error.message || "An error occured";
-            showToast(error?.message, "error");
+            showToast(errorMessage , "error");
         }
 
         

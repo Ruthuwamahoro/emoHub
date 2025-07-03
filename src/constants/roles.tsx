@@ -63,6 +63,11 @@ export const ROLE_BASED_LINKS = {
         icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
+        label: "Profile",
+        href: "/dashboard/profile",
+        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
+      },
+      {
         label: "Ask AI",
         href: "/dashboard/askus",
         icon: <FaRobot className="text-white h-5 w-5 flex-shrink-0" />,

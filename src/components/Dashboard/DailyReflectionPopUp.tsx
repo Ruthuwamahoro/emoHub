@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Sparkles, X } from 'lucide-react';
+import { usegetReflection } from '@/hooks/reflection/useGetReflection';
 
 const DailyReflectionCard = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -33,6 +34,7 @@ const DailyReflectionCard = () => {
       setIsCardVisible(false);
     }, 300);
   };
+
 
   if (!isCardVisible) {
     return null;

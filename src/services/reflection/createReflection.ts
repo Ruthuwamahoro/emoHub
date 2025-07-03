@@ -7,6 +7,9 @@ export const createDailyReflection = async(data: {
         const response = await axios.post('/api/reflection', data);
         return response.data;
     } catch(error){
-        return error;
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message || 'An error occurred');
+        }
+        throw error;
     }
 }

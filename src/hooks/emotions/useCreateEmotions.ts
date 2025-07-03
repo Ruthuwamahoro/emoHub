@@ -28,7 +28,8 @@ export const useCreateEmotionCheckins = () => {
             setFormData(initialData); 
             setErrors({});
             showToast(response.message, "success");
-            queryClient.invalidateQueries();
+            queryClient.invalidateQueries({ queryKey: ["emotion-summaries"] });
+            queryClient.invalidateQueries({ queryKey: ["Emotions"]})
         },
         onError: (err: unknown) => {
             const error = err as Error;

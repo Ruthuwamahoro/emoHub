@@ -77,7 +77,7 @@ const DailyReflectionsResponse = pgTable("daily_reflections_response", {
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
   reflectionId: uuid("reflection_id").references(() => DailyReflections.id, { onDelete: "cascade" }),
   response: text("response").notNull(),
-  is_completed: boolean("is_completed").default(false),
+  is_completed: boolean("is_completed").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

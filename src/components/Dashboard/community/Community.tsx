@@ -70,7 +70,6 @@ export default function CommunityGroups() {
     data, 
     isPending, 
     refetch, 
-    isRefetching 
   } = useGetAllGroups(session?.user?.id);
 
   const { joinGroup: joinGroupSubmit } = useJoinGroup();
@@ -80,7 +79,6 @@ export default function CommunityGroups() {
   const canManageGroups = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
   const isRegularUser = !canManageGroups;
 
-  console.log("hifijhdfhjksjhgfvcdfgh", groups)
 
   const [requests] = useState<GroupRequest[]>([
     {
@@ -106,7 +104,7 @@ export default function CommunityGroups() {
     }
   ]);
 
-  // Mock reported posts data
+
   const [reportedPosts] = useState<ReportedPost[]>([
     {
       id: 1,
@@ -377,7 +375,7 @@ export default function CommunityGroups() {
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-        {/* Header */}
+      
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex flex-col gap-4 sm:gap-6">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -417,7 +415,7 @@ export default function CommunityGroups() {
                 {isRegularUser && (
                   <Button 
                     onClick={() => setIsRequestModalOpen(true)}
-                    className="flex-1 sm:flex-none flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
+                    className="flex-1 sm:flex-none flex items-center justify-center bg-gradient-to-r from-slate-500 to-slate-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
                   >
                     <UserPlus className="mr-1 sm:mr-2" size={16} /> 
                     <span className="hidden xs:inline">Request</span>
@@ -435,7 +433,7 @@ export default function CommunityGroups() {
               </div>
             </div>
             
-            {/* Search Bar */}
+        
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6">
               <div className="flex flex-col md:flex-row justify-between gap-4">
                 <div className="relative w-full md:w-[500px]">
@@ -460,9 +458,8 @@ export default function CommunityGroups() {
           </div>
         ) : (
           <>
-            {/* Your Groups */}
             {joinedGroups.length > 0 && (
-              <section className="mb-6 sm:mb-8 bg-slate-200 px-4 sm:px-6 md:px-9 py-4 sm:py-5 rounded-2xl sm:rounded-3xl">
+              <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-50 px-4 sm:px-6 md:px-9 py-4 sm:py-5 rounded-2xl sm:rounded-3xl">
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 bg-slate-600 bg-clip-text text-transparent flex items-center">
                   <Heart className="mr-2 sm:mr-3 text-slate-500" size={20} />
                   Your Groups 💖
@@ -513,7 +510,7 @@ export default function CommunityGroups() {
                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0">
                         <Button 
                           onClick={() => handleViewGroup(group.id)}
-                          className="text-purple-600 hover:text-purple-700 flex items-center justify-center font-medium bg-purple-50 px-4 sm:px-8 py-2 sm:py-4 rounded-xl hover:bg-purple-100 transition-all duration-200 text-sm sm:text-base"
+                          className="text-white hover:text-purple-700 flex items-center justify-center bg-amber-500 px-4 sm:px-8 py-2 sm:py-4 rounded-xl hover:bg-purple-100 transition-all duration-200 text-sm sm:text-base font-light"
                         >
                           View <ArrowRight className="ml-1 w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
@@ -524,14 +521,14 @@ export default function CommunityGroups() {
                               <button className="text-blue-600 hover:text-blue-700 p-1.5 sm:p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition-all duration-200">
                                 <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
-                              <button className="text-red-500 hover:text-red-600 p-1.5 sm:p-2 bg-red-50 rounded-full hover:bg-red-100 transition-all duration-200">
+                              <button className="text-amber-500 hover:text-amber-600 p-1.5 sm:p-2 bg-red-50 rounded-full hover:bg-red-100 transition-all duration-200">
                                 <DeleteIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                               </button>
                             </>
                           ) : (
                             <Button 
                               onClick={() => handleExitGroup(group.id)}
-                              className="text-orange-500 hover:text-orange-600 text-xs sm:text-sm font-medium bg-red-50 px-4 sm:px-8 py-2 sm:py-4 rounded-xl hover:bg-orange-100 transition-all duration-200"
+                              className="text-white text-xs sm:text-sm font-extrabold bg-gradient-to-r from-slate-500 to-slate-600  px-4 sm:px-8 py-2 sm:py-4 rounded-xl transition-all duration-200"
                             >
                               Leave
                             </Button>
@@ -544,7 +541,6 @@ export default function CommunityGroups() {
               </section>
             )}
 
-            {/* Discover Groups */}
             <section>
               <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 bg-slate-600 bg-clip-text text-transparent flex items-center">
                 <Eye className="mr-2 sm:mr-3 text-slate-500" size={20} />

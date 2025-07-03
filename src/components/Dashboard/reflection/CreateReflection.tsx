@@ -23,7 +23,8 @@ export function GetsReflectionForm(){
         isPending: isPendingReflection,
       } = usegetAllCreatedReflection();
 
-      console.log("Reflection Summary Data:", reflectionData);
+
+ 
 
      const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const syntheticEvent = {
@@ -40,7 +41,6 @@ export function GetsReflectionForm(){
 
      return(
         <div className="min-h-screen bg-slate-50">
-            {/* Header Section */}
             <div className="bg-white border-b border-slate-200">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -63,7 +63,6 @@ export function GetsReflectionForm(){
                 </div>
             </div>
 
-            {/* Created Reflections Grid - Responsive */}
             {reflectionData?.data && reflectionData.data.length > 0 && (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
                     <div className="mb-4 sm:mb-6">
@@ -148,7 +147,6 @@ export function GetsReflectionForm(){
                         </div>
                     </div>
 
-                    {/* Responses Section - Scrollable */}
                     <div className="lg:col-span-8 order-1 lg:order-2">
                         <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
                             <div className="bg-[#fb923c] px-4 sm:px-6 py-3 sm:py-4">
