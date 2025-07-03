@@ -163,7 +163,7 @@ const EmoHubDashboard = () => {
           <div className="flex flex-col space-y-4 sm:space-y-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:space-y-0">
             <div className="space-y-2 lg:space-y-2">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-6xl font-bold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-black via-amber-600 to-amber-600 bg-clip-text text-transparent">
                   {greeting},
                 </span>
                 <br />

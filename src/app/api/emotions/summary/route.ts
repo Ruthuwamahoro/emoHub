@@ -45,7 +45,6 @@ export async function GET(req: NextRequest) {
     }
 }
 
-// POST - Generate summary for specific date
 export async function POST(req: NextRequest) {
     try {
         const userId = await getUserIdFromSession();
@@ -64,7 +63,6 @@ export async function POST(req: NextRequest) {
             return sendResponse(400, null, "No emotions found for the specified date");
         }
     } catch (error) {
-        console.error("Error generating summary:", error);
         return sendResponse(500, null, "Internal Server Error");
     }
 }

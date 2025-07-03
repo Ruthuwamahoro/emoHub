@@ -1,5 +1,5 @@
 
-import { UserProfile } from "@/components/Dashboard/Profile";
+import UserProfile  from "@/components/Dashboard/Profile";
 export default function Home() {
   return (
     <div className="">

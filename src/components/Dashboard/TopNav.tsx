@@ -178,11 +178,12 @@ export default function HeaderDashboard() {
                           alt={session.user.fullName || "User"}
                         />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs sm:text-sm font-medium">
-                          <AvatarImages
+                          {/* <AvatarImages
                             gender={session?.user?.gender || 'other'} 
                             name={session?.user?.username || 'Anonymous'} 
                             size={32}
-                          />
+                          /> */}
+                          {getInitials(session?.user?.fullName)}
                         </AvatarFallback>
                       </Avatar>
                     ) : (
@@ -199,12 +200,8 @@ export default function HeaderDashboard() {
                     <div className="flex flex-col items-center text-center text-white">
                       <Avatar className="bg-gradient-to-br from-blue-500 to-purple-600 h-12 w-12 sm:h-16 sm:w-16 border-4 border-white shadow-lg mb-3">
                         <AvatarImage src={session?.user?.profilePicUrl || ""} />
-                        <AvatarFallback className="text-blue-600 text-lg sm:text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600">
-                          <AvatarImages
-                            gender={session?.user?.gender || 'other'} 
-                            name={session?.user?.username || 'Anonymous'} 
-                            size={48}
-                          />
+                        <AvatarFallback className="text-white text-lg sm:text-xl font-bold bg-gradient-to-br from-blue-500 to-purple-600">
+                          {getInitials(session?.user?.fullName)}
                         </AvatarFallback>
                       </Avatar>
                       <h3 className="text-base sm:text-lg font-bold truncate max-w-full">{session?.user?.fullName}</h3>

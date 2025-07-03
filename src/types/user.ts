@@ -5,6 +5,11 @@ export interface UserInterface {
     password_hash: string;
 }
 export interface UpdateprofileInterface {
+    fullName: string;
+    username: string;
+    gender: string;
+    anonymousName: string,
+    anonymousAvatar: string,
     expertise: string;
     profilePicUrl: string;
     bio: string;

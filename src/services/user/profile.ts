@@ -1,7 +1,12 @@
-import { UpdateprofileInterface, UserInterface } from "@/types/user";
+import { UpdateprofileInterface } from "@/types/user";
 import axios from "axios";
 
-export const profileData = async (data: UpdateprofileInterface): Promise<{ message: string }> => {
+// Updated interface to include isAnonymous
+interface ExtendedUpdateprofileInterface extends UpdateprofileInterface {
+  isAnonymous?: boolean;
+}
+
+export const updateProfileData = async (data: ExtendedUpdateprofileInterface): Promise<{ message: string }> => {
     const response = await axios.patch("/api/profile", data)
     return response.data
 }
@@ -9,9 +14,7 @@ export const profileData = async (data: UpdateprofileInterface): Promise<{ messa
 export const uploadImageToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
-  
-    formData.append("file", file);
-    formData.append("upload_preset", "default_preset");
+  formData.append("upload_preset", "default_preset");
 
   try {
     const response = await axios.post(
@@ -29,3 +32,8 @@ export const uploadImageToCloudinary = async (file: File): Promise<string> => {
     throw error;
   }
 };
+
+export const getUserById = async (id: string) => {
+  const response = await axios.get(`/api/users/${id}`)
+  return response.data
+}

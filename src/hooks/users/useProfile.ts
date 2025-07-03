@@ -1,39 +1,51 @@
 import { useState } from "react";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
-import { profileData } from "@/services/user/profile";
 import { UpdateprofileInterface } from "@/types/user";
 import showToast from "@/utils/showToast";
+import { updateProfileData, uploadImageToCloudinary } from "@/services/user/profile";
 
-const initialData: UpdateprofileInterface = {
+// Updated interface to include isAnonymous
+interface ExtendedUpdateprofileInterface extends UpdateprofileInterface {
+  isAnonymous?: boolean;
+}
+
+const initialData: ExtendedUpdateprofileInterface = {
+  fullName: "",
+  username: "",
+  gender: "",
+  anonymousName: "",
+  anonymousAvatar: "",
   expertise: "",
   profilePicUrl: "",
   bio: "",
-  location: ""
+  location: "",
+  isAnonymous: false
 };
 
 export const useUpdateProfile = () => {
-  const [Data, setData] = useState<UpdateprofileInterface>(initialData);
+  const [Data, setData] = useState<ExtendedUpdateprofileInterface>(initialData);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const router = useRouter();
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
+
   const updateProfileMutation = useMutation({
     mutationKey: ["updateProfile"],
-    mutationFn: profileData,
+    mutationFn: updateProfileData,
     onSuccess: (response: { message: string }) => {
       if (response.message === "Profile Completed successfully") {
         queryClient.invalidateQueries();
         setData(initialData);
         setErrors({});
+        setImageFile(null);
+        setImagePreview(null);
         showToast(response.message, "success");
-        router.push("/");
       } else {
         showToast(response.message, "error");
       }
@@ -62,21 +74,49 @@ export const useUpdateProfile = () => {
     }));
   };
 
+  const handleImageUpload = (file: File) => {
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const removeImage = () => {
     setData({ ...Data, profilePicUrl: "" });
     setImagePreview(null);
+    setImageFile(null);
   };
+
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-
     setData((prevState) => ({
       ...prevState,
+      [id]: value,
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     try {
-      updateProfileMutation.mutate(Data);
+      let dataToSubmit = { ...Data };
+      
+      // Upload image to Cloudinary if there's a new image file
+      if (imageFile) {
+        try {
+          const imageUrl = await uploadImageToCloudinary(imageFile);
+          dataToSubmit = {
+            ...dataToSubmit,
+            profilePicUrl: imageUrl
+          };
+        } catch (error) {
+          showToast("Failed to upload image", "error");
+          return;
+        }
+      }
+
+      updateProfileMutation.mutate(dataToSubmit);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors = error.errors.reduce(
@@ -96,9 +136,14 @@ export const useUpdateProfile = () => {
     setData,
     handleSubmit,
     handleInputChanges,
+    handleImageUpload,
     isPending: updateProfileMutation.isPending,
     handleAddressChange,
     removeImage,
     errors,
+    imagePreview,
+    imageFile,
+    setImageFile,
+    setImagePreview,
   };
 };

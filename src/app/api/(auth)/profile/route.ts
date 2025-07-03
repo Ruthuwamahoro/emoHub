@@ -1,5 +1,3 @@
-// API routes for user profile
-
 import cloudinary from "cloudinary";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -29,6 +27,7 @@ export const PATCH = async (req: NextRequest) => {
     return body;
   }
 
+  
   if (Object.keys(body).length === 0) {
     return NextResponse.json(
       { status: 400, message: "No fields provided to update!", data: null },
@@ -53,6 +52,9 @@ export const PATCH = async (req: NextRequest) => {
     const updateData = {
       ...body,
     };
+
+    console.log("jiji----------", updateData)
+
 
     await db.update(User).set(updateData).where(eq(User.id, userId));
 

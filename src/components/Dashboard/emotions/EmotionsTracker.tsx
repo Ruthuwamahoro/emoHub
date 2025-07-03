@@ -1,12 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ReactSpeedometer from 'react-d3-speedometer';
 import { 
   Heart, 
   TrendingUp, 
-  Calendar, 
   Target, 
   Sparkles,
   ArrowUp,
@@ -23,6 +22,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 interface EmotionAnalysisResult {
   id?: string;
@@ -37,6 +39,123 @@ interface EmotionAnalysisResult {
 }
 
 function EnhancedEmotionGauge() {
+  const [filterType, setFilterType] = useState<'week' | 'month' | 'year'>('week');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filteredData, setFilteredData] = useState<EmotionAnalysisResult[]>([]);
+
+  const getSpeedometerColorCode = (score: number) => {
+    if (score >= 60) return 'green';
+    if (score >= 20) return 'lightgreen';
+    if (score >= -20) return 'yellow';
+    if (score >= -60) return 'orange';
+    return 'red';
+  };
+
+  const getSpeedometerColorName = (score: number) => {
+    if (score >= 60) return 'Green';
+    if (score >= 20) return 'Light Green';
+    if (score >= -20) return 'Yellow';
+    if (score >= -60) return 'Orange';
+    return 'Red';
+  };
+
+  const getSpeedometerDisplayColor = (score: number) => {
+    if (score >= 60) return '#10b981'; 
+    if (score >= 20) return '#84cc16'; 
+    if (score >= -20) return '#D4DA26'; 
+    if (score >= -60) return '#f97316';
+    return '#ef4444';
+  };
+
+
+
+  const getScoreColor = (score: number) => {
+    if (score >= 60) return 'text-emerald-600';
+    if (score >= 20) return 'text-lime-600';
+    if (score >= -20) return 'text-amber-600';
+    if (score >= -60) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 60) return 'bg-emerald-50 border-emerald-200';
+    if (score >= 20) return 'bg-lime-50 border-lime-200';
+    if (score >= -20) return 'bg-amber-50 border-amber-200';
+    if (score >= -60) return 'bg-orange-50 border-orange-200';
+    return 'bg-red-50 border-red-200';
+  };
+
+  const getGradientColor = (score: number) => {
+    if (score >= 60) return 'from-emerald-500 to-teal-600';
+    if (score >= 20) return 'from-lime-500 to-green-600';
+    if (score >= -20) return 'from-amber-500 to-orange-600';
+    if (score >= -60) return 'from-orange-500 to-red-600';
+    return 'from-rose-500 to-pink-600';
+  };
+
+  const getColorMeaning = (score: number) => {
+    if (score >= 60) {
+      return 'You\'re feeling uplifted and energized — emotions like happiness, gratitude, or excitement may be present.';
+    }
+    if (score >= 20) {
+      return 'You\'re experiencing a positive mood — feeling optimistic, content, or motivated.';
+    }
+    if (score >= -20) {
+      return 'You\'re in a neutral state — feeling balanced, calm, or steady.';
+    }
+    if (score >= -60) {
+      return 'You may be feeling mixed emotions — perhaps uncertain, reflective, or experiencing some challenges.';
+    }
+    return 'You might be going through a tough time — emotions like sadness, anxiety, or frustration could be present.';
+  };
+  
+
+
+
+  const getFilteredData = (data: EmotionAnalysisResult[], type: 'week' | 'month' | 'year', date: Date) => {
+    if (!data || data.length === 0) return [];
+    
+    const currentDate = new Date(date);
+    
+    switch (type) {
+      case 'week':
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        
+        return data.filter(item => {
+          const itemDate = new Date(item.summaryDate);
+          return itemDate >= startOfWeek && itemDate <= endOfWeek;
+        }).slice(0, 7);
+        
+      case 'month':
+        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        
+        return data.filter(item => {
+          const itemDate = new Date(item.summaryDate);
+          return itemDate >= startOfMonth && itemDate <= endOfMonth;
+        });
+        
+      case 'year':
+        const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+        const endOfYear = new Date(currentDate.getFullYear(), 11, 31);
+        
+        return data.filter(item => {
+          const itemDate = new Date(item.summaryDate);
+          return itemDate >= startOfYear && itemDate <= endOfYear;
+        });
+        
+      default:
+        return data.slice(0, 7);
+    }
+  };
+
+  
  
   const { data: summaries, isLoading } = useQuery({
     queryKey: ['emotion-summaries'],
@@ -46,6 +165,53 @@ function EnhancedEmotionGauge() {
       return response.json();
     },
   });
+
+
+  useEffect(() => {
+    if (summaries?.data) {
+      const filtered = getFilteredData(summaries.data, filterType, selectedDate);
+      setFilteredData(filtered);
+    }
+  }, [summaries?.data, filterType, selectedDate]);
+
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    
+    switch (filterType) {
+      case 'week':
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+        break;
+      case 'month':
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        break;
+      case 'year':
+        newDate.setFullYear(newDate.getFullYear() + (direction === 'next' ? 1 : -1));
+        break;
+    }
+    
+    setSelectedDate(newDate);
+  };
+
+  const getDateRangeDisplay = () => {
+    switch (filterType) {
+      case 'week':
+        const startOfWeek = new Date(selectedDate);
+        startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        
+      case 'month':
+        return selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        
+      case 'year':
+        return selectedDate.getFullYear().toString();
+        
+      default:
+        return '';
+    }
+  };
 
   const router = useRouter();
 
@@ -84,35 +250,14 @@ function EnhancedEmotionGauge() {
   const previousSummary = summaries?.data?.[1];
   const weekData = summaries?.data?.slice(0, 7) || [];
 
+
+
   const hasNoData = !summaries?.data || summaries.data.length === 0;
 
   const trend = todaySummary && previousSummary 
     ? todaySummary.emotionalScore - previousSummary.emotionalScore 
     : 0;
 
-  const getScoreColor = (score: number) => {
-    if (score >= 60) return 'text-emerald-600';
-    if (score >= 20) return 'text-amber-600';
-    return 'text-rose-600';
-  };
-
-  const getScoreBg = (score: number) => {
-    if (score >= 60) return 'bg-emerald-50 border-emerald-200';
-    if (score >= 20) return 'bg-amber-50 border-amber-200';
-    return 'bg-rose-50 border-rose-200';
-  };
-
-  const getGradientColor = (colorCode: string) => {
-    if (colorCode === 'green') return 'from-emerald-500 to-teal-600';
-    if (colorCode === 'yellow') return 'from-amber-500 to-orange-600';
-    return 'from-rose-500 to-pink-600';
-  };
-
-  const getColorMeaning = (colorCode: string) => {
-    if (colorCode === 'green') return 'Positive emotions, joy, contentment';
-    if (colorCode === 'yellow') return 'Neutral emotions, balanced state';
-    return 'Challenging emotions, stress, sadness';
-  };
 
   if (hasNoData) {
     return (
@@ -342,12 +487,13 @@ function EnhancedEmotionGauge() {
                 <div className="p-6 flex-1 overflow-y-auto">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl bg-gradient-to-r ${getGradientColor(todaySummary.colorCode)}`}>
+                      <div className={`p-2 rounded-xl bg-gradient-to-r ${getGradientColor(todaySummary.emotionalScore)}`}>
                         <Heart className="w-5 h-5 text-white" />
                       </div>
                       <div>
                         <h2 className="font-bold text-slate-900" style={{ fontSize: '18px' }}>Today's Score</h2>
-                        <p className="text-slate-600" style={{ fontSize: '14px' }}>Your current emotional state</p>
+                        <p className="text-slate-600" style={{ fontSize: '14px' }}
+                        >Your current emotional state</p>
                       </div>
                     </div>
                     
@@ -392,14 +538,28 @@ function EnhancedEmotionGauge() {
                         ringWidth={25}
                         currentValueText={`${todaySummary.emotionalScore}`}
                       />
+
+                      <div className="mt-4 flex items-center justify-center gap-2 p-3 bg-slate-50 rounded-xl">
+                        <div 
+                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          style={{ backgroundColor: getSpeedometerDisplayColor(todaySummary.emotionalScore) }}
+                        ></div>
+                        <div className="text-center">
+                          <div className="text-slate-700 font-bold text-sm">
+                            {getSpeedometerColorName(todaySummary.emotionalScore)} Zone
+                          </div>
+                          <div className="text-slate-500 text-xs">
+                            Pointer Color: {getSpeedometerColorCode(todaySummary.emotionalScore)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     
                     <div className="flex-1 space-y-3">
-                      <div className={`inline-flex px-4 py-2 rounded-full font-semibold ${
-                        todaySummary.colorCode === 'green' ? 'bg-emerald-100 text-emerald-800' :
-                        todaySummary.colorCode === 'yellow' ? 'bg-amber-100 text-amber-800' :
-                        'bg-rose-100 text-rose-800'
-                      }`} style={{ fontSize: '16px' }}>
+                    <div 
+                        className="inline-flex px-4 py-2 rounded-full font-semibold text-white"
+                        style={{ backgroundColor: getSpeedometerDisplayColor(todaySummary.emotionalScore), fontSize: '16px' }}
+                      >
                         {todaySummary.emotionalState}
                       </div>
                       
@@ -415,13 +575,12 @@ function EnhancedEmotionGauge() {
                       
                       <div className="bg-slate-50 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-3 h-3 rounded-full ${
-                            todaySummary.colorCode === 'green' ? 'bg-emerald-500' :
-                            todaySummary.colorCode === 'yellow' ? 'bg-amber-500' :
-                            'bg-rose-500'
-                          }`}></div>
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: getSpeedometerDisplayColor(todaySummary.emotionalScore) }}
+                          ></div>
                           <span className="text-slate-700 font-medium" style={{ fontSize: '13px' }}>
-                            {getColorMeaning(todaySummary.colorCode)}
+                          {getColorMeaning(todaySummary.emotionalScore)}
                           </span>
                         </div>
                       </div>
@@ -439,22 +598,74 @@ function EnhancedEmotionGauge() {
                       <TrendingUp className="w-4 h-4 text-indigo-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900" style={{ fontSize: '18px' }}>Weekly Overview</h3>
+                      <h3 className="font-bold text-slate-900" style={{ fontSize: '18px' }}>
+                        {filterType === 'week' ? 'Weekly' : filterType === 'month' ? 'Monthly' : 'Yearly'} Overview
+                      </h3>
                       <p className="text-slate-600" style={{ fontSize: '14px' }}>Your emotional patterns</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-slate-500 bg-slate-50 px-2 py-1 rounded-full">
-                    <Calendar className="w-3 h-3" />
-                    <span className="font-medium" style={{ fontSize: '12px' }}>Last 7 days</span>
+                  
+                  <div className="flex items-center gap-2">
+                    <Select value={filterType} onValueChange={(value: 'week' | 'month' | 'year') => setFilterType(value)}>
+                      <SelectTrigger className="w-24 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="week">Week</SelectItem>
+                        <SelectItem value="month">Month</SelectItem>
+                        <SelectItem value="year">Year</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-                  {weekData.slice(0, 7).map((day: EmotionAnalysisResult, index: number) => (
+                <div className="flex items-center justify-between mb-4 p-2 rounded-lg bg-gray-200">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateDate('prev')}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <CalendarDays className="w-4 h-4" />
+                    <span className="font-medium text-sm">{getDateRangeDisplay()}</span>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateDate('next')}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                
+                <div className={`grid gap-2 ${
+                  filterType === 'week' ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-7' : 
+                  filterType === 'month' ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6' : 
+                  'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                }`}>
+                  {filteredData.map((day: EmotionAnalysisResult, index: number) => (
                     <div key={day.id || index} className={`p-3 rounded-xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5 ${getScoreBg(day.emotionalScore)}`}>
                       <div className="text-center">
                         <div className="text-slate-600 mb-1 uppercase tracking-wider font-semibold" style={{ fontSize: '10px' }}>
-                          {new Date(day.summaryDate).toLocaleDateString('en-US', { weekday: 'short' })}
+                          {filterType === 'week' 
+                            ? new Date(day.summaryDate).toLocaleDateString('en-US', { weekday: 'short' })
+                            : filterType === 'month' 
+                            ? new Date(day.summaryDate).toLocaleDateString('en-US', { day: 'numeric' })
+                            : new Date(day.summaryDate).toLocaleDateString('en-US', { month: 'short' })
+                          }
+                        </div>
+                        <div className="text-slate-500 mb-1" style={{ fontSize: '9px' }}>
+                          {new Date(day.summaryDate).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            ...(filterType === 'year' && { year: 'numeric' })
+                          })}
                         </div>
                         <div className={`font-bold ${getScoreColor(day.emotionalScore)} mb-1`} style={{ fontSize: '18px' }}>
                           {day.emotionalScore > 0 ? '+' : ''}{day.emotionalScore}
@@ -463,8 +674,10 @@ function EnhancedEmotionGauge() {
                         <div className="w-full bg-slate-200 rounded-full h-1.5">
                           <div 
                             className={`h-1.5 rounded-full transition-all ${
-                              day.colorCode === 'green' ? 'bg-emerald-500' : 
-                              day.colorCode === 'yellow' ? 'bg-amber-500' : 
+                              day.emotionalScore >= 60 ? 'bg-emerald-500' : 
+                              day.emotionalScore >= 20 ? 'bg-lime-500' :
+                              day.emotionalScore >= -20 ? 'bg-amber-500' :
+                              day.emotionalScore >= -60 ? 'bg-orange-500' :
                               'bg-rose-500'
                             }`}
                             style={{ width: `${Math.max(20, Math.abs(day.emotionalScore))}%` }}
@@ -473,6 +686,13 @@ function EnhancedEmotionGauge() {
                       </div>
                     </div>
                   ))}
+                  
+                  {filteredData.length === 0 && (
+                    <div className="col-span-full text-center py-8 text-slate-500">
+                      <CalendarDays className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No data available for the selected {filterType}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

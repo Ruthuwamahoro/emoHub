@@ -191,6 +191,9 @@ export async function generateDailySummary(
       aiAnalysis = generateFallbackSummary(summaryResult);
     }
 
+
+    console.log("color of the emotion state", summaryResult.colorCode)
+
     const summaryData = {
       userId,
       summaryDate: targetDate,

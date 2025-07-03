@@ -471,7 +471,7 @@ export function SidebarDemo() {
                   <div className="px-8 py-2 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent border-none w-full">
                     <Avatar className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200 rounded-full">
                       <AvatarFallback className="text-white test-sm font-medium">
-                        {getInitials(session?.user?.username)}
+                        {getInitials(session?.user?.fullName)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="pl-5">{userName}</span>
@@ -481,11 +481,7 @@ export function SidebarDemo() {
                 <Link href="/profile" className="flex justify-center focus:outline-none rounded-lg">
                   <div className="p-10 rounded-lg hover:bg-slate-800/50 transition-colors duration-200">
                     <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                      <AvatarImages
-                        gender={session?.user?.gender || 'other'} 
-                        name={session?.user?.username || 'Anonymous'} 
-                        size={48}
-                      />
+                    {getInitials(session?.user?.fullName)}
                     </Avatar>
                   </div>
                 </Link>
@@ -537,11 +533,7 @@ export function SidebarDemo() {
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors duration-200"
                 >
                   <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                    <AvatarImages
-                      gender={session?.user?.gender || 'other'} 
-                      name={session?.user?.username || 'Anonymous'} 
-                      size={40}
-                    />
+                    {getInitials(session?.user?.fullName)}
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{userName}</p>

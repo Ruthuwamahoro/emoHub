@@ -7,8 +7,6 @@ export const useGetSingleResource = (id: string) => {
       queryFn: () =>getSingleResource(id),
     });
 
-    console.log("gigigigigigigiig", data)
-
     return {
       data,
       isLoading,
