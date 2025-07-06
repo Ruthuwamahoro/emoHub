@@ -8,7 +8,7 @@ export default function OnBordingProfile(){
     const router = useRouter();
     
     if (session?.user?.isOnboardingCompleted) {
-        router.push("/dashboard");
+        window.location.href = "/dashboard"
         return null;
     }
     

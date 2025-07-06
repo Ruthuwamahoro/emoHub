@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Eye, EyeOff, Edit2, Camera, MapPin, CheckCircle,
   AlertCircle, Clock, Save, X, Shuffle, User, Mail, Globe, Shield, Upload
@@ -64,6 +64,38 @@ const generateAnonymousName = () => {
   return `${adjective}_${noun}_${number}`;
 };
 
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+const useStableSession = () => {
+  const { data: session, status } = useSession();
+  
+  const stableSession = useMemo(() => {
+    if (status === 'loading') return null;
+    return session;
+  }, [session, status]);
+  
+  const stableUserId = useMemo(() => {
+    return stableSession?.user?.id || null;
+  }, [stableSession?.user?.id]);
+  
+  return {
+    session: stableSession,
+    status,
+    userId: stableUserId,
+    isAuthenticated: status === 'authenticated' && !!stableUserId
+  };
+};
+
 // Skeleton Components
 const ProfileSkeleton = () => (
   <div className="min-h-screen animate-pulse">
@@ -115,8 +147,12 @@ export default function UserProfile() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDataInitialized, setIsDataInitialized] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const { session, status, userId, isAuthenticated } = useStableSession();
 
-  const { data: session } = useSession();
+  // All custom hooks must be called unconditionally
   const {
     Data,
     setData,
@@ -124,44 +160,47 @@ export default function UserProfile() {
     handleInputChanges,
     isPending,
     errors,
-    removeImage
+    removeImage,
+    handleImageUpload: hookHandleImageUpload
   } = useUpdateProfile();
 
   const {
     data,
     isPending: isUserDataPending,
     isFetching,
-  } = useGetUserById(session?.user?.id as string);
+  } = useGetUserById(userId || '', {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
-      const user = data.data[0];
-
-      console.log("user data fffffffffff=+++++++++++++++++++++++", user)
-      
-      const transformedUser: UserData = {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        username: user.username,
-        profilePicUrl: user.profilePicUrl,
-        createdAt: user.createdAt,
-        isActive: user.isActive,
-        isAnonymous: user.isAnonymous || false,
-        role: user.role,
-        anonymousName: user.anonymousName || generateAnonymousName(),
-        bio: user.bio || '',
-        location: user.location || '',
-        visibility: user.visibility || 'public',
-        anonymousAvatar: user.anonymousAvatar || avatarOptions[0],
-        expertise: user.expertise || '',
-        gender: user.gender || '',
-      };
-      
+  // All callbacks must be defined unconditionally
+  const initializeData = useCallback((user: any) => {
+    if (isDataInitialized) return;
+    
+    const transformedUser: UserData = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      username: user.username,
+      profilePicUrl: user.profilePicUrl,
+      createdAt: user.createdAt,
+      isActive: user.isActive,
+      isAnonymous: user.isAnonymous || false,
+      role: user.role,
+      anonymousName: user.anonymousName || generateAnonymousName(),
+      bio: user.bio || '',
+      location: user.location || '',
+      visibility: user.visibility || 'public',
+      anonymousAvatar: user.anonymousAvatar || avatarOptions[0],
+      expertise: user.expertise || '',
+      gender: user.gender || '',
+    };
+    
+    // Batch all state updates using React's automatic batching
+    React.startTransition(() => {
       setUserData(transformedUser);
       setIsAnonymous(transformedUser.isAnonymous);
-      
-      // Update the form data with user data
       setData({
         fullName: transformedUser.fullName,
         username: transformedUser.username,
@@ -174,101 +213,139 @@ export default function UserProfile() {
         location: transformedUser.location || '',
         isAnonymous: transformedUser.isAnonymous,
       });
+      setIsDataInitialized(true);
+    });
+  }, [isDataInitialized, setData]);
+
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e?.target?.files?.[0]) return;
+    
+    const file = e.target.files[0];
+    
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file');
+      return;
     }
-  }, [data, setData]);
-
-  // Show skeleton while loading
-  if (isUserDataPending || isFetching || !userData) {
-    return <ProfileSkeleton />;
-  }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+    
+    // Batch all image-related state updates
+    React.startTransition(() => {
       setImageFile(file);
+      
+      // Create preview
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setImagePreview(result);
-        setData(prev => ({
-          ...prev,
-          [isAnonymous ? 'anonymousAvatar' : 'profilePicUrl']: result
-        }));
+      reader.onload = (readerEvent) => {
+        const result = readerEvent.target?.result as string;
+        
+        // Batch these updates too
+        React.startTransition(() => {
+          setImagePreview(result);
+          setData(prev => ({
+            ...prev,
+            [isAnonymous ? 'anonymousAvatar' : 'profilePicUrl']: result
+          }));
+        });
       };
       reader.readAsDataURL(file);
-    }
-  };
+    });
+  }, [isAnonymous, setData]);
 
-
-
-
-  const handleImageUploadLocal = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file as any);
-      // Update the preview URL in the Data state
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setData(prev => ({
-          ...prev,
-          [isAnonymous ? 'anonymousAvatar' : 'profilePicUrl']: result
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSave = async () => {
-    // Update the data with current isAnonymous state
-    setData(prev => ({
-      ...prev,
-      isAnonymous
-    }));
-    
-    // Call the submit function from the hook
-    await handleSubmit();
-    
-    // Exit edit mode on successful save
-    setEditMode(false);
-  };
-
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (userData) {
-      setData({
-        fullName: userData.fullName,
-        username: userData.username,
-        gender: userData.gender as string,
-        anonymousName: userData.anonymousName || '',
-        anonymousAvatar: userData.anonymousAvatar || avatarOptions[0],
-        expertise: userData.expertise || '',
-        profilePicUrl: userData.profilePicUrl,
-        bio: userData.bio || '',
-        location: userData.location || '',
-        isAnonymous: userData.isAnonymous,
+      React.startTransition(() => {
+        setData({
+          fullName: userData.fullName,
+          username: userData.username,
+          gender: userData.gender as string,
+          anonymousName: userData.anonymousName || '',
+          anonymousAvatar: userData.anonymousAvatar || avatarOptions[0],
+          expertise: userData.expertise || '',
+          profilePicUrl: userData.profilePicUrl,
+          bio: userData.bio || '',
+          location: userData.location || '',
+          isAnonymous: userData.isAnonymous,
+        });
+        setIsAnonymous(userData.isAnonymous);
+        setEditMode(false);
+        setShowAvatarSelector(false);
+        setImageFile(null);
+        setImagePreview(null);
       });
-      setIsAnonymous(userData.isAnonymous);
     }
-    setEditMode(false);
-    setShowAvatarSelector(false);
-    setImageFile(null);
-    setImagePreview(null);
-  };
+  }, [userData, setData]);
 
-  const generateNewAnonymousName = () => {
+  const generateNewAnonymousName = useCallback(() => {
     const newName = generateAnonymousName();
     setData(prev => ({
       ...prev,
       anonymousName: newName
     }));
-  };
+  }, [setData]);
 
-  const selectAvatar = (avatarUrl: string) => {
+  const selectAvatar = useCallback((avatarUrl: string) => {
     setData(prev => ({
       ...prev,
       [isAnonymous ? 'anonymousAvatar' : 'profilePicUrl']: avatarUrl
     }));
     setShowAvatarSelector(false);
+  }, [isAnonymous, setData]);
+
+  // Debounced save function to prevent rapid saves
+  const debouncedSave = useMemo(
+    () => debounce(async () => {
+      if (isSaving) return; // Prevent multiple saves
+      
+      setIsSaving(true);
+      try {
+        // If there's a new image file, upload it first
+        if (imageFile) {
+          await hookHandleImageUpload(imageFile);
+        }
+    
+        // Update the data with current isAnonymous state
+        setData(prev => ({ ...prev, isAnonymous }));
+        
+        // Call the submit function from the hook
+        await handleSubmit();
+        
+        // Clear local image state
+        setImageFile(null);
+        setImagePreview(null);
+        
+        // Exit edit mode on successful save
+        setEditMode(false);
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        alert('Error saving profile. Please try again.');
+      } finally {
+        setIsSaving(false);
+      }
+    }, 500),
+    [imageFile, isAnonymous, handleSubmit, hookHandleImageUpload, setData, isSaving]
+  );
+
+  // Effect for data initialization
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (data?.data && Array.isArray(data.data) && data.data.length > 0 && !isDataInitialized) {
+      const user = data.data[0];
+      initializeData(user);
+    }
+  }, [data, initializeData, isDataInitialized, status]);
+
+  // Now we can conditionally render based on loading state
+  if (status === 'loading' || isUserDataPending || isFetching || !userData) {
+    return <ProfileSkeleton />;
+  }
+
+  const handleSave = () => {
+    debouncedSave();
   };
 
   const formatJoinDate = (dateString: string) => {
@@ -280,51 +357,58 @@ export default function UserProfile() {
   };
 
   
-const AvatarSelector = () => (
-  showAvatarSelector && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Choose Avatar</h3>
-          <button
-            onClick={() => setShowAvatarSelector(false)}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-4 gap-3 mb-4">
-          {avatarOptions.map((avatar, index) => (
+  const AvatarSelector = () => (
+    showAvatarSelector && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Choose Avatar</h3>
             <button
-              key={index}
-              onClick={() => selectAvatar(avatar)}
-              className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 hover:border-purple-500 transition-colors"
+              onClick={() => setShowAvatarSelector(false)}
+              className="p-1 hover:bg-gray-100 rounded"
             >
-              <img src={avatar} alt={`Avatar ${index + 1}`} className="w-full h-full object-cover" />
+              <X className="w-5 h-5" />
             </button>
-          ))}
-        </div>
-        
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-2">Or upload custom image</h4>
-          <label className="flex items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
-            <div className="flex flex-col items-center">
-              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-              <span className="text-sm text-gray-600">Click to upload</span>
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUploadLocal}
-              className="hidden"
-            />
-          </label>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            {avatarOptions.map((avatar, index) => (
+              <button
+                key={index}
+                onClick={() => selectAvatar(avatar)}
+                className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 hover:border-purple-500 transition-colors"
+              >
+                <img src={avatar} alt={`Avatar ${index + 1}`} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+          
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-2">Or upload custom image</h4>
+            <label className="flex items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
+              <div className="flex flex-col items-center">
+                <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-600">
+                  {imageFile ? imageFile.name : 'Click to upload'}
+                </span>
+                {imageFile && (
+                  <span className="text-xs text-green-600 mt-1">
+                    File selected - click Save to upload
+                  </span>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
       </div>
-    </div>
-  )
-);
+    )
+  );
 
   const ProfileHeader = () => (
     <div className="relative mb-6">
@@ -334,7 +418,10 @@ const AvatarSelector = () => (
         <div className="relative">
           <div className="w-32 h-32 border-4 border-white shadow-lg rounded-full overflow-hidden bg-gray-200">
             <img 
-              src={isAnonymous ? Data.anonymousAvatar : Data.profilePicUrl || userData.profilePicUrl}
+              src={
+                imagePreview || 
+                (isAnonymous ? Data.anonymousAvatar : Data.profilePicUrl || userData.profilePicUrl)
+              }
               alt={isAnonymous ? Data.anonymousName : userData.fullName}
               className="w-full h-full object-cover"
             />

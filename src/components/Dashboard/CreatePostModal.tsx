@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useCreatePosts } from '@/hooks/users/groups/posts/useCreatePosts';
 import { Loader } from "@/components/ui/loader";
 
@@ -45,6 +46,7 @@ interface PostFormData {
   mediaAlt?: string;
   linkUrl?: string;
   linkDescription?: string;
+  isAnonymous?: boolean;
 }
 
 interface FormErrors {
@@ -59,6 +61,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [linkPreviewImageFile, setLinkPreviewImageFile] = useState<File | null>(null);
   const [linkPreviewImage, setLinkPreviewImage] = useState<string | null>(null);
+  // Remove local isAnonymous state - use only formData.isAnonymous
 
   const { 
     formData, 
@@ -112,6 +115,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
     fileReader.readAsDataURL(file);
   };
 
+  const handleAnonymousToggle = (checked: boolean) => {
+    // Only update the form data state
+    updateField('isAnonymous', checked);
+  };
+
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -120,6 +128,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
       
       formDataObj.append('title', formData.title);
       formDataObj.append('contentType', activeTab);
+      
+      // FIX: Properly handle the boolean value
+      formDataObj.append('isAnonymous', formData.isAnonymous ? 'true' : 'false');
       
       switch (activeTab) {
         case 'text':
@@ -141,7 +152,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
           }
           break;
       }
-
+  
       await handleSubmit(formDataObj as any);
       resetForm();
       onClose();
@@ -156,6 +167,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
     setLinkPreviewImage(null);
     setLinkPreviewImageFile(null);
     setActiveTab('text');
+    // Don't set local isAnonymous - it will be reset by the hook
   };
 
   const handleClose = () => {
@@ -168,13 +180,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
       <DialogContent className="sm:max-w-[600px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Create New Post</DialogTitle>
-          <Button 
-            variant="ghost" 
-            className="absolute right-4 top-4 rounded-full p-2" 
-            onClick={handleClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
         <form onSubmit={handleSubmitForm} className="space-y-4">
@@ -192,6 +197,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
               {errors.title && (
                 <p className="text-red-500 text-sm mt-1">{errors.title}</p>
               )}
+            </div>
+
+            <div className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50">
+              <Label htmlFor="anonymous-toggle" className="text-sm font-medium">
+                Post anonymously
+              </Label>
+              <Switch
+                id="anonymous-toggle"
+                checked={formData.isAnonymous ?? false}
+                onCheckedChange={handleAnonymousToggle}
+              />
+              <span className="text-sm text-gray-600">
+                {formData.isAnonymous ? 'Anonymous' : 'Show your name'}
+              </span>
             </div>
 
             <Tabs value={activeTab} onValueChange={handleTabChange}>

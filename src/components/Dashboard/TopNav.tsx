@@ -5,7 +5,7 @@ import { CircleUser, Menu, Settings, LogOut, Bell, X } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Avatar as AvatarImages } from "@/utils/genderAvatar";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +56,7 @@ export default function HeaderDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const router = useRouter();
   const handleSignOut = async () => {
     try {
       console.log('Attempting to sign out...');
@@ -64,7 +65,7 @@ export default function HeaderDashboard() {
         redirect: true 
       });
     } catch (error) {
-      window.location.href = '/login';
+      router.push('/login');
     }
   };
 
@@ -214,7 +215,7 @@ export default function HeaderDashboard() {
 
                   <div className="p-2">
                     <DropdownMenuItem asChild className="rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
-                      <Link href="/profile" className="w-full flex items-center gap-3">
+                      <Link href="/dashboard/profile" className="w-full flex items-center gap-3">
                         <div className="p-2 bg-blue-50 rounded-lg">
                           <CircleUser className="h-4 w-4 text-blue-600" />
                         </div>

@@ -5,14 +5,13 @@ import { Heart, MessageCircle, Share2, ExternalLink, Send, MoreHorizontal, Bookm
 import { useSession } from 'next-auth/react';
 import { useCreateComment } from '@/hooks/users/groups/posts/comments/usePostComments';
 import { useParams } from 'next/navigation';
-import { Avatar as AvatarImages } from "@/utils/genderAvatar";
 import { useCommentLikes } from '@/hooks/users/groups/posts/comments/usePostCommentLikes';
 import { usePostLikes } from '@/hooks/users/groups/posts/comments/usePostLikes';
 import CommentReplies from './CommentReplies';
 import { formatDistanceToNow } from 'date-fns';
 import { Flag } from 'lucide-react';
 import { PostReportModal } from "./ReportModal";
-
+import { getInitials } from '../TopNav';
 
 interface Comment {
   id: string | number;
@@ -43,10 +42,8 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  
   const params = useParams();
   const groupId = params?.id as string;
-
   const COMMENTS_PER_PAGE = 3;
 
   const {
@@ -104,32 +101,53 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
   };
 
   const getUserAvatar = () => {
+    if (post.isAnonymous) {
+      const anonymityName = post.author?.anonymity_name || 'Anonymous';
+      return (
+        <div className="relative">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
+            {getInitials(anonymityName)}
+          </div>
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+        </div>
+      );
+    }
+  
     if (post.author?.image) {
       return (
         <div className="relative">
           <img 
             src={post.author.image}
-            alt={post.author?.username || 'User'} 
+            alt={post.author?.fullName || post.author?.name || 'User'} 
             className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg"
           />
           <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
-
+  
+    const realName = post.author?.fullName || post.author?.name || 'User';
     return (
-        <AvatarImages
-        gender={post.author?.gender || 'other'} 
-        name={post.author?.username || 'Anonymous'} 
-        />
+      <div className="relative">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
+          {getInitials(realName)}
+        </div>
+        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+      </div>
     );
   };
+
 
   const getUserDisplayName = () => {
     if (session?.user?.username === post.author?.username) {
       return "You";
     }
-    return post.author?.name || 'Anonymous User';
+    
+    if (post.isAnonymous) {
+      return post.author?.anonymity_name || 'Anonymous';
+    }
+    
+    return post.author?.fullName || post.author?.name || 'Anonymous User';
   };
 
   const getCurrentUserAvatar = () => {
@@ -146,12 +164,43 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
       );
     }
     return (
-        <AvatarImages
-        gender={session?.user?.gender || 'other'} 
-        name={session?.user?.username || 'You'} 
-        size={36}
-        />
+      <div className="relative">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+          {getInitials(session?.user?.fullName)}
+        </div>
+        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
+      </div>
     );
+  };
+
+  const getCommentUserAvatar = (comment: Comment) => {
+    if (comment.author.image) {
+      return (
+        <div className="relative">
+          <img 
+            src={comment.author.image} 
+            alt={comment.author.name} 
+            className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm"
+          />
+          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
+        </div>
+      );
+    }
+    return (
+      <div className="relative">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+          {getInitials(comment.author.name)}
+        </div>
+        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
+      </div>
+    );
+  };
+
+  const getCommentUserDisplayName = (comment: Comment) => {
+    if (session?.user?.username === comment.author.username) {
+      return "You";
+    }
+    return comment.author.name || 'Anonymous';
   };
 
   useEffect(() => {
@@ -167,14 +216,10 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
     }
   }, [showDropdown]);
 
-
   const handleReportPost = () => {
     setShowReportModal(true);
     setShowDropdown(false);
   };
-
-
-
 
   const formatDate = (date: string) => {
     const now = new Date();
@@ -242,36 +287,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
     const commentIdStr = commentId.toString();
     toggleCommentLike(commentIdStr, groupId, post.id);
   };
-
-  const getCommentUserAvatar = (comment: Comment) => {
-    if (comment.author.image) {
-      return (
-        <div className="relative">
-          <img 
-            src={comment.author.image} 
-            alt={comment.author.name} 
-            className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm"
-          />
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
-        </div>
-      );
-    }
-    return (
-        <AvatarImages
-        gender={comment.author.gender || 'other'} 
-        name={comment.author?.username || comment.author.name} 
-        size={48}
-        />
-    );
-  };
-
-  const getCommentUserDisplayName = (comment: Comment) => {
-    if (session?.user?.username === comment.author.username) {
-      return "You";
-    }
-    return comment.author.name || 'Anonymous';
-  };
-
 
   const renderPostContent = () => {
     switch (post.contentType) {
@@ -384,24 +399,23 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
               <button className="p-2 rounded-full hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-all duration-200">
                 <MoreHorizontal className="w-4 h-4" />
               </button>
-                  <div className="absolute right-0 bottom-0 mt-1 w-40   py-2 z-20">
-                    <button
-                      onClick={() => setShowReportModal(true)}
-                      className="w-full px-4 py-2 text-left text-sm text-rose-600 flex items-center space-x-2 transition-colors duration-200"
-                    >
-                      <Flag className="w-4 h-4" />
-                      <span>Report post</span>
-                    </button>
+              <div className="absolute right-0 bottom-0 mt-1 w-40 py-2 z-20">
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="w-full px-4 py-2 text-left text-sm text-rose-600 flex items-center space-x-2 transition-colors duration-200"
+                >
+                  <Flag className="w-4 h-4" />
+                  <span>Report post</span>
+                </button>
               </div>
               {showReportModal && (
                 <PostReportModal
-                isOpen={showReportModal}
-                onOpenChange={setShowReportModal}
-                postId={post.id}
-                postAuthor={post.author?.name || 'Anonymous'}
-              />
+                  isOpen={showReportModal}
+                  onOpenChange={setShowReportModal}
+                  postId={post.id}
+                  postAuthor={post.author?.name || 'Anonymous'}
+                />
               )}
-
             </div>
           </div>
         </div>
@@ -502,7 +516,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
                       <p className="text-gray-800 text-sm leading-relaxed break-words">{comment.content}</p>
                     </div>
 
-                    {/* Comment Actions */}
                     <div className="flex items-center mt-2 ml-3 space-x-4">
                       <button
                         onClick={() => handleCommentLike(comment.id)}

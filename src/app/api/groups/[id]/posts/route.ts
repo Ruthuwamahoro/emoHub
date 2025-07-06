@@ -13,6 +13,7 @@ import db from "@/server/db";
 import cloudinary from "@/utils/cloudinary";
 import { desc, eq, and, sql } from "drizzle-orm";
 import { userIsGroupMember } from "@/utils/userIsGroupMember";
+import { boolean } from "drizzle-orm/mysql-core";
 const validContentTypes = ["text", "image", "video", "audio", "link"];
 const emotional = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${emotional}`;
@@ -318,6 +319,7 @@ export async function POST(
     const mediaAlt = formData.get("mediaAlt") as string | null;
     const linkUrl = formData.get("linkUrl") as string | null;
     const linkDescription = formData.get("linkDescription") as string | null;
+    const isAnonymous = formData.get("isAnonymous") as unknown as boolean;
 
     if (!title || title.trim() === "") {
       return sendResponse(400, null, "Title is required");
@@ -473,6 +475,7 @@ export async function POST(
         mediaUrl,
         mediaAlt,
         linkUrl,
+        isAnonymous,
         linkDescription,
         linkPreviewImage,
       })
@@ -517,10 +520,12 @@ export const GET = async (
         author: {
           id: User.id,
           name: User.fullName,
+          fullName: User.fullName,
           username: User.username,
           gender: User.gender,
           image: User.profilePicUrl,
           verified: User.isVerified,
+          anonymity_name: User.anonymousName,
         },
       })
       .from(Post)
@@ -539,6 +544,7 @@ export const GET = async (
               username: User.username,
               gender: User.gender,
               image: User.profilePicUrl,
+              anonymity_name: User.anonymousName
             },
             likesCount: sql<number>`count(distinct ${CommentLikes.id})`,
           })
@@ -609,7 +615,10 @@ export const GET = async (
 
         return {
           ...post,
-          author,
+          author: {
+            ...author,
+            fullName: author?.name, 
+          },
           comments: commentsWithReplies.map((c) => ({
             ...c.comment,
             author: c.author,
@@ -617,6 +626,7 @@ export const GET = async (
             likes: Number(c.likesCount),
             replies: c.replies,
           })),
+          isAnonymous: post.isAnonymous || false,
           likes: Number(postLikesResult[0]?.count || 0),
           likesCount: Number(postLikesResult[0]?.count || 0),
           isLiked: userPostLike.length > 0,

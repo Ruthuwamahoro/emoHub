@@ -11,6 +11,7 @@ const initialData: createPostsInterface = {
   mediaAlt: "",
   linkUrl: "",
   linkDescription: "",
+  isAnonymous: false
 };
 
 interface FormErrors {
@@ -121,15 +122,19 @@ export const useCreatePosts = (groupId: string) => {
     if (!validateForm()) {
       return Promise.reject("Validation failed");
     }
-    
+  
     if (formDataObj) {
       return mutation.mutateAsync(formDataObj);
     }
-    
+  
     const formDataObj2 = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formDataObj2.append(key, value.toString());
+        if (typeof value === 'boolean') {
+          formDataObj2.append(key, value.toString());
+        } else {
+          formDataObj2.append(key, value.toString());
+        }
       }
     });
     

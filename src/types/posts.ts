@@ -7,6 +7,7 @@ export interface createPostsInterface {
     linkUrl?: string;
     linkDescription?: string;
     linkPreviewImage?: string;
+    isAnonymous?: boolean
   }
   
   export interface Post {

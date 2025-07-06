@@ -27,14 +27,9 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id: string;
-    email: string;
-    fullName: string;
-    username: string;
-    role: string;
-    profilePicUrl?: string;
-    expertise?: string;
-    isActive: boolean;
+    id?: string;
+    email?: string;
+    sub?: string;
     loginTime?: number;
   }
 }
@@ -84,7 +79,6 @@ export const options: NextAuthOptions = {
             throw new Error("No user found");
           }
 
-          
           const user = existingUser[0];
 
           if(user.isVerified){
@@ -93,7 +87,6 @@ export const options: NextAuthOptions = {
               user.password ?? ""
             );
 
-            
             if (!isPasswordValid) {
               throw new Error("Invalid password");
             }
@@ -166,13 +159,13 @@ export const options: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.fullName = user.fullName;
-        token.username = user.username;
-        token.role = user.role; 
-        token.profilePicUrl = user.profilePicUrl;
-        token.expertise = user.expertise;
-        token.onboardingCompleted = user.isOnboardingCompleted ?? false;
-      } else if (token.email) {
+        token.sub = user.id; 
+      }
+      
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user && token.email) {
         try {
           const userData = await db
             .select({
@@ -194,36 +187,21 @@ export const options: NextAuthOptions = {
 
           if (userData.length > 0) {
             const user = userData[0];
-            token.id = user.id;
-            token.fullName = user.fullName;
-            token.username = user.username ?? undefined;
-            token.role = user.roleName;
-            token.profilePicUrl = user.profilePicUrl ?? undefined;
-            token.expertise = user.expertise ?? undefined;
-            token.isActive = user.isActive ?? false;
-            token.gender = user.gender ?? undefined;
-            token.onboardingCompleted = user.isOnboardingCompleted ?? false;
+            session.user.id = user.id;
+            session.user.email = user.email;
+            session.user.fullName = user.fullName;
+            session.user.username = user.username || "";
+            session.user.role = user.roleName;
+            session.user.profilePicUrl = user.profilePicUrl || undefined;
+            session.user.expertise = user.expertise || undefined;
+            session.user.isActive = user.isActive || true;
+            session.user.gender = user.gender || undefined;
+            session.user.isOnboardingCompleted = user.isOnboardingCompleted || false;
+            session.loginTime = token.loginTime;
           }
         } catch (error) {
-          console.error("Error refreshing user data:", error);
+          console.error("Error fetching user data:", error);
         }
-      }
-      
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.fullName = token.fullName as string;
-        session.user.username = token.username as string;
-        session.user.role = token.role as string;
-        session.user.profilePicUrl = token.profilePicUrl as string | undefined;
-        session.user.expertise = token.expertise as string | undefined;
-        session.user.isActive = token.isActive as boolean;
-        session.user.isOnboardingCompleted = token.onboardingCompleted as boolean;
-        session.loginTime = token.loginTime;
-        session.user.gender = token.gender as string;
       }
       return session;
     },
@@ -234,6 +212,22 @@ export const options: NextAuthOptions = {
   },
   jwt: {
     secret: process.env.JWT_SECRET as string,
+    maxAge: 30 * 24 * 60 * 60,
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60
+      }
+    }
+  } as any,
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  }
 };
-

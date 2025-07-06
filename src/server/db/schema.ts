@@ -116,6 +116,7 @@ const Post = pgTable("Post", {
   linkUrl: varchar("link_url", { length: 1024 }),
   linkDescription: text("link_description"),
   linkPreviewImage: varchar("link_preview_image", { length: 1024 }),
+  isAnonymous: boolean("isAnonymous").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -248,6 +249,7 @@ const Comment = pgTable("comments", {
   userId: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
   postId: uuid("post_id").references(() => Post.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  isAnonymous: boolean("isAnonymous").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -273,6 +275,7 @@ const CommentReplies = pgTable("CommentReplies", {
     .references(() => User.id, { onDelete: "cascade" })
     .notNull(),
   commentReplies: text("commentReplies").notNull(),
+  isAnonymous: boolean("isAnonymous").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

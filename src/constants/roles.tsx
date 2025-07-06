@@ -3,7 +3,6 @@ import { FaChartLine, FaHome, FaRobot, FaUserMd } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
 import { MdAdminPanelSettings, MdEventRepeat, MdHelpOutline, MdOutlineCalendarToday } from "react-icons/md";
 import { RiMentalHealthFill } from "react-icons/ri";
-import { SiGoogleanalytics } from "react-icons/si";
 import { TiGroup } from "react-icons/ti";
 
 export const COMMON_LINKS = [
@@ -66,12 +65,7 @@ export const ROLE_BASED_LINKS = {
         label: "Profile",
         href: "/dashboard/profile",
         icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Ask AI",
-        href: "/dashboard/askus",
-        icon: <FaRobot className="text-white h-5 w-5 flex-shrink-0" />,
-      },
+      }
     ],
   
     specialist: [
@@ -129,8 +123,13 @@ export const ROLE_BASED_LINKS = {
         icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "Emotion Insights",
+        label: "All Emotion Insights",
         href: "/dashboard/emotions",
+        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
+      },
+      {
+        label: "Emotion Checkins",
+        href: "/dashboard/emotioncheckins",
         icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
@@ -149,11 +148,6 @@ export const ROLE_BASED_LINKS = {
         icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "Analytics & Reports",
-        href: "/admin/analytics",
-        icon: <IconReport className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
         label: "Community Management",
         href: "/dashboard/community",
         icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
@@ -164,10 +158,10 @@ export const ROLE_BASED_LINKS = {
         icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
-        label: "System Settings",
-        href: "/admin/settings",
-        icon: <IconSettings className="text-white h-5 w-5 flex-shrink-0" />,
-      },
+        label: "Profile",
+        href: "/dashboard/profile",
+        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
+      }
     ],
   
     superadmin: [

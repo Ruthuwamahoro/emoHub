@@ -21,8 +21,6 @@ export async function POST(
             return sendResponse(400, null, "Post ID is required");
         }
 
-        console.log("Received Group ID:", ids);
-        console.log("Received Post ID:", id);
 
         const postId = id
         if (!postId) {
@@ -32,7 +30,6 @@ export async function POST(
         if (!content) {
             return new Response(JSON.stringify({ error: "Content is required" }), { status: 400 });
         }
-        console.log("Received content:+++++++++++", content);
         await db.insert(Comment).values({
             content,
             postId,
