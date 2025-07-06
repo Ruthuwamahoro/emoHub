@@ -31,6 +31,7 @@ declare module "next-auth/jwt" {
     email?: string;
     sub?: string;
     loginTime?: number;
+    isOnboardingCompleted?: boolean; 
   }
 }
 
@@ -183,6 +184,22 @@ export const options: NextAuthOptions = {
         token.sub = user.id;
         // Store onboarding status in token for redirect logic
         token.isOnboardingCompleted = user.isOnboardingCompleted;
+      }
+
+      if (token.email && !user) {
+        try {
+          const userData = await db
+            .select({ isOnboardingCompleted: User.onboardingCompleted })
+            .from(User)
+            .where(eq(User.email, token.email))
+            .limit(1);
+          
+          if (userData.length > 0) {
+            token.isOnboardingCompleted = userData[0].isOnboardingCompleted ?? false;
+          }
+        } catch (error) {
+          console.error("Error fetching user onboarding status:", error);
+        }
       }
       
       return token;

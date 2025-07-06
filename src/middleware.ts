@@ -7,25 +7,57 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: JWT_SECRET });
   const { pathname } = request.nextUrl;
-
-
-  const protectedRoutes = ['/dashboard', '/profile','/dashboard/*'];
-
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
-
-  if (isProtectedRoute && !token) {
+  
+  // Define routes
+  const protectedRoutes = ['/dashboard', '/profile'];
+  const authRoutes = ['/login', '/register'];
+  const onboardingRoute = '/onboarding';
+  
+  const isProtectedRoute = protectedRoutes.some(route => 
+    pathname.startsWith(route.replace('/*', ''))
+  );
+  const isAuthRoute = authRoutes.includes(pathname);
+  const isOnboardingRoute = pathname === onboardingRoute;
+  
+  // No token - redirect to login (except for auth routes and onboarding)
+  if (!token && (isProtectedRoute || isOnboardingRoute)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-
-  if (pathname === '/login' && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  
+  // Has token - handle different scenarios
+  if (token) {
+    // If user is on auth pages but logged in, redirect based on onboarding status
+    if (isAuthRoute) {
+      if (token.isOnboardingCompleted === false) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    
+    // If user hasn't completed onboarding, only allow onboarding route
+    if (token.isOnboardingCompleted === false) {
+      if (!isOnboardingRoute) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+    }
+    
+    // If user completed onboarding but is on onboarding page, redirect to dashboard
+    if (token.isOnboardingCompleted === true && isOnboardingRoute) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
-
+  
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard', '/profile', '/login'],
+  matcher: [
+    '/dashboard/:path*',
+    '/profile/:path*', 
+    '/login', 
+    '/register',
+    '/onboarding'
+  ],
 };
 
 
