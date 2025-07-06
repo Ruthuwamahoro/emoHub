@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 interface CreatePostsCommentInterface {
     content: string;
+    isAnonymous: boolean
 }
 
 interface CommentMutationParams {
@@ -16,6 +17,7 @@ interface CommentMutationParams {
 
 const initialData: CreatePostsCommentInterface = {
     content: "",
+    isAnonymous: false
 };
 
 export const useCreateComment = (ids: string) => {
@@ -28,7 +30,8 @@ export const useCreateComment = (ids: string) => {
             return createComment({
                 ids,
                 id,
-                content: data.content
+                content: data.content,
+                isAnonymous: data.isAnonymous 
             });
         },
         onSuccess: (response, variables) => {
@@ -75,17 +78,22 @@ export const useCreateComment = (ids: string) => {
     };
 
     const handleInputField = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { id: string; value: any } }
+      ) => {
         const { id, value } = e.target;
-        setFormData({ ...formData, [id]: value });
+        
+        // Handle boolean values for isAnonymous
+        const processedValue = id === 'isAnonymous' ? Boolean(value) : value;
+        
+        setFormData({ ...formData, [id]: processedValue });
+        
         if (errors[id]) {
-            setErrors((prevErrors) => {
-                const { [id]: _, ...rest } = prevErrors;
-                return rest;
-            });
+          setErrors((prevErrors) => {
+            const { [id]: _, ...rest } = prevErrors;
+            return rest;
+          });
         }
-    };
+      };
 
     return {
         mutate,

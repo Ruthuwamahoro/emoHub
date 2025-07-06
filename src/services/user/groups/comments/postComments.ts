@@ -3,6 +3,7 @@ import axios from "axios";
 export type CommentFormData = {
   id: string;
   content: string;
+  isAnonymous: boolean;
   ids?: string;
 };
 
@@ -11,10 +12,11 @@ export type CommentLikesFormData = {
   commentId: string;
 };
 
-export const createComment = async ({ id,ids,content }: CommentFormData) => {
+export const createComment = async ({ id,ids,content, isAnonymous }: CommentFormData) => {
   try {
     const response = await axios.post(`/api/groups/${id}/posts/${ids}/comments`, { 
-      content
+      content,
+      isAnonymous
     });
     console.log('API Call Response:', response.data);
     return response.data;

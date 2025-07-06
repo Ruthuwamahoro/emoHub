@@ -26,7 +26,8 @@ export async function POST(
         if (!postId) {
             return new Response(JSON.stringify({ error: "Post ID is required" }), { status: 400 });
         }
-        const { content } = await req.json();
+        const { content, isAnonymous } = await req.json();
+
         if (!content) {
             return new Response(JSON.stringify({ error: "Content is required" }), { status: 400 });
         }
@@ -34,6 +35,7 @@ export async function POST(
             content,
             postId,
             userId,
+            isAnonymous
         }).returning();
 
         return sendResponse(200, null, "Comment created successfully");

@@ -499,6 +499,7 @@ export async function POST(
     return sendResponse(500, null, err);
   }
 }
+
 export const GET = async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -526,6 +527,7 @@ export const GET = async (
           image: User.profilePicUrl,
           verified: User.isVerified,
           anonymity_name: User.anonymousName,
+          anonymousName: User.anonymousName, // Add both for consistency
         },
       })
       .from(Post)
@@ -544,9 +546,11 @@ export const GET = async (
               username: User.username,
               gender: User.gender,
               image: User.profilePicUrl,
-              anonymity_name: User.anonymousName
+              anonymousName: User.anonymousName,
+              anonymity_name: User.anonymousName, // Add both for consistency
             },
             likesCount: sql<number>`count(distinct ${CommentLikes.id})`,
+            isAnonymous: Comment.isAnonymous
           })
           .from(Comment)
           .leftJoin(User, eq(Comment.userId, User.id))
@@ -554,7 +558,7 @@ export const GET = async (
           .where(eq(Comment.postId, post.id))
           .groupBy(Comment.id, User.id)
           .orderBy(desc(Comment.createdAt));
-
+        
         const commentsWithReplies = await Promise.all(
           comments.map(async (comment) => {
             const replies = await db
@@ -565,6 +569,7 @@ export const GET = async (
                   name: User.fullName,
                   username: User.username,
                   image: User.profilePicUrl,
+                  anonymousName: User.anonymousName,
                 },
               })
               .from(CommentReplies)
@@ -588,6 +593,7 @@ export const GET = async (
               comment: {
                 ...comment.comment,
                 isLiked: userCommentLike.length > 0,
+                isAnonymous: comment.isAnonymous || comment.comment.isAnonymous
               },
               replies: replies.map((r) => ({
                 ...r.reply,
@@ -621,10 +627,16 @@ export const GET = async (
           },
           comments: commentsWithReplies.map((c) => ({
             ...c.comment,
-            author: c.author,
+            author: {
+              ...c.author,
+              // Ensure both anonymousName and anonymity_name are available
+              anonymousName: c.author?.anonymousName,
+              anonymity_name: c.author?.anonymousName,
+            },
             likesCount: Number(c.likesCount),
             likes: Number(c.likesCount),
             replies: c.replies,
+            isAnonymous: c.comment.isAnonymous || c.isAnonymous
           })),
           isAnonymous: post.isAnonymous || false,
           likes: Number(postLikesResult[0]?.count || 0),

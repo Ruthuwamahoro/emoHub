@@ -129,7 +129,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ groupId, isOpen, onCl
       formDataObj.append('title', formData.title);
       formDataObj.append('contentType', activeTab);
       
-      // FIX: Properly handle the boolean value
       formDataObj.append('isAnonymous', formData.isAnonymous ? 'true' : 'false');
       
       switch (activeTab) {
