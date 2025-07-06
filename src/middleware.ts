@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
   
   const { pathname } = request.nextUrl;
   
-  const protectedRoutes = ['/dashboard', '/admin'];
+  const protectedRoutes = ['/dashboard'];
   const isProtectedRoute = protectedRoutes.some(route => 
     pathname.startsWith(route)
   );
