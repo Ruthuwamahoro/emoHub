@@ -41,18 +41,16 @@ export const useLogin = () => {
   const handleSubmission = async () => {
     try {
       loginSchema.parse(formData);
-  
+
       setIsLoading(true);
       setErrors({});
-      
       const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
         password_hash: formData.password_hash,
       });
-  
+
       setIsLoading(false);
-      
       if (result?.error) {
         setErrors({ general: result.error });
         if(result?.error === "AccessDenied"){
@@ -60,11 +58,14 @@ export const useLogin = () => {
         } else {
           showToast("Invalid credentials", "error")
         }
-      } else if (result?.ok) {
-        showToast("Successfully logged in", "success");
-        
-        // Force page reload to get fresh session data
-        window.location.href = "/dashboard";
+      } else {
+        showToast("Successfully logged in", "success")
+        if(session?.user.isOnboardingCompleted){
+
+          router.push("/dashboard");
+        } else {
+          router.push("/onboarding");
+        }
       }
     } catch (error) {
       setIsLoading(false);

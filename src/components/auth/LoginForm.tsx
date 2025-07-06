@@ -21,21 +21,8 @@ export default function EmoHubSignIn() {
 
   const handleOAuthLogin = async (provider: string) => {
     setLoading(true);
-    try {
-      // Don't specify a callbackUrl here - let NextAuth handle it
-      const result = await signIn(provider, { 
-        redirect: false 
-      });
-      
-      if (result?.ok) {
-        // Force a page reload to get the latest session
-        window.location.href = "/dashboard";
-      }
-    } catch (error) {
-      console.error("OAuth login error:", error);
-    } finally {
-      setLoading(false);
-    }
+    await signIn(provider, { callbackUrl: "/onboarding" });
+    setLoading(false);
   };
 
   return (
