@@ -55,6 +55,7 @@ export const options: NextAuthOptions = {
           if (!credentials?.email || !credentials.password_hash) {
             throw new Error("Missing credentials");
           }
+          
           const existingUser = await db
             .select({
               id: User.id,
@@ -81,33 +82,34 @@ export const options: NextAuthOptions = {
 
           const user = existingUser[0];
 
-          if(user.isVerified){
-            const isPasswordValid = await bcrypt.compare(
-              credentials.password_hash,
-              user.password ?? ""
-            );
-
-            if (!isPasswordValid) {
-              throw new Error("Invalid password");
-            }
-            
-            return {
-              id: user.id,
-              email: user.email,
-              fullName: user.fullName,
-              username: user.username,
-              role: user.roleName, 
-              profilePicUrl: user.profilePicUrl,
-              expertise: user.expertise,
-              isActive: user.isActive,
-              gender: user.gender,
-              isOnboardingCompleted: user.isOnboardingCompleted,
-            };
+          if (!user.isVerified) {
+            throw new Error("Please verify your email");
           }
 
-          return "Please verify your email";
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password_hash,
+            user.password ?? ""
+          );
+
+          if (!isPasswordValid) {
+            throw new Error("Invalid password");
+          }
+          
+          return {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            username: user.username,
+            role: user.roleName, 
+            profilePicUrl: user.profilePicUrl,
+            expertise: user.expertise,
+            isActive: user.isActive,
+            gender: user.gender,
+            isOnboardingCompleted: user.isOnboardingCompleted,
+          };
           
         } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
       },
@@ -146,12 +148,31 @@ export const options: NextAuthOptions = {
             fullName: name,
             role: userRole[0].id,
             isActive: true,
+            isVerified: true, // OAuth users are auto-verified
+            onboardingCompleted: false, // New users need onboarding
           });
         }
       }
       
       return true;
     },
+    
+    // Add redirect callback to handle conditional redirects
+    async redirect({ url, baseUrl }) {
+      // If it's a relative URL, make it absolute
+      if (url.startsWith('/')) {
+        url = baseUrl + url;
+      }
+      
+      // Always allow redirects to the same origin
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      
+      // Default fallback
+      return baseUrl;
+    },
+    
     async jwt({ token, user, account }) {
       if (account && user) {
         token.loginTime = Date.now();
@@ -159,11 +180,14 @@ export const options: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.sub = user.id; 
+        token.sub = user.id;
+        // Store onboarding status in token for redirect logic
+        token.isOnboardingCompleted = user.isOnboardingCompleted;
       }
       
       return token;
     },
+    
     async session({ session, token }) {
       if (token && session.user && token.email) {
         try {
