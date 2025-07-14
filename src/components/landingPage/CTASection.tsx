@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export const FinalCTASection = () => {
   return (
-    <section className="max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto py-8 sm:py-10 bg-slate-900 relative overflow-hidden mb-12 sm:mb-16 md:mb-20 mt-12 sm:mt-16 md:mt-20 mx-4 sm:mx-auto rounded-2xl sm:rounded-3xl">
+    <section className="max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto py-8 sm:py-10 bg-slate-900 relative overflow-hidden mb-12 sm:mb-16 md:mb-20 mt-12 sm:mt-16 md:mt-20 mx-4 sm:mx-auto rounded-2xl sm:rounded-3xl" data-aos="flip-left">
       <div className="absolute inset-0 bg-black/10 rounded-2xl sm:rounded-3xl"></div>
       
       <div className="absolute top-0 left-0 w-full h-full">

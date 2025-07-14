@@ -60,7 +60,7 @@ export const EmoHubLanding = () => {
   }, []);
 
   return (
-    <div className="md:py-14 py-10 bg-gradient-to-br from-amber-50 via-white to-orange-50 relative overflow-hidden flex items-center">
+    <div className="md:py-14 py-10 bg-gradient-to-br from-amber-50 via-white to-orange-50 relative overflow-hidden flex items-center" id="home">
       <div className="absolute inset-0">
         <div 
           className="absolute top-16 md:top-20 left-1/4 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-gradient-to-br from-amber-400/20 to-orange-500/20 rounded-full blur-3xl animate-pulse transition-transform duration-1000 ease-out"
@@ -84,7 +84,7 @@ export const EmoHubLanding = () => {
           }`}>
 
             <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-              <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight sm:leading-[1.1] transition-all duration-1000 delay-200 ${
+              <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight sm:leading-[1.1] transition-all duration-1000 delay-20 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>
                 {titleText.split(' ').map((word, wordIndex) => {
@@ -107,7 +107,7 @@ export const EmoHubLanding = () => {
               
               <p className={`text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed max-w-lg transition-all duration-1000 delay-400 md:py-0 py-6 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}>
+              }`} >
                 Transform isolation into Ubuntu - the African philosophy that "I am because we are". 
                 Build emotional strength through community, where your emotional intelligence contributes to collective resilience.
               </p>
@@ -168,7 +168,7 @@ export const EmoHubLanding = () => {
               </svg>
             </div>
             
-            <div className="relative flex justify-center lg:justify-start">
+            <div className="relative flex justify-center lg:justify-start" data-aos="slide-up" data-aos-duration="1000">
               {/* Main Image */}
               <div className="relative z-10">
                 <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-amber-100 to-orange-100 p-2 sm:p-3 hover:shadow-3xl transition-all duration-500 hover:scale-105">
@@ -184,7 +184,7 @@ export const EmoHubLanding = () => {
               <div className="absolute -top-2 sm:-top-4 md:-top-6 lg:-top-8 right-2 sm:right-4 md:right-8 lg:right-12 z-20">
                 <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-52 lg:h-52 rounded-full overflow-hidden shadow-xl bg-gradient-to-br from-red-100 to-amber-100 p-1 sm:p-1.5 md:p-2 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <img 
-                    src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    src="https://i.pinimg.com/736x/68/bb/ff/68bbff44405e76289c884d221db18415.jpg"
                     alt="Diverse group in supportive circle, Ubuntu community"
                     className="w-full h-full object-cover rounded-full"
                   />

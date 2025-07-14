@@ -1,7 +1,6 @@
 import { UpdateprofileInterface } from "@/types/user";
 import axios from "axios";
 
-// Updated interface to include isAnonymous
 interface ExtendedUpdateprofileInterface extends UpdateprofileInterface {
   isAnonymous?: boolean;
 }

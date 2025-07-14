@@ -39,7 +39,6 @@ export const updateUserProgress = async (userId: string) => {
 
         console.log('Calculated streaks:', { currentStreak, longestStreak });
 
-        // Check if user progress record exists
         const existingProgress = await db.select()
             .from(UserProgress)
             .where(eq(UserProgress.user_id, userId))
@@ -59,14 +58,12 @@ export const updateUserProgress = async (userId: string) => {
         };
 
         if (existingProgress.length === 0) {
-            // Insert new progress record
             console.log('Creating new user progress:', progressData);
             await db.insert(UserProgress).values({
                 ...progressData,
                 created_at: new Date()
             });
         } else {
-            // Update existing progress record
             console.log('Updating existing user progress:', progressData);
             await db.update(UserProgress).set(progressData)
                 .where(eq(UserProgress.user_id, userId));

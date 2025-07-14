@@ -43,7 +43,6 @@ export const useUpdateElementProgress = () => {
                   }
                   return element;
                 }),
-                // Update challenge stats
                 total_elements: data.challengeStats.total,
                 completed_elements: data.challengeStats.completed,
                 completed_percentage: data.challengeStats.percentage,
@@ -55,7 +54,6 @@ export const useUpdateElementProgress = () => {
         };
       });
     },
-    // Replace the onError section with:
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Failed to update challenge progress. Please try again.';
       showToast(errorMessage, 'error')

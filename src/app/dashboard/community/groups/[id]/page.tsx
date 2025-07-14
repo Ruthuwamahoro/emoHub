@@ -141,7 +141,6 @@ function GroupDetailPage() {
         </div>
       ) : (
         <>
-          {/* Back button with responsive positioning */}
           <div className="relative mb-4 sm:mb-8">
             <Link 
               href="/dashboard/community" 
@@ -153,7 +152,6 @@ function GroupDetailPage() {
               Back
             </Link>
 
-            {/* Hero section with responsive image */}
             <div className="h-40 sm:h-48 md:h-56 lg:h-64 overflow-hidden rounded-lg sm:rounded-xl relative bg-opacity-50">
               <Image
                 src={data?.group?.image || data?.data?.group.image}
@@ -199,7 +197,6 @@ function GroupDetailPage() {
             ))}
           </div>
 
-          {/* Tab content */}
           <div className="min-h-[50vh]">
             {activeTab === 'discussions' && renderDiscussionsTab()}
             {activeTab === 'members' && (

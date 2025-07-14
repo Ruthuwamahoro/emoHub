@@ -1,7 +1,7 @@
 //API endpoints for onboarding questions
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { sendResponse } from "@/utils/Responses";
-import { checkIfIsRegularUser, checkIfUserIsModerator, getUserIdFromSession} from "@/utils/getUserIdFromSession";
+import { getUserIdFromSession} from "@/utils/getUserIdFromSession";
 import db from "@/server/db";
 import { User, userOnBoardingProfile } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest){
   try {
     const userId = await getUserIdFromSession()
-
+    console.log("User ID from session:", userId);
 
     if (!userId) {
       return sendResponse(401, null, "User not authenticated");

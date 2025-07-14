@@ -31,11 +31,9 @@ export const createPostsService = async({ data, groupId } : { data: FormData, gr
         throw moderationError;
       }
       
-      // For other API errors, use the response message
       throw new Error(errorData.message || "API request failed");
     }
     
-    // For network errors or other non-axios errors
     const err = error instanceof Error ? error.message : "Unexpected error occurred";
     console.log("+++++++", err)
     throw new Error(err);

@@ -17,7 +17,7 @@ export const WhyEmoHubSection = () => {
     },
     {
       icon: <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-amber-500" />,
-      title: "Peer Support",
+      title: "Group Support",
       description: "Engage in meaningful conversations and receive encouragement from people who truly understand.",
       gradient: "bg-white"
     },
@@ -30,11 +30,11 @@ export const WhyEmoHubSection = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 bg-gray-100 relative">
+    <section className="py-12 sm:py-16 lg:py-24 bg-gray-100 relative" id="about">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
       <div className="absolute top-4 sm:top-6 lg:top-8 left-1/2 transform -translate-x-1/2 w-12 sm:w-14 lg:w-16 h-0.5 bg-gradient-to-r from-rose-400 to-amber-400 rounded-full"></div>
       
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8" data-aos="fade-up">
         <div className="text-center mb-12 sm:mb-16 lg:mb-20">
           <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-4 sm:mb-6">
             Why Choose{' '}

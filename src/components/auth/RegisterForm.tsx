@@ -31,9 +31,9 @@ export function LeftAuthPage() {
       </div>
 
       <div className="mb-16">
-        <div className="relative w-64 h-64 xl:w-72 xl:h-72">
+        <div className="relative w-64 h-64 xl:w-52 xl:h-52 rounded-full overflow-hidden">
           <Image 
-            src="/images/image1-auth.png" 
+            src="/images/image1.png"  
             alt="authentication background" 
             fill 
             className=''
@@ -47,8 +47,8 @@ export function LeftAuthPage() {
           Emotional intelligence
         </h1>
         <p className="text-slate-400 text-sm leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing<br />
-          elit, sed do eiusmod tempor incididunt.
+          Building emotional intelligence through authentic human connection. <br />
+          Join our community of growth-minded individuals transforming their emotional lives.
         </p>
       </div>
     </div>
@@ -58,6 +58,7 @@ export function LeftAuthPage() {
 export function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const {
     formData,
@@ -74,7 +75,13 @@ export function RegisterForm() {
     await signIn(provider, { callbackUrl: "/dashboard" });
     setLoading(false);
   };
-  console.log(showVerificationPopup)
+
+  const handleFormSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (termsAccepted) {
+      handleSubmit();
+    }
+  };
 
   return (
     <>
@@ -125,10 +132,7 @@ export function RegisterForm() {
             </div>
 
             {/* Registration Form */}
-            <form onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              handleSubmit();
-            }}>
+            <form onSubmit={handleFormSubmit}>
               <div className="space-y-4 sm:space-y-5">
                 {/* Full Name */}
                 <div>
@@ -210,22 +214,30 @@ export function RegisterForm() {
                   <input
                     type="checkbox"
                     id="terms"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
                     className="w-4 h-4 rounded border-2 border-gray-300 text-orange-500 focus:ring-orange-600 focus:ring-2 focus:ring-offset-0 checked:bg-orange-600 checked:border-orange-500 hover:border-orange-400 transition-colors duration-200"
                     style={{
                       accentColor: '#fb923c' // This ensures the checkmark is orange in browsers that support it
                     }}
+                    required
                   />
                 </div>
                 <label htmlFor="terms" className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                  I accept the terms & Conditions
+                  <Link href="/privacy-terms" className='hover:text-blue-600 hover:underline'>I accept the privacy terms & Conditions
+                  </Link>
                 </label>
               </div>
 
-              {/* Sign Up Button - Always enabled */}
+              {/* Sign Up Button - Disabled when terms not accepted */}
               <button 
                 type="submit"
-                disabled={isPending}
-                className="w-full bg-orange-400 hover:bg-orange-500 disabled:bg-orange-300 text-white font-semibold py-3 px-4 rounded-lg mt-6 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
+                disabled={isPending || !termsAccepted}
+                className={`w-full font-semibold py-3 px-4 rounded-lg mt-6 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base ${
+                  termsAccepted 
+                    ? 'bg-orange-400 hover:bg-orange-500 disabled:bg-orange-300 text-white' 
+                    : 'bg-orange-300 text-gray-600 cursor-not-allowed'
+                }`}
               >
                 {isPending ? (
                   <>

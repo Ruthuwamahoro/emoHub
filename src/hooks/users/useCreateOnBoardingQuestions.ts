@@ -36,13 +36,11 @@ export const useOnboardingSubmission = () => {
     mutationFn: onBoardingQuestions,
     onSuccess: (response) => {
       
-      // Reset form data
       setFormData(initialData);
       setErrors({});
       router.push("/dashboard");
 
       
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["onboarding-status"] });
 
@@ -58,7 +56,6 @@ export const useOnboardingSubmission = () => {
   const updateFormField = (field: keyof OnboardingFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Clear any existing error for this field
     if (errors[field]) {
       setErrors(prev => {
         const { [field]: _, ...rest } = prev;
@@ -69,7 +66,6 @@ export const useOnboardingSubmission = () => {
 
   const handleSubmit = async (): Promise<SubmitResult> => {
     try {
-      // Validate required fields
       const requiredFields: (keyof OnboardingFormData)[] = [
         'currentEmotions', 
         'expressFellings', 
@@ -88,7 +84,6 @@ export const useOnboardingSubmission = () => {
         return { success: false, error: "Please fill in all required fields" };
       }
 
-      // Submit the data
       await mutate(formData);
       return { success: true };
       

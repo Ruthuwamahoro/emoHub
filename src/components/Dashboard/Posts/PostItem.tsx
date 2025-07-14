@@ -134,7 +134,6 @@ const PostModal: React.FC<{
               </div>
             </div>
 
-            {/* Post content */}
             <div className="flex-1 overflow-y-auto p-4">
               {post.title && (
                 <div className="mb-4">
@@ -142,11 +141,11 @@ const PostModal: React.FC<{
                 </div>
               )}
               
-              {post.textContent && (
+              {/* {post.textContent && (
                 <div className="mb-4">
                   <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{post.textContent}</p>
                 </div>
-              )}
+              )} */}
 
               {renderPostContent()}
             </div>

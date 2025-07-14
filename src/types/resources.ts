@@ -52,16 +52,16 @@ export interface LearningResource {
 
   export interface QuizQuestion {
     id: string;
-    questionText: string; // Changed from 'question' to 'questionText'
-    questionType: 'multiple-choice' | 'true-false' | 'short-answer'; // Changed from 'type'
-    points: number; // Changed from 'marks'
+    questionText: string; 
+    questionType: 'multiple-choice' | 'true-false' | 'short-answer';
+    points: number; 
     explanation?: string;
     options?: {
       optionText: string;
       isCorrect: boolean;
-      orderIndex?: number; // Make this optional since we'll set it when creating
+      orderIndex?: number; 
     }[];
-    correctAnswer?: string | number; // For display purposes in frontend
+    correctAnswer?: string | number; 
   }
 
 

@@ -8,27 +8,22 @@ export const FAQContactSection = () => {
   const faqs = [
     {
       question: "What makes emoHub different from therapy or counseling?",
-      answer: "emoHub is a peer-to-peer community platform focused on emotional growth and connection. While we provide educational resources and support, we're not a replacement for professional therapy. We complement traditional mental health care by offering daily practice, community support, and emotional intelligence building.",
+      answer: "emoHub is a  community platform focused on emotional growth and connection. While we provide educational resources and support, we're not a replacement for professional therapy. We complement traditional  health care by offering daily practice, community support, and emotional intelligence building.",
       icon: <Brain className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "Is my personal information and mood data secure?",
-      answer: "Absolutely. We use bank-level encryption to protect your data. Your mood tracking information is private by default, and you control what you share with the community. We never sell your personal information and follow strict privacy guidelines.",
+      question: "Is my personal information and emotional data secure?",
+      answer: "Absolutely. We use bank-level encryption to protect your data. Your emotional tracking information is private by default, and you control what you share with the community. We never sell your personal information and follow strict privacy guidelines.",
       icon: <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
       question: "How much time do I need to spend daily on emoHub?",
-      answer: "You can benefit from as little as 5-10 minutes daily. Our daily challenges are designed to fit into busy schedules. Whether you have 5 minutes for a quick check-in or 30 minutes for deeper engagement, you'll find value at your own pace.",
+      answer: "You can benefit from as little as 5-40 minutes daily. Our daily challenges are designed to fit into busy schedules. Whether you have 5 minutes for a quick emotional check-in or 30 minutes for group engagement, you'll find value at your own pace.",
       icon: <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "Can I use emoHub if I'm already in therapy?",
-      answer: "Yes! Many of our members use emoHub alongside professional therapy. Our platform can complement your therapeutic journey by providing daily practice, peer support, and tools to track your emotional patterns between sessions.",
-      icon: <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-    },
-    {
       question: "What if I'm not comfortable sharing in the community at first?",
-      answer: "That's completely normal and okay! You can start by observing, using our mood tracking privately, and taking daily challenges. There's no pressure to share until you feel ready. Many members lurk for weeks before participating actively.",
+      answer: "That's completely normal and okay! You can start by observing, using our emotions tracking privately, and taking daily challenges. There's no pressure to share until you feel ready. Many members lurk for weeks before participating actively.",
       icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
@@ -39,9 +34,9 @@ export const FAQContactSection = () => {
   ];
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100" id="faq">
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden">
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" data-aos="slide-left">
           <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-white/50 mb-6 sm:mb-8">
               <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />

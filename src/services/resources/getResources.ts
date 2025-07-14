@@ -48,7 +48,6 @@ export interface ApiResponse {
   filters: FilterInfo;
 }
 
-// Query parameters interface
 export interface ResourcesQueryParams {
   search?: string;
   page?: number;

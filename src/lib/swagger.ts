@@ -83,7 +83,6 @@ const options: swaggerJSDoc.Options = {
           }
         },
         
-        // Authentication Response Schemas
         AuthResponse: {
           type: 'object',
           properties: {

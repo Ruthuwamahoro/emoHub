@@ -8,7 +8,6 @@ import { UpdateprofileInterface } from "@/types/user";
 import showToast from "@/utils/showToast";
 import { updateProfileData, uploadImageToCloudinary } from "@/services/user/profile";
 
-// Updated interface to include isAnonymous
 interface ExtendedUpdateprofileInterface extends UpdateprofileInterface {
   isAnonymous?: boolean;
 }
@@ -102,7 +101,6 @@ export const useUpdateProfile = () => {
     try {
       let dataToSubmit = { ...Data };
       
-      // Upload image to Cloudinary if there's a new image file
       if (imageFile) {
         try {
           const imageUrl = await uploadImageToCloudinary(imageFile);

@@ -76,8 +76,7 @@ export const Navbar = () => {
                 { name: 'Home', href: '#home' },
                 { name: 'About', href: '#about' },
                 { name: 'Features', href: '#features' },
-                { name: 'Community', href: '#community' },
-                { name: 'Contact', href: '#contact' }
+                { name: 'FAQ', href: '#faq' },
               ].map((item, index) => (
                 <a
                   key={item.name}
@@ -134,11 +133,10 @@ export const Navbar = () => {
             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-amber-200/20 rounded-full blur-xl text-sm"></div>
             
             {[
-              { name: 'Home', href: '#home' },
-              { name: 'About', href: '#about' },
-              { name: 'Features', href: '#features' },
-              { name: 'Community', href: '#community' },
-              { name: 'Contact', href: '#contact' }
+                { name: 'Home', href: '#home' },
+                { name: 'About', href: '#about' },
+                { name: 'Features', href: '#features' },
+                { name: 'FAQ', href: '#faq' },
             ].map((item) => (
               <a
                 key={item.name}

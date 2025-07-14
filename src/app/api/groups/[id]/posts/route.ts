@@ -28,6 +28,8 @@ interface ContentModerationResult {
   confidence: number;
   meaningfulnessScore: number; 
   contentQuality: "spam" | "low" | "medium" | "high"; 
+  isGenuineSeekingHelp: boolean; 
+  supportCategory: "help-seeking" | "sharing-resources" | "encouragement" | "general" | "concerning";
 }
 
 interface ModeratorData {
@@ -63,6 +65,8 @@ async function moderateContentWithGemini(
       confidence: 0.5,
       meaningfulnessScore: 0.5,
       contentQuality: "medium",
+      isGenuineSeekingHelp: false,
+      supportCategory: "general",
     };
   }
 
@@ -82,27 +86,43 @@ async function moderateContentWithGemini(
         confidence: 1.0,
         meaningfulnessScore: 0.0,
         contentQuality: "spam",
+        isGenuineSeekingHelp: false,
+        supportCategory: "general",
       };
     }
 
-    const prompt = `You are an expert content moderator focused on both community safety and content quality. Analyze this social media post content for:
+    const prompt = `You are an expert content moderator for a MENTAL HEALTH AND SUPPORT COMMUNITY platform. This is a safe space where people share struggles, seek help, offer support, and share resources. Your role is to distinguish between genuine support requests and harmful content.
 
-SAFETY ASSESSMENT:
-1. Rudeness, harassment, or offensive language
-2. Potential negative emotional impact on readers
-3. Toxic behavior patterns
-4. Harmful or triggering content
-5. Excessive negativity or doom-posting
-6. Content that promotes depression, anxiety, or despair
-7. Bullying or discriminatory language
+CONTEXT: This is a support platform where:
+- People share personal struggles and ask for help (THIS IS ENCOURAGED)
+- Users offer advice, resources, and encouragement
+- Emotional vulnerability is NORMAL and HEALTHY
+- Discussing mental health challenges is the PRIMARY PURPOSE
 
-MEANINGFULNESS ASSESSMENT:
-1. Does the content provide value to the community?
-2. Is it spam, gibberish, or nonsensical?
-3. Does it contribute to meaningful discussion?
-4. Is it just random characters, repeated words, or meaningless phrases?
-5. Does it have clear intent and purpose?
-6. Is it overly short without substance (like just "hi", "test", ".", etc.)?
+WHAT TO FLAG AS INAPPROPRIATE:
+1. Harassment, bullying, or attacking other users
+2. Spam or meaningless content
+3. Content promoting self-harm or dangerous behaviors
+4. Discriminatory language or hate speech
+5. Trolling or mocking people's struggles
+6. Excessive profanity used aggressively
+7. Content that discourages seeking help
+
+WHAT NOT TO FLAG (These are APPROPRIATE for this platform):
+1. Sharing personal struggles, depression, anxiety, overwhelm
+2. Asking for support, advice, or resources
+3. Expressing emotional vulnerability
+4. Discussing mental health challenges
+5. Sharing coping strategies or resources
+6. Offering encouragement to others
+7. Using words like "overwhelmed," "struggling," "hard," "difficult," "isolated"
+
+SUPPORT CONTENT CATEGORIES:
+- "help-seeking": User is asking for support/advice for their struggles
+- "sharing-resources": User is sharing helpful resources/advice
+- "encouragement": User is offering support to others
+- "general": General discussion related to mental health/support
+- "concerning": Content that might indicate serious risk (suicide threats, self-harm plans)
 
 Content to analyze:
 Title: "${title}"
@@ -112,30 +132,24 @@ Link Description: "${linkDescription || 'N/A'}"
 
 Provide a JSON response with this exact structure:
 {
-  "isAppropriate": boolean (false if content violates community guidelines),
-  "isMeaningful": boolean (false if content lacks substance or purpose),
+  "isAppropriate": boolean (false ONLY if truly harmful/inappropriate for a support platform),
+  "isMeaningful": boolean (false only for spam/gibberish, not for emotional content),
   "riskLevel": "low" | "medium" | "high",
-  "concerns": ["specific issues found", "another concern"],
-  "suggestions": ["how to improve the content", "alternative approaches"],
+  "concerns": ["specific issues found"],
+  "suggestions": ["constructive feedback"],
   "emotionalImpact": "positive" | "neutral" | "negative",
   "confidence": number between 0-1,
-  "meaningfulnessScore": number between 0-1 (0 = spam/gibberish, 1 = highly meaningful),
-  "contentQuality": "spam" | "low" | "medium" | "high"
+  "meaningfulnessScore": number between 0-1,
+  "contentQuality": "spam" | "low" | "medium" | "high",
+  "isGenuineSeekingHelp": boolean (true if user is genuinely asking for support),
+  "supportCategory": "help-seeking" | "sharing-resources" | "encouragement" | "general" | "concerning"
 }
 
-Guidelines for meaningfulness assessment:
-- Mark "isMeaningful" as false for: spam, gibberish, test posts, single characters, repeated words
-- "meaningfulnessScore" should be 0-0.3 for spam/gibberish, 0.3-0.6 for low quality, 0.6-0.8 for decent, 0.8-1.0 for high quality
-- "contentQuality" should reflect overall post value to the community
-- Consider context: a simple "Hello" might be meaningful for introductions but spam elsewhere
-- Very short posts without context should be marked as low meaningfulness
-
-Examples of non-meaningful content:
-- Single words without context: "test", "hi", "hello"
-- Gibberish: "asdfgh", "qwerty", random character strings
-- Repeated characters: "aaaaaaa", "........"
-- Empty or near-empty posts
-- Obvious spam or placeholder text`;
+IMPORTANT: 
+- Emotional vulnerability and sharing struggles is APPROPRIATE content
+- Only flag as inappropriate if content is truly harmful to the community
+- "negative" emotionalImpact is OK for genuine support requests
+- Focus on INTENT rather than emotional tone`;
 
     const response = await fetch(GEMINI_API_URL, {
       method: "POST",
@@ -194,6 +208,12 @@ Examples of non-meaningful content:
         )
           ? parsed.contentQuality
           : "medium",
+        isGenuineSeekingHelp: Boolean(parsed.isGenuineSeekingHelp),
+        supportCategory: ["help-seeking", "sharing-resources", "encouragement", "general", "concerning"].includes(
+          parsed.supportCategory
+        )
+          ? parsed.supportCategory
+          : "general",
       };
     }
 
@@ -201,12 +221,14 @@ Examples of non-meaningful content:
   } catch (error) {
     console.error("Content moderation error:", error);
     
+    // Enhanced fallback logic for support platform
     const contentToCheck = [title, textContent, linkDescription]
       .filter(Boolean)
       .join(" ")
       .toLowerCase()
       .trim();
 
+    // Patterns for meaningless content (unchanged)
     const meaninglessPatterns = [
       /^[.]{2,}$/,
       /^([a-z])\1{3,}$/, 
@@ -226,45 +248,59 @@ Examples of non-meaningful content:
     );
 
     const isMeaningful = !isMeaninglessPattern && !isSpamKeyword && contentToCheck.length > 2;
-    
-    const rudeKeywords = [
-      "stupid", "idiot", "hate", "kill", "die", "ugly", "worthless",
-      "loser", "pathetic", "disgusting", "terrible", "awful", "dumb",
-      "moron", "trash", "garbage", "waste", "useless", "failure"
+
+    // Updated harmful content detection (more targeted)
+    const actuallyHarmfulKeywords = [
+      "kys", "kill yourself", "should die", "worthless piece", "go die",
+      "hate you all", "everyone sucks", "you're all idiots", "bunch of losers"
     ];
 
-    const negativeEmotionalKeywords = [
-      "hopeless", "pointless", "doom", "disaster", "catastrophe",
-      "nightmare", "hell", "torture", "suffering", "misery",
-      "depressing", "devastating", "tragic", "horrible", "dreadful"
+    // Signs of genuine help-seeking
+    const helpSeekingIndicators = [
+      "need help", "struggling with", "feeling overwhelmed", "advice",
+      "support", "has anyone", "what helped", "going through",
+      "dealing with", "coping with", "feel alone", "isolated"
     ];
 
-    const hasRudeContent = rudeKeywords.some(keyword =>
+    // Serious risk indicators
+    const riskIndicators = [
+      "want to die", "end it all", "no point living", "suicide",
+      "hurt myself", "can't go on", "no hope left"
+    ];
+
+    const hasActuallyHarmfulContent = actuallyHarmfulKeywords.some(keyword =>
       contentToCheck.includes(keyword)
     );
 
-    const hasNegativeEmotionalContent = negativeEmotionalKeywords.some(keyword =>
-      contentToCheck.includes(keyword)
+    const isSeekingHelp = helpSeekingIndicators.some(indicator =>
+      contentToCheck.includes(indicator)
+    );
+
+    const hasRiskIndicators = riskIndicators.some(indicator =>
+      contentToCheck.includes(indicator)
     );
 
     return {
-      isAppropriate: !hasRudeContent,
+      isAppropriate: !hasActuallyHarmfulContent, // Only flag truly harmful content
       isMeaningful,
-      riskLevel: (hasRudeContent || hasNegativeEmotionalContent) ? "high" : "low",
+      riskLevel: hasRiskIndicators ? "high" : (hasActuallyHarmfulContent ? "medium" : "low"),
       concerns: [
-        ...(hasRudeContent ? ["Potentially offensive language detected"] : []),
-        ...(hasNegativeEmotionalContent ? ["Potentially distressing content detected"] : []),
+        ...(hasActuallyHarmfulContent ? ["Potentially harmful language detected"] : []),
+        ...(hasRiskIndicators ? ["Content may indicate serious risk - needs attention"] : []),
         ...(!isMeaningful ? ["Content appears to be spam or lacks meaningful substance"] : [])
       ],
       suggestions: [
-        ...(hasRudeContent ? ["Consider using more respectful language"] : []),
-        ...(hasNegativeEmotionalContent ? ["Consider framing content more positively"] : []),
-        ...(!isMeaningful ? ["Please provide more meaningful content that contributes to the community discussion"] : [])
+        ...(hasActuallyHarmfulContent ? ["Consider using more supportive language"] : []),
+        ...(hasRiskIndicators ? ["Please consider reaching out to professional help"] : []),
+        ...(!isMeaningful ? ["Please provide more meaningful content"] : []),
+        ...(isSeekingHelp ? ["Thank you for reaching out for support"] : [])
       ],
-      emotionalImpact: hasNegativeEmotionalContent ? "negative" : (hasRudeContent ? "negative" : "neutral"),
+      emotionalImpact: hasActuallyHarmfulContent ? "negative" : (isSeekingHelp ? "neutral" : "neutral"),
       confidence: 0.7,
-      meaningfulnessScore: isMeaningful ? 0.6 : 0.2,
+      meaningfulnessScore: isMeaningful ? 0.7 : 0.2,
       contentQuality: isMeaningful ? "medium" : "spam",
+      isGenuineSeekingHelp: isSeekingHelp,
+      supportCategory: hasRiskIndicators ? "concerning" : (isSeekingHelp ? "help-seeking" : "general"),
     };
   }
 }
@@ -353,13 +389,17 @@ export async function POST(
 
     const shouldBlockForPolicy = !moderationResult.isAppropriate;
     const shouldBlockForMeaning = !moderationResult.isMeaningful;
-    const shouldBlockForEmotionalImpact =
-      moderationResult.emotionalImpact === "negative" &&
-      (moderationResult.riskLevel === "high" || moderationResult.confidence > 0.7);
+    const shouldBlockForEmotionalImpact = 
+      moderationResult.emotionalImpact === "negative" && 
+      moderationResult.riskLevel === "high" && 
+      !moderationResult.isGenuineSeekingHelp &&
+      moderationResult.confidence > 0.8;
+    const needsUrgentReview = moderationResult.supportCategory === "concerning";
+
 
     const shouldBlock = shouldBlockForPolicy || shouldBlockForMeaning || shouldBlockForEmotionalImpact;
 
-    if (shouldBlock) {
+    if (shouldBlock || needsUrgentReview) {
       const moderatedContentId = await saveToModeratorData(
         userId,
         groupId,
@@ -370,15 +410,18 @@ export async function POST(
       let reason = "Content flagged for review";
       let userMessage = "Your post has been submitted for review.";
 
-      if (shouldBlockForMeaning) {
+      if (needsUrgentReview) {
+        reason = "Content needs urgent review";
+        userMessage = "Your post has been submitted for urgent review. If you're in crisis, please contact emergency services or a crisis helpline immediately.";
+      } else if (shouldBlockForMeaning) {
         reason = "Content lacks meaningful substance";
-        userMessage = "Your post appears to lack meaningful content. It has been saved for moderator review. Please ensure your posts contribute valuable information to the community.";
+        userMessage = "Your post appears to lack meaningful content. Please ensure your posts contribute valuable information to the community.";
       } else if (shouldBlockForPolicy) {
         reason = "Content violates community guidelines";
-        userMessage = "Your post violates our community guidelines and has been submitted for moderator review.";
+        userMessage = "Your post violates our community guidelines and has been submitted for review.";
       } else if (shouldBlockForEmotionalImpact) {
-        reason = "Content flagged for negative emotional impact";
-        userMessage = "Your post may have a negative emotional impact and has been submitted for moderator review.";
+        reason = "Content flagged for review";
+        userMessage = "Your post has been submitted for review.";
       }
 
       return sendResponse(400, {
@@ -386,9 +429,12 @@ export async function POST(
         moderatedContentId,
         message: reason,
         suggestions: moderationResult.suggestions,
-        savedForReview: true
+        savedForReview: true,
+        isGenuineSeekingHelp: moderationResult.isGenuineSeekingHelp,
+        supportCategory: moderationResult.supportCategory
       }, userMessage);
     }
+
 
     if (moderationResult.riskLevel === "medium" ||
         moderationResult.emotionalImpact === "negative" ||

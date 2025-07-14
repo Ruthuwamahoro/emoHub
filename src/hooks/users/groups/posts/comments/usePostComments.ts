@@ -82,7 +82,6 @@ export const useCreateComment = (ids: string) => {
       ) => {
         const { id, value } = e.target;
         
-        // Handle boolean values for isAnonymous
         const processedValue = id === 'isAnonymous' ? Boolean(value) : value;
         
         setFormData({ ...formData, [id]: processedValue });

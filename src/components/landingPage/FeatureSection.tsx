@@ -46,7 +46,7 @@ export const FeaturesSection = () => {
         <div className="absolute bottom-10 sm:bottom-16 md:bottom-20 right-1/4 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 bg-gradient-to-br from-emerald-300/15 to-rose-300/15 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" >
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4 sm:mb-6">
             Powerful{' '}
@@ -60,7 +60,7 @@ export const FeaturesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8" data-aos="zoom-in">
           {features.map((feature, index) => (
             <div
               key={index}

@@ -1,5 +1,4 @@
 export const EMOTION_CATEGORIES = {
-    // Positive emotions
     'Happy': 'positive',
     'Loved': 'positive',
     'Excited': 'positive',
@@ -11,7 +10,6 @@ export const EMOTION_CATEGORIES = {
     'Energetic': 'positive',
     'Content': 'positive',
     
-    // Negative emotions
     'Sad': 'negative',
     'Angry': 'negative',
     'Annoyed': 'negative',
@@ -23,7 +21,6 @@ export const EMOTION_CATEGORIES = {
     'Overwhelmed': 'negative',
     'Depressed': 'negative',
     
-    // Neutral emotions
     'Tired': 'neutral',
     'Neutral': 'neutral',
     'Calm': 'neutral',
@@ -71,18 +68,14 @@ export const EMOTION_CATEGORIES = {
           totalScore -= entry.emotionIntensity;
           break;
         case 'neutral':
-          // Ignore neutral emotions in score calculation
           break;
       }
     });
   
-    // Normalize the score by dividing by total entries
     const normalizedScore = Math.round(totalScore / entries.length);
     
-    // Clamp the score between -100 and +100
     const clampedScore = Math.max(-100, Math.min(100, normalizedScore));
   
-    // Determine emotional state and color
     let emotionalState: EmotionalState;
     let colorCode: ColorCode;
   

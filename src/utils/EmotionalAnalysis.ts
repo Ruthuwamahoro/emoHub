@@ -73,7 +73,7 @@ export function analyzeMentalHealthData(data: {
 function determineOverallStatus(data: any): "good" | "moderate" | "concerning" {
   const scores = {
     mood: data.moodRating,
-    stress: 10 - data.stressLevel, // Invert stress score
+    stress: 10 - data.stressLevel, 
     sleep: data.sleepQuality,
     energy: data.moodFactors.energy,
     motivation: data.moodFactors.motivation,

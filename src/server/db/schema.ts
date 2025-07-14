@@ -55,7 +55,7 @@ const User = pgTable("users", {
   expertise: text("expertise"),
   anonymousName: varchar("anonymity_name", { length: 50 }),
   anonymousAvatar: varchar("anonymity_avatar", { length: 50 }),
-  isAnonymous: boolean("is_active").default(false),
+  isAnonymous: boolean("isAnonymous").default(false),
   badges: text("badges"),
   location: text("location"),
   isVerified: boolean("is_Verified").default(false),

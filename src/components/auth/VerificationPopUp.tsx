@@ -21,7 +21,7 @@ export function VerificationPopup({ isOpen, onClose, userEmail }: VerificationPo
 
         <DialogHeader className="text-center relative z-10 pt-8">
           <div className="mx-auto mb-6 relative">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg animate-bounce">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-orange-500 shadow-lg animate-bounce">
               <CheckCircle className="h-10 w-10 text-white" />
             </div>
             <div className="absolute -top-2 -right-2">
