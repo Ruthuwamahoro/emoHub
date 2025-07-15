@@ -134,7 +134,7 @@ const EmoHubDashboard = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 bg-white shadow-xl border-dotted">
         
         <div className="mb-8 sm:mb-10 lg:mb-12">
           <div className="flex items-center justify-start mb-4 lg:hidden">
@@ -162,12 +162,12 @@ const EmoHubDashboard = () => {
 
           <div className="flex flex-col space-y-4 sm:space-y-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:space-y-0">
             <div className="space-y-2 lg:space-y-2">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-6xl font-bold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-black via-amber-600 to-amber-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-2xl font-bold tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-black via-amber-600 to-amber-600 bg-clip-text text-transparent font-bold">
                   {greeting},
                 </span>
                 <br />
-                <span className="text-slate-800">{fullName || 'Friend'}!</span>
+                <span className="text-slate-800 font-bold">{fullName || 'Friend'}!</span>
               </h1>
               <p className="text-slate-600 text-sm sm:text-base lg:text-lg max-w-full sm:max-w-xl lg:max-w-2xl leading-relaxed">
                 Your personal sanctuary for emotional growth, meaningful reflections, and building deeper self-awareness

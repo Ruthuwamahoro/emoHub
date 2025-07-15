@@ -5,7 +5,7 @@ import db from "@/server/db";
 import { eq } from "drizzle-orm";
 import { User } from "@/server/db/schema";
 
-export const isOnboardingCompleted = async(userId: string): Promise<boolean> => {
+const isOnboardingCompleted = async(userId: string): Promise<boolean> => {
     try {
         const user = await db.select().from(User).where(eq(User.id, userId)).limit(1);
         if (user.length === 0) {

@@ -5,6 +5,7 @@ import { getUserIdFromSession} from "@/utils/getUserIdFromSession";
 import db from "@/server/db";
 import { User, userOnBoardingProfile } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(req: NextRequest){
   try {
@@ -18,16 +19,30 @@ export async function POST(req: NextRequest){
 
     const body = await req.json();
 
-    const existingProfile = await db.select()
-      .from(userOnBoardingProfile)
-      .where(eq(userOnBoardingProfile.userId, userId))
-      .limit(1);
+    const existingUser = await db.select({
+      id: User.id,
+      onboardingCompleted: User.onboardingCompleted
+    })
+    .from(User)
+    .where(eq(User.id, userId))
+    .limit(1);
 
+    if (existingUser.length === 0) {
+      return sendResponse(401, null, "Unauthorized");
+    }
+
+    if (existingUser[0].onboardingCompleted) {
+      return sendResponse(409, null, "Onboarding already completed");
+
+    }
+
+    const existingProfile = await db.select({ id: userOnBoardingProfile.id })
+        .from(userOnBoardingProfile)
+        .where(eq(userOnBoardingProfile.userId, userId))
+        .limit(1);
     if (existingProfile.length > 0) {
       return sendResponse(409, null, "Onboarding profile already exists");
     }
-
-
 
     await db.insert(userOnBoardingProfile).values({
         userId,
@@ -44,6 +59,7 @@ export async function POST(req: NextRequest){
           onboardingCompletedAt: new Date()
         })
         .where(eq(User.id, userId));
+
     return sendResponse(200, null,"Onboarding profile created successfully");
 
   } catch (error) {

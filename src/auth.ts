@@ -30,8 +30,9 @@ declare module "next-auth/jwt" {
     id?: string;
     email?: string;
     sub?: string;
+    role?: string;
     loginTime?: number;
-     isOnboardingCompleted?: boolean; 
+    isOnboardingCompleted?: boolean; 
   }
 }
 
@@ -174,7 +175,7 @@ export const options: NextAuthOptions = {
       return baseUrl;
     },
     
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (account && user) {
         token.loginTime = Date.now();
       }
@@ -182,8 +183,31 @@ export const options: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.sub = user.id;
-        // Store onboarding status in token for redirect logic
+        token.role = user.role; // Store role in token
         token.isOnboardingCompleted = user.isOnboardingCompleted;
+      }
+      
+      // For OAuth providers, we need to fetch the role from database
+      if (account && (account.provider === "google" || account.provider === "github") && token.email) {
+        try {
+          const userData = await db
+            .select({
+              id: User.id,
+              roleName: Role.name,
+              isOnboardingCompleted: User.onboardingCompleted,
+            })
+            .from(User)
+            .innerJoin(Role, eq(User.role, Role.id))
+            .where(eq(User.email, token.email))
+            .limit(1);
+          
+          if (userData.length > 0) {
+            token.role = userData[0].roleName;
+            token.isOnboardingCompleted = userData[0].isOnboardingCompleted ?? false;
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
       }
       
       return token;
@@ -209,7 +233,7 @@ export const options: NextAuthOptions = {
             .innerJoin(Role, eq(User.role, Role.id))
             .where(eq(User.email, token.email))
             .limit(1);
-
+console.log("User data fetched=============:", userData[0].isOnboardingCompleted);
           if (userData.length > 0) {
             const user = userData[0];
             session.user.id = user.id;
@@ -221,8 +245,10 @@ export const options: NextAuthOptions = {
             session.user.expertise = user.expertise || undefined;
             session.user.isActive = user.isActive || true;
             session.user.gender = user.gender || undefined;
-            session.user.isOnboardingCompleted = user.isOnboardingCompleted || false;
+            session.user.isOnboardingCompleted = user.isOnboardingCompleted ?? false;
             session.loginTime = token.loginTime;
+            token.isOnboardingCompleted = user.isOnboardingCompleted ?? false;
+            token.role = user.roleName; // Update token role to ensure consistency
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -239,18 +265,6 @@ export const options: NextAuthOptions = {
     secret: process.env.JWT_SECRET as string,
     maxAge: 30 * 24 * 60 * 60,
   },
-  cookies: {
-    sessionToken: {
-      name: `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: true, 
-        maxAge: 30 * 24 * 60 * 60
-      }
-    }
-  } as any,
   pages: {
     signIn: '/login',
     error: '/login',

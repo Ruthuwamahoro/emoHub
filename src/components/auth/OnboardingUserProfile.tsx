@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Heart, ArrowRight, ArrowLeft, Check, Brain, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+
 
 interface OnboardingStep {
   id: number;
@@ -160,6 +162,7 @@ export const EmoHubOnboarding = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+
   
   const router = useRouter();
   
@@ -186,6 +189,18 @@ export const EmoHubOnboarding = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+
+  useEffect(() => {
+    if (isCompleted) {
+      const timer = setTimeout(() => {
+        console.log('Redirecting to dashboard...');
+        router.push('/dashboard');
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isCompleted, router]);
+
   const currentStepData = onboardingSteps.find(step => step.id === currentStep);
   const totalSteps = onboardingSteps.length;
 
@@ -206,10 +221,10 @@ export const EmoHubOnboarding = () => {
         // Show completion state briefly
         setIsCompleted(true);
         
-        // Redirect to dashboard after a short delay
+        // Small delay to ensure session is updated
         setTimeout(() => {
-          router.push('/dashboard');
-        }, 1500);
+          window.location.href = '/dashboard';
+        }, 500);
       }
       // Error handling is managed by the hook
     }

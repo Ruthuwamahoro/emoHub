@@ -8,6 +8,8 @@ import {
   BookOpen, 
   Calendar 
 } from 'lucide-react';
+import EmotionGauge from '@/components/Dashboard/emotions/EmotionsTracker';
+
 
 // Types for dashboard metrics
 interface DashboardMetrics {
@@ -208,6 +210,9 @@ const AdminDashboard: React.FC = () => {
           </p>
         </div>
       </div>
+      <div className="mb-8 sm:mb-9 lg:mb-10 mt-20">
+          <EmotionGauge />
+        </div>
     </div>
   );
 };
