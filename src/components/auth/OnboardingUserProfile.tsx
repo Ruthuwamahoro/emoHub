@@ -10,14 +10,13 @@ interface OnboardingStep {
   id: number;
   question: string;
   subtitle?: string;
-  field: keyof FormData; // Changed from string to keyof FormData
+  field: keyof FormData; 
   options: {
     id: string;
     label: string;
   }[];
 }
 
-// Define the form data interface
 interface FormData {
   impression: string;
   currentEmotions: string;
@@ -93,7 +92,6 @@ const onboardingSteps: OnboardingStep[] = [
   }
 ];
 
-// Custom hook for onboarding submission
 const useOnboardingSubmission = () => {
   const [formData, setFormData] = useState<FormData>({
     impression: "",
@@ -129,11 +127,9 @@ const useOnboardingSubmission = () => {
       }
 
       const result = await response.json();
-      console.log('Onboarding completed successfully:', result);
       return { success: true, data: result };
       
     } catch (error) {
-      console.error('Error submitting onboarding data:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to complete onboarding';
       setSubmitError(errorMessage);
       return { success: false, error: errorMessage };
@@ -158,10 +154,11 @@ const useOnboardingSubmission = () => {
 
 export const EmoHubOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isVisible, setIsVisible] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const { update} = useSession();
+
 
   
   const router = useRouter();
@@ -192,9 +189,14 @@ export const EmoHubOnboarding = () => {
 
   useEffect(() => {
     if (isCompleted) {
-      const timer = setTimeout(() => {
-        console.log('Redirecting to dashboard...');
-        router.push('/dashboard');
+
+      const timer = setTimeout(async() => {
+
+        await update(() => console.log("this is my trigger"));
+
+
+        router.refresh();
+
       }, 1500);
       
       return () => clearTimeout(timer);
@@ -214,19 +216,11 @@ export const EmoHubOnboarding = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // Submit to backend
       const result = await handleSubmit();
       
       if (result.success) {
-        // Show completion state briefly
         setIsCompleted(true);
-        
-        // Small delay to ensure session is updated
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 500);
       }
-      // Error handling is managed by the hook
     }
   };
 
@@ -257,7 +251,6 @@ export const EmoHubOnboarding = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-amber-50/30 to-emerald-50/40 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decorative elements */}
       <div className="absolute inset-0">
         <div 
           className="absolute top-20 left-1/4 w-64 h-64 bg-gradient-to-br from-rose-300/30 to-pink-400/30 rounded-full blur-3xl animate-pulse transition-transform duration-1000 ease-out"
@@ -284,7 +277,6 @@ export const EmoHubOnboarding = () => {
         isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}>
         
-        {/* Brand Header */}
         <div className={`text-center mb-8 transition-all duration-700 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
         }`}>
@@ -296,7 +288,6 @@ export const EmoHubOnboarding = () => {
           </div>
         </div>
 
-        {/* Progress Steps */}
         <div className={`mb-12 transition-all duration-700 delay-200 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
@@ -335,7 +326,6 @@ export const EmoHubOnboarding = () => {
           </div>
         </div>
 
-        {/* Question Section */}
         <div className={`text-center mb-10 transition-all duration-700 delay-400 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}>
@@ -353,7 +343,6 @@ export const EmoHubOnboarding = () => {
           )}
         </div>
 
-        {/* Options */}
         <div className={`mb-12 transition-all duration-700 delay-600 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
@@ -397,7 +386,6 @@ export const EmoHubOnboarding = () => {
           )}
         </div>
 
-        {/* Error Message */}
         {submitError && (
           <div className="mb-6 text-center">
             <div className="inline-block bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
@@ -406,7 +394,6 @@ export const EmoHubOnboarding = () => {
           </div>
         )}
 
-        {/* Navigation Buttons */}
         <div className={`flex items-center justify-center gap-6 transition-all duration-700 delay-800 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>

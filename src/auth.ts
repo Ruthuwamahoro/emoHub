@@ -150,8 +150,8 @@ export const options: NextAuthOptions = {
             fullName: name,
             role: userRole[0].id,
             isActive: true,
-            isVerified: true, // OAuth users are auto-verified
-            onboardingCompleted: false, // New users need onboarding
+            isVerified: true,
+            onboardingCompleted: false, 
           });
         }
       }
@@ -159,35 +159,43 @@ export const options: NextAuthOptions = {
       return true;
     },
     
-    // Add redirect callback to handle conditional redirects
     async redirect({ url, baseUrl }) {
-      // If it's a relative URL, make it absolute
       if (url.startsWith('/')) {
         url = baseUrl + url;
       }
       
-      // Always allow redirects to the same origin
       if (url.startsWith(baseUrl)) {
         return url;
       }
       
-      // Default fallback
       return baseUrl;
     },
     
-    async jwt({ token, user, account, trigger }) {
+    async jwt({ token, user, account, trigger, session }) {
+
+
+      if (trigger === "update" && session) {
+        if (session.isOnboardingCompleted !== undefined) {
+          token.isOnboardingCompleted = true;
+        }
+        return token;
+      }
       if (account && user) {
         token.loginTime = Date.now();
       }
+
+      
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.sub = user.id;
-        token.role = user.role; // Store role in token
+        token.role = user.role; 
         token.isOnboardingCompleted = user.isOnboardingCompleted;
       }
+
+
+
       
-      // For OAuth providers, we need to fetch the role from database
       if (account && (account.provider === "google" || account.provider === "github") && token.email) {
         try {
           const userData = await db
@@ -213,7 +221,8 @@ export const options: NextAuthOptions = {
       return token;
     },
     
-    async session({ session, token }) {
+    async session({ session, token, trigger }) {
+      
       if (token && session.user && token.email) {
         try {
           const userData = await db
@@ -233,7 +242,8 @@ export const options: NextAuthOptions = {
             .innerJoin(Role, eq(User.role, Role.id))
             .where(eq(User.email, token.email))
             .limit(1);
-console.log("User data fetched=============:", userData[0].isOnboardingCompleted);
+
+
           if (userData.length > 0) {
             const user = userData[0];
             session.user.id = user.id;
@@ -248,7 +258,7 @@ console.log("User data fetched=============:", userData[0].isOnboardingCompleted
             session.user.isOnboardingCompleted = user.isOnboardingCompleted ?? false;
             session.loginTime = token.loginTime;
             token.isOnboardingCompleted = user.isOnboardingCompleted ?? false;
-            token.role = user.roleName; // Update token role to ensure consistency
+            token.role = user.roleName; 
           }
         } catch (error) {
           console.error("Error fetching user data:", error);

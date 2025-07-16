@@ -1,6 +1,7 @@
 import { onBoardingQuestions } from "@/services/user/onBoarding";
 import showToast from "@/utils/showToast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
@@ -26,30 +27,34 @@ interface SubmitResult {
   error?: string;
 }
 
-export const useOnboardingSubmission = () => {
+export const useOnboardingSubmission = async() => {
   const [formData, setFormData] = useState<OnboardingFormData>(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { update} = useSession();
+
+
 
   const { mutate, isPending } = useMutation({
     mutationFn: onBoardingQuestions,
-    onSuccess: (response) => {
-      
+    onSuccess: async(response) => {
+      console.log("Leo ni dad")
+      await update({
+        role: "User"
+      });
       setFormData(initialData);
       setErrors({});
-      router.push("/dashboard");
 
       
-      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["onboarding-status"] });
+      
+
 
     },
     onError: (err: unknown) => {
       const error = err as Error;
       const errorMessage = error.message || "An error occurred during onboarding";
       showToast(errorMessage, "error");
-      console.error('Onboarding submission error:', error);
     }
   });
 
