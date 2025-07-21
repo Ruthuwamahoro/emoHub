@@ -1,38 +1,40 @@
 "use client"
 import React from 'react';
 import { ArrowRight, MessageCircle, BarChart3, Calendar, GraduationCap, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const FeaturesSection = () => {
+  const { t } = useTranslation();
 
   const features = [
     {
       icon: <BarChart3 className="h-8 w-8 sm:h-10 sm:w-10" />,
-      title: "Emotions Tracking & Analytics",
-      description: "Visualize your emotional patterns with beautiful charts and gain insights into your mental wellness journey.",
+      title: t('features.emotionsTracking.title'),
+      description: t('features.emotionsTracking.description'),
       image: "📊",
       gradient: "from-amber-500 to-amber-500",
       bgPattern: "from-amber-500/10 to-amber-500/10"
     },
     {
       icon: <Calendar className="h-8 w-8 sm:h-10 sm:w-10" />,
-      title: "Daily Emotional Challenges",
-      description: "Grow stronger every day with personalized challenges designed to build emotional resilience and awareness.",
+      title: t('features.dailyChallenges.title'),
+      description: t('features.dailyChallenges.description'),
       image: "🎯",
       gradient: "from-amber-500 to-amber-500",
       bgPattern: "from-amber-500/10 to-amber-500/10"
     },
     {
       icon: <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10" />,
-      title: "Learning Resources",
-      description: "Master emotional intelligence through interactive articles, videos, from experts.",
+      title: t('features.learningResources.title'),
+      description: t('features.learningResources.description'),
       image: "📚",
       gradient: "from-amber-500 to-amber-500",
       bgPattern: "from-amber-500/10 to-amber-500/10"
     },
     {
       icon: <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10" />,
-      title: "Group/Community Discussions",
-      description: "Join supportive conversations, share experiences, and connect with others on similar emotional journeys.",
+      title: t('features.communityDiscussions.title'),
+      description: t('features.communityDiscussions.description'),
       image: "💬",
       gradient: "from-amber-500 to-amber-500",
       bgPattern: "from-amber-500/10 to-amber-500/10"
@@ -49,14 +51,14 @@ export const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" >
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4 sm:mb-6">
-            Powerful{' '}
+            {t('features.title.prefix')}{' '}
             <span className="bg-amber-500 to-emerald-500 bg-clip-text text-transparent font-bold">
-              Features
+              {t('features.title.highlight')}
             </span>
-            {' '}for Growth
+            {' '}{t('features.title.suffix')}
           </h3>
           <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed px-2">
-            Everything you need to understand your emotions, build resilience, and connect with others meaningfully.
+            {t('features.subtitle')}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export const FeaturesSection = () => {
                   
                   <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0 hidden sm:block">
                     <div className="flex items-center space-x-2 text-xs sm:text-sm font-medium text-slate-500">
-                      <span>Explore</span>
+                      <span>{t('features.explore')}</span>
                       <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                     </div>
                   </div>

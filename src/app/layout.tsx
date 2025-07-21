@@ -17,6 +17,7 @@ const metadata: Metadata = {
 
 
 import { Josefin_Sans, Jost } from 'next/font/google'
+import { I18nProvider } from "@/components/i18Provider";
 
 const josefinSans = Josefin_Sans({
   subsets: ['latin'],
@@ -49,7 +50,9 @@ export default function RootLayout({
         <SessionProvider>
           <ReactQueryProvider>
             <Toaster />
-            {children}
+            <I18nProvider>
+              {children}
+            </I18nProvider>
           </ReactQueryProvider>
         </SessionProvider>
       </body>

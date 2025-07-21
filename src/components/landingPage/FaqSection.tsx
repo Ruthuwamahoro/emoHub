@@ -1,34 +1,36 @@
 "use client"
 import React, { useState } from 'react';
 import { Heart, Users, Brain, Shield, Calendar, GraduationCap, Plus, Minus, HelpCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const FAQContactSection = () => {
+  const { t } = useTranslation();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
   const faqs = [
     {
-      question: "What makes emoHub different from therapy or counseling?",
-      answer: "emoHub is a  community platform focused on emotional growth and connection. While we provide educational resources and support, we're not a replacement for professional therapy. We complement traditional  health care by offering daily practice, community support, and emotional intelligence building.",
+      question: t('faq.questions.therapy.question'),
+      answer: t('faq.questions.therapy.answer'),
       icon: <Brain className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "Is my personal information and emotional data secure?",
-      answer: "Absolutely. We use bank-level encryption to protect your data. Your emotional tracking information is private by default, and you control what you share with the community. We never sell your personal information and follow strict privacy guidelines.",
+      question: t('faq.questions.security.question'),
+      answer: t('faq.questions.security.answer'),
       icon: <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "How much time do I need to spend daily on emoHub?",
-      answer: "You can benefit from as little as 5-40 minutes daily. Our daily challenges are designed to fit into busy schedules. Whether you have 5 minutes for a quick emotional check-in or 30 minutes for group engagement, you'll find value at your own pace.",
+      question: t('faq.questions.timeCommitment.question'),
+      answer: t('faq.questions.timeCommitment.answer'),
       icon: <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "What if I'm not comfortable sharing in the community at first?",
-      answer: "That's completely normal and okay! You can start by observing, using our emotions tracking privately, and taking daily challenges. There's no pressure to share until you feel ready. Many members lurk for weeks before participating actively.",
+      question: t('faq.questions.sharingComfort.question'),
+      answer: t('faq.questions.sharingComfort.answer'),
       icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
-      question: "Is emoHub suitable for teenagers?",
-      answer: "emoHub is designed for adults 18+. We believe emotional intelligence skills are crucial for young adults as they navigate independence, relationships, and career challenges. Our content and community guidelines are tailored for this demographic.",
+      question: t('faq.questions.ageRequirement.question'),
+      answer: t('faq.questions.ageRequirement.answer'),
       icon: <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
     }
   ];
@@ -40,18 +42,18 @@ export const FAQContactSection = () => {
           <div className="text-center mb-12 sm:mb-16 md:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-white/50 mb-6 sm:mb-8">
               <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-              <span className="text-sm sm:text-base text-slate-700 font-semibold">FAQ</span>
+              <span className="text-sm sm:text-base text-slate-700 font-semibold">{t('faq.badge')}</span>
             </div>
             
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 mb-6 sm:mb-8 leading-tight px-2">
-              Frequently Asked{' '}
+            <h3 className="text-3xl sm:text-4xl md:text-4xl font-bold text-slate-800 mb-6 sm:mb-8 leading-tight px-2">
+              {t('faq.title.prefix')}{' '}
               <span className="bg-amber-500 font-bold bg-clip-text text-transparent">
-                Questions
+                {t('faq.title.highlight')}
               </span>
             </h3>
             
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-600 leading-relaxed max-w-3xl mx-auto px-4">
-              Everything you need to know about starting your emotional growth journey with emoHub.
+              {t('faq.subtitle')}
             </p>
           </div>
 

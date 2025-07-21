@@ -1,9 +1,12 @@
 import { IconArrowLeft, IconReport, IconDatabase, IconSettings, IconShieldCheck, IconUsers } from "@tabler/icons-react";
-import { FaChartLine, FaHome, FaRobot, FaUserMd } from "react-icons/fa";
+import { FaChartLine, FaRobot, FaUserMd } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
 import { MdAdminPanelSettings, MdEventRepeat, MdHelpOutline, MdOutlineCalendarToday } from "react-icons/md";
-import { RiMentalHealthFill } from "react-icons/ri";
+import { RiCalendarEventLine, RiEmotionHappyLine, RiMentalHealthFill } from "react-icons/ri";
 import { TiGroup } from "react-icons/ti";
+import { FaHome, FaUserCircle } from "react-icons/fa";
+import { TbWriting, TbTargetArrow } from "react-icons/tb";
+import { HiUserGroup } from "react-icons/hi";
 
 export const COMMON_LINKS = [
     {
@@ -25,48 +28,48 @@ export const COMMON_LINKS = [
 
 
 export const ROLE_BASED_LINKS = {
-    user: [
-      {
-        label: "Home",
-        href: "/dashboard",
-        icon: <FaHome className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Emotion Checkins",
-        href: "/dashboard/emotioncheckins",
-        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Daily Reflections",
-        href: "/dashboard/dailyreflection",
-        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Challenges",
-        href: "/dashboard/challenges",
-        icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Resources",
-        href: "/dashboard/resources",
-        icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Groups/Community",
-        href: "/dashboard/community",
-        icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Events",
-        href: "/dashboard/events",
-        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-      },
-      {
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
-      }
-    ],
+  user : [
+    {
+      label: "Home",
+      href: "/dashboard",
+      icon: <FaHome className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Emotion Checkins",
+      href: "/dashboard/emotioncheckins",
+      icon: <RiEmotionHappyLine className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Daily Reflections",
+      href: "/dashboard/dailyreflection",
+      icon: <TbWriting className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Challenges",
+      href: "/dashboard/challenges",
+      icon: <TbTargetArrow className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Resources",
+      href: "/dashboard/resources",
+      icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Groups/Community",
+      href: "/dashboard/community",
+      icon: <HiUserGroup className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Events",
+      href: "/dashboard/events",
+      icon: <RiCalendarEventLine className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Profile",
+      href: "/dashboard/profile",
+      icon: <FaUserCircle className="text-white h-5 w-5 flex-shrink-0" />,
+    },
+  ],
   
     specialist: [
       {

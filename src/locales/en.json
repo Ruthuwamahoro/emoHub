@@ -1,0 +1,136 @@
+{
+    "navigation": {
+      "brand": "emoHub",
+      "home": "Home",
+      "about": "About Us",
+      "features": "Features", 
+      "faq": "FAQ",
+      "login": "Login",
+      "getStarted": "Get Started",
+      "language": "Language"
+    },
+    "home": {
+      "title": "Transform Your Emotional Life",
+      "subtitle": "Transform isolation into Ubuntu - the African philosophy that \"I am because we are\". Build emotional strength through community, where your emotional intelligence contributes to collective resilience.",
+      "beginJourney": "Begin Your Journey",
+      "emotionalIntelligence": "Emotional Intelligence",
+      "ubuntuCommunity": "Ubuntu Community",
+      "collectiveHealing": "Collective Healing",
+      "imageAlt1": "Person in peaceful meditation, emotional awareness",
+      "imageAlt2": "Diverse group in supportive circle, Ubuntu community",
+      "imageAlt3": "Hands forming heart shape, emotional intelligence"
+    },
+    "whyEmoHub": {
+      "title": {
+        "prefix": "Why Choose",
+        "highlight": "emoHub?"
+      },
+      "subtitle": "We believe everyone deserves emotional wellness and genuine human connection. Here's how we're different from other platforms.",
+      "benefits": {
+        "emotionalGrowth": {
+          "title": "Emotional Growth",
+          "description": "Develop deeper self-awareness and emotional intelligence through guided exercises and personalized insights."
+        },
+        "breakingIsolation": {
+          "title": "Breaking Isolation",
+          "description": "Connect with a supportive community that understands your journey and celebrates your progress."
+        },
+        "groupSupport": {
+          "title": "Group Support",
+          "description": "Engage in meaningful conversations and receive encouragement from people who truly understand."
+        },
+        "resilienceBuilding": {
+          "title": "Resilience Building",
+          "description": "Learn practical tools and strategies to bounce back stronger from life's challenges and setbacks."
+        }
+      }
+    },
+    "features": {
+        "title": {
+        "prefix": "Powerful",
+        "highlight": "Features",
+        "suffix": "for Growth"
+        },
+        "subtitle": "Everything you need to understand your emotions, build resilience, and connect with others meaningfully.",
+        "emotionsTracking": {
+        "title": "Emotions Tracking & Analytics",
+        "description": "Visualize your emotional patterns with beautiful charts and gain insights into your mental wellness journey."
+        },
+        "dailyChallenges": {
+        "title": "Daily Emotional Challenges",
+        "description": "Grow stronger every day with personalized challenges designed to build emotional resilience and awareness."
+        },
+        "learningResources": {
+        "title": "Learning Resources",
+        "description": "Master emotional intelligence through interactive articles, videos, from experts."
+        },
+        "communityDiscussions": {
+        "title": "Group/Community Discussions",
+        "description": "Join supportive conversations, share experiences, and connect with others on similar emotional journeys."
+        },
+        "explore": "Explore"
+    },
+    "faq": {
+        "badge": "FAQ",
+        "title": {
+        "prefix": "Frequently Asked",
+        "highlight": "Questions"
+        },
+        "subtitle": "Everything you need to know about starting your emotional growth journey with emoHub.",
+        "questions": {
+        "therapy": {
+            "question": "What makes emoHub different from therapy or counseling?",
+            "answer": "emoHub is a community platform focused on emotional growth and connection. While we provide educational resources and support, we're not a replacement for professional therapy. We complement traditional health care by offering daily practice, community support, and emotional intelligence building."
+        },
+        "security": {
+            "question": "Is my personal information and emotional data secure?",
+            "answer": "Absolutely. We use bank-level encryption to protect your data. Your emotional tracking information is private by default, and you control what you share with the community. We never sell your personal information and follow strict privacy guidelines."
+        },
+        "timeCommitment": {
+            "question": "How much time do I need to spend daily on emoHub?",
+            "answer": "You can benefit from as little as 5-40 minutes daily. Our daily challenges are designed to fit into busy schedules. Whether you have 5 minutes for a quick emotional check-in or 30 minutes for group engagement, you'll find value at your own pace."
+        },
+        "sharingComfort": {
+            "question": "What if I'm not comfortable sharing in the community at first?",
+            "answer": "That's completely normal and okay! You can start by observing, using our emotions tracking privately, and taking daily challenges. There's no pressure to share until you feel ready. Many members lurk for weeks before participating actively."
+        },
+        "ageRequirement": {
+            "question": "Is emoHub suitable for teenagers?",
+            "answer": "emoHub is designed for adults 18+. We believe emotional intelligence skills are crucial for young adults as they navigate independence, relationships, and career challenges. Our content and community guidelines are tailored for this demographic."
+        }
+        }
+    },
+    "cta": {
+        "title": "Ready to Transform Your",
+        "prefix": "Emotional Life?",
+        "subtitle": "Join the platform to discover the power of emotional intelligence. Your journey to emotional wellness starts with a single step.",
+        "button": "Get Started Now"
+    },
+    "footer": {
+        "brand": "emoHub",
+        "description": "Building emotional intelligence through authentic human connection. Join our community of growth-minded individuals transforming their emotional lives.",
+        "platform": {
+        "title": "Platform",
+        "aboutUs": "About Us",
+        "community": "Community",
+        "resources": "Resources"
+        },
+        "support": {
+        "title": "Support",
+        "contactUs": "Contact Us",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service"
+        },
+        "legal": {
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "cookies": "Cookies"
+        },
+        "tagline": "Spreading emotional wellness",
+        "copyright": "© 2025 emoHub. All rights reserved."
+    },
+    "languages": {
+      "en": "English",
+      "rw": "Kinyarwanda"
+    }
+  }

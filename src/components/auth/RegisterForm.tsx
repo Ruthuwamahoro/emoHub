@@ -21,11 +21,10 @@ export function LeftAuthPage() {
       />
       <div className="absolute top-8 flex items-center justify-center space-x-3 mt-10">
       <div className="relative">
-        <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
-                <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
-              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full animate-pulse delay-500"></div>
+        <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+        <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
+        </div>
+
         </div>
         <span className="text-white text-xl font-medium">emoHub</span>
       </div>

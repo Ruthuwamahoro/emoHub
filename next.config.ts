@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  i18n: {
+    locales: ['en', 'rw'],
+    defaultLocale: 'en',
+
+  },
   experimental: {
     serverComponentsExternalPackages: ['swagger-jsdoc']
   }

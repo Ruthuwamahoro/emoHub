@@ -51,12 +51,14 @@ export const CustomSiderbarLink = ({
   link, 
   className, 
   dataTour,
-  onMobileClick
+  onMobileClick,
+  sidebarOpen
 }: { 
   link: any; 
   className?: string;
   dataTour?: string;
   onMobileClick?: () => void;
+  sidebarOpen?: boolean;
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -77,7 +79,6 @@ export const CustomSiderbarLink = ({
         return error;
       }
     } else {
-
       onMobileClick?.();
     }
   };
@@ -88,19 +89,30 @@ export const CustomSiderbarLink = ({
         onClick={handleClick} 
         data-tour={dataTour} 
         className={cn(
-          "flex items-center justify-start gap-3 py-3 px-4 md:py-2 md:px-3 rounded-md transition-colors duration-200 w-full text-left",
-          "text-slate-300 hover:bg-slate-800 hover:text-white",
+          "flex items-center gap-3 rounded-lg transition-all duration-200 w-full text-left relative group",
+          sidebarOpen ? "py-3 px-4 md:py-2 md:px-3" : "py-3 px-3 justify-center",
+          "text-slate-300 hover:bg-slate-800/80 hover:text-white",
           "focus:outline-none focus:bg-slate-800 focus:text-white",
-          "text-base md:text-sm", 
+          "text-base md:text-sm border-l-2 border-transparent hover:border-l-blue-400",
           className
         )}
       >
-        <div className="w-5 h-5 md:w-4 md:h-4">
+        <div className={cn(
+          "transition-all duration-200 flex-shrink-0",
+          sidebarOpen ? "w-5 h-5 md:w-4 md:h-4" : "w-6 h-6"
+        )}>
           {link.icon}
         </div>
-        <span className="whitespace-pre inline-block !p-0 !m-0">
-          {link.label}
-        </span>
+        {sidebarOpen && (
+          <span className="whitespace-pre inline-block !p-0 !m-0 transition-opacity duration-200">
+            {link.label}
+          </span>
+        )}
+        {!sidebarOpen && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none">
+            {link.label}
+          </div>
+        )}
       </button>
     );
   }
@@ -111,26 +123,39 @@ export const CustomSiderbarLink = ({
         href={link.href}
         onClick={handleClick}
         className={cn(
-          "flex items-center justify-start gap-3 py-3 px-4 md:py-2 md:px-3 rounded-md transition-colors duration-200 w-full",
-          "text-slate-300",
-          isActive && "bg-slate-800 text-white",
-          !isActive && "hover:bg-slate-800/50 hover:text-white",
-          "focus:outline-none focus:bg-slate-800 focus:text-white",
+          "flex items-center gap-3 rounded-lg transition-all duration-200 w-full relative group",
+          sidebarOpen ? "py-3 px-4 md:py-2 md:px-3" : "py-3 px-3 justify-center",
+          "text-slate-300 border-l-2 transition-all duration-200",
+          isActive && "bg-slate-800/90 text-white border-l-blue-400 shadow-lg",
+          !sidebarOpen && "hover:bg-slate-800/60 hover:text-white border-l-transparent hover:border-l-blue-400/50 ",
+          !isActive && "hover:bg-slate-800/60 hover:text-white border-l-transparent hover:border-l-blue-400/50",
+          "focus:outline-none focus:bg-slate-800 focus:text-white focus:border-l-blue-400",
           "text-base md:text-sm"
         )}
       >
         <div className={cn(
-          "w-5 h-5 md:w-4 md:h-4",
-          isActive && "text-blue-400"
+          "transition-all duration-200 flex-shrink-0",
+          sidebarOpen ? "w-5 h-5 md:w-4 md:h-4" : "w-6 h-6",
+          isActive && "text-blue-400 drop-shadow-sm"
         )}>
           {link.icon}
         </div>
-        <span className={cn(
-          "whitespace-pre inline-block !p-0 !m-0",
-          isActive && "font-medium"
-        )}>
-          {link.label}
-        </span>
+        {sidebarOpen && (
+          <span className={cn(
+            "whitespace-pre inline-block !p-0 !m-0 transition-all duration-200",
+            isActive && "font-semibold text-white"
+          )}>
+            {link.label}
+          </span>
+        )}
+        {!sidebarOpen && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none">
+            {link.label}
+          </div>
+        )}
+        {isActive && !sidebarOpen && (
+          <div className="absolute right-0 w-1 h-full bg-blue-400 rounded-l"></div>
+        )}
       </Link>
     </div>
   );
@@ -276,7 +301,6 @@ export function SidebarDemo() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && mobileOpen) {
@@ -309,10 +333,13 @@ export function SidebarDemo() {
     }
   }, [session, mounted]);
 
+  // Improved tour persistence - use localStorage instead of sessionStorage
   useEffect(() => {
-    if (mounted && session) {
-      const hasSeenTour = sessionStorage.getItem(`emohub-tour-${session.user?.id}`);
-      if (!hasSeenTour) {
+    if (mounted && session?.user?.id) {
+      const tourKey = `emohub-tour-completed-${session.user.id}`;
+      const hasCompletedTour = localStorage.getItem(tourKey);
+      
+      if (!hasCompletedTour) {
         setTimeout(() => {
           setRunTour(true);
         }, 1500);
@@ -333,7 +360,9 @@ export function SidebarDemo() {
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunTour(false);
       if (session?.user?.id) {
-        sessionStorage.setItem(`emohub-tour-${session.user.id}`, 'true');
+        const tourKey = `emohub-tour-completed-${session.user.id}`;
+        localStorage.setItem(tourKey, 'true');
+        localStorage.setItem(`${tourKey}-timestamp`, Date.now().toString());
       }
     }
   };
@@ -362,7 +391,6 @@ export function SidebarDemo() {
   const handleMobileLinkClick = () => {
     setMobileOpen(false);
   };
-
 
   useEffect(() => {
     (window as any).toggleMobileSidebar = () => {
@@ -402,7 +430,6 @@ export function SidebarDemo() {
           </Sidebar>
         </div>
 
- 
         {mobileOpen && (
           <>
             <div 
@@ -437,28 +464,29 @@ export function SidebarDemo() {
 
   return (
     <>
- 
+      {/* Desktop Sidebar with increased width when closed */}
       <div className={cn("h-screen hidden md:block")}>
         <Sidebar open={open} setOpen={setOpen}>
           <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
             <div className="flex flex-col flex-1 overflow-hidden relative">
               {open ? <Logo /> : <LogoIcon />}
               
-              <div className="fixed top-3 left-6 z-50 transition-all duration-300"
-                style={{ 
-                  transform: open ? 'translateX(940px)' : 'translateX(940px)' 
-                }}
+              <div className="fixed top-3 right-4 z-50 transition-all duration-300"
                 data-tour="take-tour">
                 <VibratingHelpButton onClick={startTour} />
               </div>
               
-              <div className="mt-8 flex flex-col gap-2 text-white">
+              <div className={cn(
+                "mt-8 flex flex-col gap-1 text-white transition-all duration-200",
+                !open && "px-1"
+              )}>
                 {allLinks.map((link, idx) => (
                   <CustomSiderbarLink 
                     key={`${link.href}-${idx}`} 
                     link={link} 
                     className=""
                     dataTour={getTourAttributeForLink(link)}
+                    sidebarOpen={open}
                   />
                 ))}
               </div>
@@ -467,10 +495,10 @@ export function SidebarDemo() {
             <div className="relative" data-tour="profile">
               {open ? (
                 <Button className="p-[3px] relative w-full bg-transparent hover:bg-slate-800 transition-colors duration-200">
-                  <div className="absolute inset-0 bg-gray-400/20 rounded-lg border-none" />
+                  <div className="absolute inset-0 bg-orange-400 rounded-lg border-none" />
                   <div className="px-8 py-2 rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent border-none w-full">
                     <Avatar className="cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200 rounded-full">
-                      <AvatarFallback className="text-white test-sm font-medium">
+                      <AvatarFallback className="text-white test-sm font-bold">
                         {getInitials(session?.user?.fullName)}
                       </AvatarFallback>
                     </Avatar>
@@ -478,11 +506,16 @@ export function SidebarDemo() {
                   </div>
                 </Button>
               ) : (
-                <Link href="/profile" className="flex justify-center focus:outline-none rounded-lg">
-                  <div className="p-10 rounded-lg hover:bg-slate-800/50 transition-colors duration-200">
+                <Link href="/profile" className="flex justify-center focus:outline-none rounded-lg group">
+                  <div className="p-3 rounded-lg hover:bg-slate-800/50 transition-colors duration-200 relative">
                     <Avatar className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                    {getInitials(session?.user?.fullName)}
+                      <AvatarFallback className="text-white bg-orange-400  text-sm font-bold rounded-full w-10 h-10 flex items-center justify-center">
+                        {getInitials(session?.user?.fullName)}
+                      </AvatarFallback>
                     </Avatar>
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-white-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none">
+                      {userName}
+                    </div>
                   </div>
                 </Link>
               )}
@@ -499,7 +532,6 @@ export function SidebarDemo() {
           />
           <div className="fixed inset-y-0 left-0 z-50 w-80 bg-slate-900 text-white md:hidden">
             <div className="flex flex-col h-full">
-           
               <div className="flex items-center justify-between p-4 border-b border-slate-700">
                 <Logo />
                 <Button
@@ -521,6 +553,7 @@ export function SidebarDemo() {
                       className=""
                       dataTour={getTourAttributeForLink(link)}
                       onMobileClick={handleMobileLinkClick}
+                      sidebarOpen={true}
                     />
                   ))}
                 </div>
@@ -533,7 +566,9 @@ export function SidebarDemo() {
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors duration-200"
                 >
                   <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all duration-200">
-                    {getInitials(session?.user?.fullName)}
+                    <AvatarFallback className="text-white text-sm font-medium bg-slate-700 rounded-full w-full h-full flex items-center justify-center">
+                      {getInitials(session?.user?.fullName)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{userName}</p>
@@ -553,7 +588,7 @@ export function SidebarDemo() {
         showProgress={true}
         showSkipButton={true}
         callback={handleJoyrideCallback}
-        debug={true}
+        debug={false}
         disableOverlayClose={true} 
         disableCloseOnEsc={false}
         hideCloseButton={false}
@@ -621,11 +656,9 @@ export const Logo = () => {
       data-tour="logo"
     >
       <div className="relative">
-        <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+        <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
           <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
         </div>
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
-        <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full animate-pulse delay-500"></div>
       </div>
       <motion.span
         initial={{ opacity: 0 }}
@@ -646,11 +679,9 @@ export const LogoIcon = () => {
       data-tour="logo"
     >
       <div className="relative">
-        <div className="w-10 h-10 bg-gradient-to-br from-rose-400 via-amber-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+        <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
           <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
         </div>
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-emerald-400 rounded-full animate-ping"></div>
-        <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full animate-pulse delay-500"></div>
       </div>
     </Link>
   );

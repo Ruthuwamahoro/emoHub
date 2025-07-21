@@ -5,6 +5,7 @@ import { LeftAuthPage } from "@/components/auth/RegisterForm";
 import { useLogin } from '@/hooks/users/useLoginUser';
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { Brain } from "lucide-react";
 
 export default function EmoHubSignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,8 +32,8 @@ export default function EmoHubSignIn() {
 
       <div className="flex-1 bg-white flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-0">
         <div className="flex lg:hidden items-center justify-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
-            <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
+          <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+            <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
           </div>
           <span className="text-slate-700 text-lg font-medium">emoHub</span>
         </div>

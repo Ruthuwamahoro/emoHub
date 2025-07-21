@@ -1,15 +1,17 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, ArrowRight, Brain, Heart, Sun, Zap } from 'lucide-react';
 
 export const EmoHubLanding = () => {
+  const { t } = useTranslation();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [titleText, setTitleText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
   const [isWritingComplete, setIsWritingComplete] = useState(false);
 
-  const fullTitle = "Transform Your Emotional Life";
+  const fullTitle = t('home.title');
   const writingSpeed = 100;
 
   useEffect(() => {
@@ -27,7 +29,12 @@ export const EmoHubLanding = () => {
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    // Reset title animation when language changes
+    setTitleText('');
+    setIsWritingComplete(false);
+    setShowCursor(true);
+    
+    if (!isLoaded || !fullTitle) return;
 
     const timer = setTimeout(() => {
       let currentIndex = 0;
@@ -47,7 +54,7 @@ export const EmoHubLanding = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isLoaded]);
+  }, [isLoaded, fullTitle]);
 
   useEffect(() => {
     if (!showCursor) return;
@@ -88,7 +95,13 @@ export const EmoHubLanding = () => {
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>
                 {titleText.split(' ').map((word, wordIndex) => {
-                  if (word === 'Emotional') {
+                  // Check for emotional/Ubuntu related words in different languages
+                  const emotionalWords = ['Emotional', 'Amarangamutima', 'Ubuntu'];
+                  const isEmotionalWord = emotionalWords.some(emoWord => 
+                    word.toLowerCase().includes(emoWord.toLowerCase())
+                  );
+                  
+                  if (isEmotionalWord) {
                     return (
                       <span key={wordIndex} className="relative inline-block mr-2 sm:mr-3">
                         <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent font-extrabold">
@@ -107,9 +120,8 @@ export const EmoHubLanding = () => {
               
               <p className={`text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed max-w-lg transition-all duration-1000 delay-400 md:py-0 py-6 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`} >
-                Transform isolation into Ubuntu - the African philosophy that "I am because we are". 
-                Build emotional strength through community, where your emotional intelligence contributes to collective resilience.
+              }`}>
+                {t('home.subtitle')}
               </p>
             </div>
 
@@ -123,7 +135,7 @@ export const EmoHubLanding = () => {
               >
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
                 <Sun className="relative z-10 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 group-hover:rotate-180 transition-transform duration-500" />
-                <span className="relative z-10">Begin Your Journey</span>
+                <span className="relative z-10">{t('home.beginJourney')}</span>
                 <ArrowRight className="relative z-10 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 group-hover:translate-x-2 transition-transform duration-300" />
                 <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl blur opacity-0 group-hover:opacity-60 transition-opacity duration-300 -z-10"></div>
               </button>
@@ -135,15 +147,15 @@ export const EmoHubLanding = () => {
             }`}>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-sm px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full shadow-sm border border-amber-100 hover:shadow-md transition-all duration-300 hover:scale-105">
                 <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Emotional Intelligence</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">{t('home.emotionalIntelligence')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-sm px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full shadow-sm border border-amber-100 hover:shadow-md transition-all duration-300 hover:scale-105">
                 <Users className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Ubuntu Community</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">{t('home.ubuntuCommunity')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-sm px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full shadow-sm border border-amber-100 hover:shadow-md transition-all duration-300 hover:scale-105">
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Collective Healing</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">{t('home.collectiveHealing')}</span>
               </div>
             </div>
           </div>
@@ -174,7 +186,7 @@ export const EmoHubLanding = () => {
                 <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-amber-100 to-orange-100 p-2 sm:p-3 hover:shadow-3xl transition-all duration-500 hover:scale-105">
                   <img 
                     src="https://i.pinimg.com/736x/71/03/71/7103715b95e36a59027f9b4c74770fcd.jpg"
-                    alt="Person in peaceful meditation, emotional awareness"
+                    alt={t('home.imageAlt1', 'Person in peaceful meditation, emotional awareness')}
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>
@@ -185,7 +197,7 @@ export const EmoHubLanding = () => {
                 <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-52 lg:h-52 rounded-full overflow-hidden shadow-xl bg-gradient-to-br from-red-100 to-amber-100 p-1 sm:p-1.5 md:p-2 hover:shadow-2xl transition-all duration-500 hover:scale-105">
                   <img 
                     src="https://i.pinimg.com/736x/68/bb/ff/68bbff44405e76289c884d221db18415.jpg"
-                    alt="Diverse group in supportive circle, Ubuntu community"
+                    alt={t('home.imageAlt2', 'Diverse group in supportive circle, Ubuntu community')}
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>
@@ -196,7 +208,7 @@ export const EmoHubLanding = () => {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden shadow-lg bg-gradient-to-br from-orange-100 to-yellow-100 p-1 sm:p-1.5 hover:shadow-xl transition-all duration-500 hover:scale-105">
                   <img 
                     src="https://i.pinimg.com/736x/64/d0/4e/64d04ef0c7d226a6de2abb460a259bce.jpg"
-                    alt="Hands forming heart shape, emotional intelligence"
+                    alt={t('home.imageAlt3', 'Hands forming heart shape, emotional intelligence')}
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>

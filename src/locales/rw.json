@@ -1,0 +1,137 @@
+{
+    "navigation": {
+      "brand": "emoHub",
+      "home": "Ahabanza",
+      "about": "Ibyerekeye Twebwe",
+      "features": "Ibisobanuro",
+      "faq": "Ibibazo Bikunze Kubazwa",
+      "login": "Kwinjira",
+      "getStarted": "Tangira",
+      "language": "Ururimi"
+    },
+    "home": {
+      "title": "Hindura Uburyo Wiyumva",
+      "subtitle": "Va mu bwigunge, ube hamwe n'abandi mu bumwe bwa muntu – nk'uko Ubuntu ribivuga ngo \"Ndiho kuko turiho.\" Iyo uri kumwe n'abandi, wubaka imbaraga z'amarangamutima kandi ugafasha abandi gukomera mu buzima.",
+      "beginJourney": "Tangira Urugendo Rwawe",
+      "emotionalIntelligence": "Ubushobozi bwo kumenya no gucunga amarangamutima",
+      "ubuntuCommunity": "Ubuntu Muryango",
+      "collectiveHealing": "Gukira twese hamwe",
+      "imageAlt1": "Umuntu uri mu gutekereza mu mahoro, ubumenyi bw'amarangamutima",
+      "imageAlt2": "Itsinda ritandukanye riri mu ruziga rwishimira, umuryango wa Ubuntu",
+      "imageAlt3": "Amaboko akora ishusho y'umutima, ubushobozi bw'amarangamutima"
+    },
+    "whyEmoHub": {
+      "title": {
+        "prefix": "Kuki Uhitamo",
+        "highlight": "emoHub?"
+      },
+      "subtitle": "Twizera ko buri muntu akwiye ubuzima bwiza bw'amarangamutima n'ubusabane nyabwo hagati y'abantu. Dore uko dutandukana n'izindi mbuga.",
+      "benefits": {
+        "emotionalGrowth": {
+          "title": "Kuzamura Amarangamutima",
+          "description": "Kuzamuka mu kwiyumva no kugira ubushobozi bwo gucunga amarangamutima binyuze mu myitozo iyobowe n'amakuru akubiyeho."
+        },
+        "breakingIsolation": {
+          "title": "Kuva mu Bwigunge",
+          "description": "Guhurira n'umuryango wishimira uwo uri nawe kandi ushimira iterambere ryawe."
+        },
+        "groupSupport": {
+          "title": "Gufashanya mu Matsinda",
+          "description": "Kugira ibiganiro bifite ishingiro no kubona inshingano kuva ku bantu bakumenya neza."
+        },
+        "resilienceBuilding": {
+          "title": "Kubaka Ubunyangamugayo",
+          "description": "Kwiga ibikoresho bifatika n'amayeri yo gusubira inyuma ukomeye kurusha mbere mu ngorane z'ubuzima."
+        }
+      }
+    },
+    
+    "features": {
+        "title": {
+        "prefix": "Ubufasha",
+        "highlight": "emoHub",
+        "suffix": "itanga"
+        },
+        "subtitle": "Ibintu byose ukeneye kumenya amarangamutima yawe, kubaka ubunyangamugayo, no guhurira n'abandi mu buryo bufatika.",
+        "emotionsTracking": {
+        "title": "Gukurikirana no Gusesengura Amarangamutima",
+        "description": "Reba uko amarangamutima yawe agenda binyuze mu bishushanyo byiza kandi ubone amakuru ajyanye n'ubuzima bwawe bw'ubwenge."
+        },
+        "dailyChallenges": {
+        "title": "Imbogamizi za Buri Munsi z'Amarangamutima",
+        "description": "Komera buri munsi binyuze mu mbogamizi zakubiyeho zagenewe kubaka ubunyangamugayo n'ubumenyi bw'amarangamutima."
+        },
+        "learningResources": {
+        "title": "Ibikoresho byo Kwiga",
+        "description": "Menya ubushobozi bw'amarangamutima binyuze mu nyandiko zihuza, amashusho, kuva ku bahanga."
+        },
+        "communityDiscussions": {
+        "title": "Ibiganiro by'Itsinda/Umuryango",
+        "description": "Jya mu biganiro bishimira, sangira ubunyangamugayo bwawe, kandi uhurire n'abandi bafite urugendo rumwe n'urwawe."
+        },
+        "explore": "Shakisha"
+    },
+    "faq": {
+        "badge": "Ibibazo Bikunze Kubazwa",
+        "title": {
+        "prefix": "Ibibazo",
+        "highlight": "Bikunze Kubazwa"
+        },
+        "subtitle": "Ibintu byose ukeneye kumenya mbere yo gutangira urugendo rwawe rwo gukura mu by'amarangamutima na emoHub.",
+        "questions": {
+        "therapy": {
+            "question": "Ni iki gitandukanya emoHub na kuvurwa cyangwa inama z'ubwoba?",
+            "answer": "emoHub ni urubuga rw'umuryango rwibanze ku gukura kw'amarangamutima no guhuza abantu. Mu gihe dutanga ibikoresho by'uburezi n'ubufasha, ntabwo dusimbuza kuvurwa kw'abahanga. Tuzuza ubuvuzi gakondo dutanga imyitozo ya buri munsi, ubufasha bw'umuryango, no kubaka ubushobozi bw'amarangamutima."
+        },
+        "security": {
+            "question": "Ese amakuru yange bwite n'amakuru y'amarangamutima arafitwe neza?",
+            "answer": "Rwose. Dukoresha ubushishozi bw'urwego rw'amabanki kurinda amakuru yawe. Amakuru yawe yo gukurikirana amarangamutima ni ibanga ku buryo busanzwe, kandi wewe wowe ugenzura icyo usangira n'umuryango. Ntigeze tugurisha amakuru yawe bwite kandi dukurikiza amabwiriza akomeye y'ibanga."
+        },
+        "timeCommitment": {
+            "question": "Ni igihe kingana n'iki nkeneye gukoresha buri munsi kuri emoHub?",
+            "answer": "Urashobora kunguka kuva ku minota 5-40 buri munsi. Imbogamizi zacu za buri munsi zagenewe guhuza n'amahoro menshi. Haba ufite minota 5 yo kugenzura vuba amarangamutima cyangwa minota 30 yo kwinjira mu itsinda, uzabona agaciro ku buryo bwawe."
+        },
+        "sharingComfort": {
+            "question": "Niba ntari mfite ubwoba bwo gusangira mu muryango mu ntangiriro?",
+            "answer": "Ibyo ni ibisanzwe kandi ni byiza! Urashobora gutangira mu kureba, ukoresha sisitemu yacu yo gukurikirana amarangamutima ku bwite, no gufata imbogamizi za buri munsi. Nta gahato ko gusangira kugeza ubyumva witeguye. Abanyamuryango benshi bategereza ibyumweru mbere yo kwitabira neza."
+        },
+        "ageRequirement": {
+            "question": "Ese emoHub ikwiye ingimbi?",
+            "answer": "emoHub yagenewe abakuru b'imyaka 18+. Twizera ko ubushobozi bw'ubwenge bw'amarangamutima ari ingenzi ku rubyiruko rukiri gukomera mu kwikemeza, mu mibanire, no mu bibazo by'umwuga. Ibintu byacu n'amabwiriza y'umuryango byagenewe uru rwego."
+        }
+        }
+    },
+    "cta": {
+    "title": "Witeguye guhindura uko",
+    "prefix": "wiyumva?",
+    "subtitle": "Injira ku rubuga maze umenye imbaraga z’ubushobozi bwo gucunga amarangamutima. Urugendo rwawe rwo kugira ubuzima bwiza bw’amarangamutima rutangirira ku ntambwe imwe.",
+    "button": "Tangirira Ubu"
+    },
+    "footer": {
+    "brand": "emoHub",
+    "description": "Kubaka ubushobozi bw'amarangamutima binyuze mu busabane nyabwo hagati y'abantu. Jya mu muryango wacu w'abantu bafite ibitekerezo byo gukura bahinduye ubuzima bwabo bw'amarangamutima.",
+    "platform": {
+      "title": "Urubuga",
+      "aboutUs": "Ibyerekeye Twebwe",
+      "community": "Umuryango",
+      "resources": "Ibikoresho"
+    },
+    "support": {
+      "title": "Ubufasha",
+      "contactUs": "Twandikire",
+      "privacyPolicy": "Amategeko y'Ibanga",
+      "termsOfService": "Amategeko yo Gukoresha"
+    },
+    "legal": {
+      "privacy": "Ibanga",
+      "terms": "Amategeko",
+      "cookies": "Cookies"
+    },
+    "tagline": "Gukwirakwiza ubuzima bwiza bw'amarangamutima",
+    "copyright": "© 2025 emoHub. Uburenganzira bwose burabitswe."
+  },
+    "languages": {
+      "en": "Icyongereza",
+      "rw": "Ikinyarwanda"
+    }
+  }

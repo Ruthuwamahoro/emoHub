@@ -1,30 +1,34 @@
+"use client";
 import React from 'react';
 import {Users, Brain, MessageCircle, Shield} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const WhyEmoHubSection = () => {
+  const { t } = useTranslation();
+  
   const benefits = [
     {
       icon: <Brain className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-amber-500" />,
-      title: "Emotional Growth",
-      description: "Develop deeper self-awareness and emotional intelligence through guided exercises and personalized insights.",
+      title: t('whyEmoHub.benefits.emotionalGrowth.title'),
+      description: t('whyEmoHub.benefits.emotionalGrowth.description'),
       gradient: "bg-white"
     },
     {
       icon: <Users className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-amber-500" />,
-      title: "Breaking Isolation",
-      description: "Connect with a supportive community that understands your journey and celebrates your progress.",
+      title: t('whyEmoHub.benefits.breakingIsolation.title'),
+      description: t('whyEmoHub.benefits.breakingIsolation.description'),
       gradient: "bg-white"
     },
     {
       icon: <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-amber-500" />,
-      title: "Group Support",
-      description: "Engage in meaningful conversations and receive encouragement from people who truly understand.",
+      title: t('whyEmoHub.benefits.groupSupport.title'),
+      description: t('whyEmoHub.benefits.groupSupport.description'),
       gradient: "bg-white"
     },
     {
       icon: <Shield className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-amber-500" />,
-      title: "Resilience Building",
-      description: "Learn practical tools and strategies to bounce back stronger from life's challenges and setbacks.",
+      title: t('whyEmoHub.benefits.resilienceBuilding.title'),
+      description: t('whyEmoHub.benefits.resilienceBuilding.description'),
       gradient: "bg-white"
     }
   ];
@@ -37,14 +41,13 @@ export const WhyEmoHubSection = () => {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8" data-aos="fade-up">
         <div className="text-center mb-12 sm:mb-16 lg:mb-20">
           <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-4 sm:mb-6">
-            Why Choose{' '}
+            {t('whyEmoHub.title.prefix')}{' '}
             <span className="bg-amber-500 font-bold bg-clip-text text-transparent">
-              emoHub?
+              {t('whyEmoHub.title.highlight')}
             </span>
           </h3>
           <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
-            We believe everyone deserves emotional wellness and genuine human connection.
-            Here's how we're different from other platforms.
+            {t('whyEmoHub.subtitle')}
           </p>
         </div>
 

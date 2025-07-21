@@ -266,7 +266,7 @@ const EmoHubDashboard = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-7 lg:mb-8">
               <div>
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-medium text-slate-800 mb-1 sm:mb-2">EI Challenges Progress</h2>
-                <p className="text-slate-500 text-sm sm:text-base">Track your emotional intelligence growth</p>
+                <p className="text-slate-500 text-sm sm:text-base">Track emotional intelligence growth</p>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <select
@@ -274,9 +274,9 @@ const EmoHubDashboard = () => {
                   onChange={(e) => setSelectedMonth(e.target.value)}
                   className="text-xs sm:text-sm border border-gray-200 rounded-lg lg:rounded-xl px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 font-medium min-w-0"
                 >
-                  <option>March 2020</option>
-                  <option>April 2020</option>
-                  <option>May 2020</option>
+                  <option>July 2025</option>
+                  <option>July 2025</option>
+                  <option>July 2025</option>
                 </select>
                 <button className="p-2 hover:bg-gray-100 rounded-lg lg:rounded-xl transition-colors">
                   <MoreHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -288,7 +288,6 @@ const EmoHubDashboard = () => {
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
                 <span className="text-sm text-slate-500 font-medium order-2 sm:order-1">Challenges completed</span>
                 <div className="text-left sm:text-right order-1 sm:order-2">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-medium text-emerald-800 mb-1">44</div>
                   <div className="flex items-center gap-2 justify-start sm:justify-end">
                     <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
                     <span className="text-xs sm:text-sm text-orange-500 font-medium">+12% from last month</span>
@@ -320,8 +319,8 @@ const EmoHubDashboard = () => {
                     tickLine={false}
                     tick={{ fontSize: 11, fill: '#64748B', fontWeight: 500 }}
                     className="sm:text-xs"
-                    tickFormatter={(value) => `${value}%`}
-                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}`}
+                    domain={[0, 10]}
                   />
                   <Area
                     type="monotone"
