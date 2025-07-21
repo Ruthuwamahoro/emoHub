@@ -91,7 +91,7 @@ export const EmoHubLanding = () => {
           }`}>
 
             <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-              <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight sm:leading-[1.1] transition-all duration-1000 delay-20 ${
+              <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight sm:leading-[1.1] transition-all duration-1000 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>
                 {titleText.split(' ').map((word, wordIndex) => {

@@ -102,7 +102,7 @@ export const Navbar = () => {
               {/* Login Link */}
               <a
                 href="/login"
-                className="relative group text-slate-700 hover:text-rose-600 px-4 py-2 text-body-medium font-medium transition-all duration-300 hover:scale-105"
+                className="relative group text-orange-700 hover:text-rose-600 px-4 py-2 text-body-medium font-medium transition-all duration-300 hover:scale-105"
               >
                 <span className="relative z-10">{t('navigation.login')}</span>
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-rose-500 to-amber-500 group-hover:w-full transition-all duration-300"></div>
@@ -142,10 +142,12 @@ export const Navbar = () => {
       </nav>
 
       {isMenuOpen && (
-        <div className="md:hidden fixed top-[88px] left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gradient-to-r from-rose-100 via-amber-100 to-emerald-100 shadow-lg animate-slideDown">
+        <div className="md:hidden fixed top-[100px] left-32 right-0 z-40 bg-white/95 backdrop-blur-lg shadow-lg animate-slideDown" data-aos="slide-right">
           <div className="px-4 pt-2 pb-4 space-y-2 relative max-h-[calc(100vh-88px)] overflow-y-auto">
             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-rose-200/20 to-amber-200/20 rounded-full blur-xl"></div>
-            
+            <div>
+                <LanguageSwitcher />
+            </div>
             {navItems.map((item) => (
               <a
                 key={item.name}
@@ -159,10 +161,8 @@ export const Navbar = () => {
               </a>
             ))}
             
+
             <div className="pt-2 space-y-3">
-              <div className="px-4">
-                <LanguageSwitcher />
-              </div>
               
               <a
                 href="/login"

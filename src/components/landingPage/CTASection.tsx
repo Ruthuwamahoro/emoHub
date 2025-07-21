@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 export const FinalCTASection = () => {
   const { t } = useTranslation();
   return (
-    <section className="max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto py-8 sm:py-10 bg-slate-900 relative overflow-hidden mb-12 sm:mb-16 md:mb-20 mt-12 sm:mt-16 md:mt-20 mx-4 sm:mx-auto rounded-2xl sm:rounded-3xl">
+    <section className="max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-7xl mx-auto py-8 sm:py-10 bg-gray-100  relative overflow-hidden mb-12 sm:mb-16 md:mb-20 mt-12 sm:mt-16 md:mt-20 mx-4 sm:mx-auto rounded-2xl sm:rounded-3xl">
       <div className="absolute inset-0 bg-black/10 rounded-2xl sm:rounded-3xl"></div>
       
       <div className="absolute top-0 left-0 w-full h-full">
@@ -16,20 +16,20 @@ export const FinalCTASection = () => {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 sm:mb-8 leading-tight px-2">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-black mb-6 sm:mb-8 leading-tight px-2">
           {t('cta.title')}{' '}
-          <span className="bg-amber-600 bg-clip-text text-transparent font-light">
+          <span className="bg-amber-600 bg-clip-text text-transparent font-bold">
           {t('cta.prefix')}{' '}
           </span>
         </h2>
         
-        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-indigo-100 mb-8 sm:mb-10 md:mb-12 leading-relaxed max-w-3xl mx-auto px-2">
+        <p className="text-base sm:text-lg md:text-xl lg:text-lg text-black mb-8 sm:mb-10 md:mb-12 leading-relaxed max-w-3xl mx-auto px-2">
           {t('cta.subtitle')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-10 md:mb-12">
           <button 
-            className="group bg-white text-slate-700 px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-4 rounded-xl sm:rounded-2xl text-base sm:text-lg hover:shadow-2xl hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center font-medium"
+            className="group text-white font-bold px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-4 rounded-xl sm:rounded-2xl text-base sm:text-lg hover:shadow-2xl hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center font-medium bg-slate-500"
             onClick={() => window.location.href="/register"}
           >
             <span>{t('cta.button')}</span>
