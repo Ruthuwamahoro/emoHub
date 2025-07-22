@@ -35,7 +35,9 @@ export default function EmoHubSignIn() {
           <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
             <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
           </div>
-          <span className="text-slate-700 text-lg font-medium">emoHub</span>
+          <span className="text-xl bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
+           ǝmo<span className="text-slate-900 font-extrabold italic">Hub</span>
+          </span>
         </div>
 
         <div className="max-w-sm mx-auto w-full">

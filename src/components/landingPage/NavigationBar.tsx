@@ -68,16 +68,18 @@ export const Navbar = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
             <div className="flex items-center space-x-3 group">
               <div className="relative">
                 <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
                   <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
                 </div>
               </div>
-              <span className="text-xl font-medium bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent hover:from-rose-600 hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
-                {t('navigation.brand')}
-              </span>
+              {/* <span className="text-xl bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
+                <span>{t('navigation.brand')}<span className="text-slate-900 font-bold italic">Hub</span></span>
+              </span> */}
+              <span className="text-xl bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
+              {t('navigation.brand')}<span className="text-slate-900 font-extrabold italic">Hub</span>
+            </span>
             </div>
 
             <div className="hidden md:flex items-center space-x-1 text-sm">
@@ -95,11 +97,7 @@ export const Navbar = () => {
               ))}
             </div>
 
-            {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              {/* Language Switcher */}
-              
-              {/* Login Link */}
               <a
                 href="/login"
                 className="relative group text-orange-700 hover:text-rose-600 px-4 py-2 text-body-medium font-medium transition-all duration-300 hover:scale-105"
@@ -110,25 +108,22 @@ export const Navbar = () => {
               
               <a
                 href="/register"
-                className="group relative bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                className="group relative bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-slate-500/30 hover:shadow-slate-500/50 transform hover:scale-105 transition-all duration-300 overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                 <span className="relative z-10 flex items-center gap-2">
                   {t('navigation.getStarted')}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
-                <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-400 rounded-xl blur opacity-0 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
               </a>
               <LanguageSwitcher />
 
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="relative group text-slate-700 hover:text-rose-600 p-2 rounded-lg hover:bg-gradient-to-r hover:from-rose-50 hover:to-amber-50 transition-all duration-300"
+                className="relative group text-slate-700 hover:text-orange-600 p-2 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 transition-all duration-300"
                 aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               >
                 <div className="relative z-10">
@@ -167,7 +162,7 @@ export const Navbar = () => {
               <a
                 href="/login"
                 onClick={() => setIsMenuOpen(false)}
-                className="relative group block w-full text-left px-4 py-3 text-slate-700 hover:text-rose-600 font-medium rounded-lg hover:bg-gradient-to-r hover:from-rose-50 hover:to-amber-50 transition-all duration-300"
+                className="relative group block w-full text-left px-4 py-3 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-gradient-to-r hover:from-rose-50 hover:to-amber-50 transition-all duration-300"
               >
                 <span className="relative z-10">{t('navigation.login')}</span>
                 <div className="absolute bottom-1 left-4 w-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 group-hover:w-16 transition-all duration-300"></div>
@@ -178,7 +173,7 @@ export const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className="group relative block w-full bg-gradient-to-r from-slate-700 to-slate-900 text-white px-4 py-3 rounded-xl text-sm font-semibold shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all duration-300 overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {t('navigation.getStarted')}

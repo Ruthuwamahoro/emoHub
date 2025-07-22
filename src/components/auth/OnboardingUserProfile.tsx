@@ -4,6 +4,7 @@ import { Heart, ArrowRight, ArrowLeft, Check, Brain, Sparkles } from 'lucide-rea
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { Button } from '../ui/button';
 
 
 interface OnboardingStep {
@@ -397,26 +398,26 @@ export const EmoHubOnboarding = () => {
         <div className={`flex items-center justify-center gap-6 transition-all duration-700 delay-800 ${
           isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <button
+          <Button
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className={`group flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all duration-300 bg-white/80 backdrop-blur-sm border border-white/50 ${
+            className={`group flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 bg-white/80 backdrop-blur-sm border border-white/50 ${
               currentStep === 1 
                 ? 'opacity-50 cursor-not-allowed text-slate-400' 
-                : 'text-slate-700 hover:bg-white hover:scale-105 hover:text-slate-800'
+                : 'text-slate-700 hover:bg-white/90 hover:scale-105 hover:text-slate-800'
             }`}
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
             Previous
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={handleNext}
             disabled={!isCurrentStepCompleted || isSubmitting}
-            className={`group relative flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 overflow-hidden ${
+            className={`group relative flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 overflow-hidden ${
               isCurrentStepCompleted && !isSubmitting
-                ? 'bg-gradient-to-r from-[#fb923c] to-amber-500 text-white hover:from-amber-500 hover:to-emerald-500 hover:scale-105 transform'
-                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-[#fb923c] to-amber-500 text-white hover:from-slate-700 hover:to-slate-500 hover:scale-105 transform'
+                : 'bg-slate-300 text-slate-800 cursor-not-allowed'
             }`}
           >
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -434,7 +435,7 @@ export const EmoHubOnboarding = () => {
             {!isSubmitting && (
               <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             )}
-          </button>
+          </Button>
         </div>
       </div>
 

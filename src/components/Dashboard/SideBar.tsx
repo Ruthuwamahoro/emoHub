@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
 import VibratingHelpButton from "./HelperButton";
-import { Avatar as AvatarImages } from "@/utils/genderAvatar";
 
 const SidebarSkeleton = ({ open, isMobile }: { open: boolean; isMobile?: boolean }) => (
   <div className={cn(
@@ -333,7 +332,6 @@ export function SidebarDemo() {
     }
   }, [session, mounted]);
 
-  // Improved tour persistence - use localStorage instead of sessionStorage
   useEffect(() => {
     if (mounted && session?.user?.id) {
       const tourKey = `emohub-tour-completed-${session.user.id}`;
@@ -409,7 +407,6 @@ export function SidebarDemo() {
   if (!session) {
     return (
       <>
-        {/* Desktop Sidebar */}
         <div className={cn("h-screen hidden md:block")}>
           <Sidebar open={open} setOpen={setOpen}>
             <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
@@ -464,7 +461,6 @@ export function SidebarDemo() {
 
   return (
     <>
-      {/* Desktop Sidebar with increased width when closed */}
       <div className={cn("h-screen hidden md:block")}>
         <Sidebar open={open} setOpen={setOpen}>
           <SidebarBody className="justify-between gap-10 bg-slate-900 text-white">
@@ -665,7 +661,9 @@ export const Logo = () => {
         animate={{ opacity: 1 }}
         className="text-white text-xl font-medium whitespace-pre"
       >
-        emoHub
+        <span className="text-xl text-white">
+            ǝmo<span className="text-white-900 font-extrabold italic">Hub</span>
+        </span>
       </motion.span>
     </Link>
   );

@@ -11,9 +11,6 @@ export const LanguageSwitcher = () => {
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
     setIsOpen(false);
-    
-    // Optional: You can also store the selection in localStorage
-    // This is already handled by i18next-browser-languagedetector
     localStorage.setItem('i18nextLng', langCode);
   };
 
@@ -27,7 +24,7 @@ export const LanguageSwitcher = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:text-rose-600 rounded-lg hover:bg-gradient-to-r hover:from-rose-50 hover:to-amber-50 transition-all duration-300 min-w-[120px]"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:text-orange-600 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 transition-all duration-300 min-w-[120px]"
         aria-label={t('navigation.language')}
       >
         <Globe className="w-4 h-4 flex-shrink-0" />
@@ -38,14 +35,12 @@ export const LanguageSwitcher = () => {
 
       {isOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
           
-          {/* Dropdown */}
           <div className="absolute right-0 mt-2 py-2 w-48 bg-white/95 backdrop-blur-lg rounded-lg shadow-lg border border-rose-100/50 z-20 animate-slideDown">
             {supportedLanguages.map((lang) => (
               <button
@@ -53,7 +48,7 @@ export const LanguageSwitcher = () => {
                 onClick={() => handleLanguageChange(lang.code)}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gradient-to-r hover:from-rose-50 hover:to-amber-50 transition-all duration-200 flex items-center gap-3 ${
                   i18n.language === lang.code 
-                    ? 'bg-gradient-to-r from-rose-50 to-amber-50 text-rose-700 font-medium' 
+                    ? 'bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-medium' 
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
                 aria-label={`Switch to ${lang.name}`}
@@ -63,7 +58,7 @@ export const LanguageSwitcher = () => {
                 </span>
                 <span className="flex-1">{lang.name}</span>
                 {i18n.language === lang.code && (
-                  <Check className="w-4 h-4 text-rose-600" />
+                  <Check className="w-4 h-4 text-orange-600" />
                 )}
               </button>
             ))}

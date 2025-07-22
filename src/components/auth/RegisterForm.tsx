@@ -26,7 +26,9 @@ export function LeftAuthPage() {
         </div>
 
         </div>
-        <span className="text-white text-xl font-medium">emoHub</span>
+        <span className="text-xl text-white">
+            ǝmo<span className="text-white-900 font-extrabold italic">Hub</span>
+        </span>
       </div>
 
       <div className="mb-16">
@@ -88,12 +90,13 @@ export function RegisterForm() {
         <LeftAuthPage />
 
         <div className="flex-1 bg-white flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-0">
-          {/* Mobile logo - only show on mobile */}
           <div className="flex lg:hidden items-center justify-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
-              <div className="w-5 h-5 bg-slate-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 transition-all duration-300 group-hover:scale-110">
+              <Brain className="h-6 w-6 text-white animate-pulse" fill="currentColor" />
             </div>
-            <span className="text-slate-700 text-lg font-medium">emoHub</span>
+            <span className="text-xl bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent hover:via-amber-600 hover:to-emerald-600 transition-all duration-300">
+            ǝmo<span className="text-slate-900 font-extrabold italic">Hub</span>
+            </span>
           </div>
 
           <div className="max-w-sm mx-auto w-full">
@@ -102,7 +105,6 @@ export function RegisterForm() {
               Community
             </h2>
 
-            {/* Google Sign Up Button */}
             <button 
               className="w-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded-lg py-3 px-4 flex items-center justify-center space-x-3 mb-6 mt-6 sm:mt-8"
               onClick={() => handleOAuthLogin("google")}
@@ -149,7 +151,6 @@ export function RegisterForm() {
                   )}
                 </div>
 
-                {/* Username */}
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Username</label>
                   <input
@@ -165,7 +166,6 @@ export function RegisterForm() {
                   )}
                 </div>
 
-                {/* Email */}
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Email</label>
                   <input
@@ -181,7 +181,6 @@ export function RegisterForm() {
                   )}
                 </div>
 
-                {/* Password */}
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Password</label>
                   <div className="relative">
@@ -207,7 +206,6 @@ export function RegisterForm() {
                 </div>
               </div>
 
-              {/* Terms and Conditions Checkbox with Orange Styling */}
               <div className="flex items-start space-x-3 mt-6">
                 <div className="flex items-center h-5 mt-0.5">
                   <input
@@ -217,7 +215,7 @@ export function RegisterForm() {
                     onChange={(e) => setTermsAccepted(e.target.checked)}
                     className="w-4 h-4 rounded border-2 border-gray-300 text-orange-500 focus:ring-orange-600 focus:ring-2 focus:ring-offset-0 checked:bg-orange-600 checked:border-orange-500 hover:border-orange-400 transition-colors duration-200"
                     style={{
-                      accentColor: '#fb923c' // This ensures the checkmark is orange in browsers that support it
+                      accentColor: '#fb923c' 
                     }}
                     required
                   />
@@ -228,7 +226,6 @@ export function RegisterForm() {
                 </label>
               </div>
 
-              {/* Sign Up Button - Disabled when terms not accepted */}
               <button 
                 type="submit"
                 disabled={isPending || !termsAccepted}
@@ -249,7 +246,6 @@ export function RegisterForm() {
               </button>
             </form>
 
-            {/* Sign In Link */}
             <div className="text-center mt-6">
               <span className="text-sm text-gray-500">Own an Account? </span>
               <Link href="/login" className="text-sm text-gray-700 font-medium hover:underline">
