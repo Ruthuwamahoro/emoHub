@@ -8,7 +8,7 @@ export async function GET(req:NextRequest, {params}: {params: Promise<{id: strin
     try {
         const { id } = await params;
         const challenge = await db.select().from(Challenges).where(eq(Challenges.id, id));
-        return sendResponse(200, challenge, 'element created successfully')
+        return sendResponse(200, challenge, 'element retrieved successfully')
         
     } catch (error) {
         const err = error instanceof Error ? error?.message : 'An expected error occured';
@@ -19,7 +19,7 @@ export async function DELETE(req:NextRequest, {params}: {params: Promise<{id: st
     try {
         const { id } = await params;
         await db.delete(Challenges).where(eq(Challenges.id, id));
-        return sendResponse(200, null, 'element created successfully')
+        return sendResponse(200, null, 'element deleted successfully')
         
     } catch (error) {
         const err = error instanceof Error ? error?.message : 'An expected error occured';

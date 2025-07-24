@@ -20,7 +20,7 @@ export const useCreateChallenge = (groupId?: string) => {
     const [formData, setFormData] = useState(initialData);
     const [ errors, setErrors] = useState<Record<string, string>>({});
     const queryClient = useQueryClient();
-    const { mutate, isPending } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: AddChallenge,
         onSuccess: (response) => {
             console.log('Challenge created successfully:', groupId);
@@ -28,7 +28,11 @@ export const useCreateChallenge = (groupId?: string) => {
             setFormData(initialData); 
             setErrors({});
             showToast(response.message, "success");
-            queryClient.invalidateQueries({ queryKey: ["Challenges", groupId] });
+            queryClient.invalidateQueries({ queryKey: ["Challenges"] });
+            queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+            if (groupId) {
+              queryClient.invalidateQueries({ queryKey: ["Challenges", groupId] });
+          }
         },
         onError: (err: unknown) => {
             const error = err as Error;
@@ -52,35 +56,35 @@ export const useCreateChallenge = (groupId?: string) => {
     };
     
     const handleSubmit = async (e?: React.FormEvent, dataOverride?: typeof formData): Promise<SubmitResult> => {
-        if (e) {
+      if (e) {
           e.preventDefault();
-        }
-        const dataToUse = dataOverride || formData;
+      }
+      const dataToUse = dataOverride || formData;
 
-        try {
-          await mutate(dataToUse);
+      try {
+          await mutateAsync(dataToUse);
           return { success: true };
-        } catch (error) {
+      } catch (error) {
           if (error instanceof z.ZodError) {
-            const fieldErrors = error.errors.reduce(
-              (acc, curr) => {
-                acc[curr.path[0]] = curr.message;
-                return acc;
-              },
-              {} as Record<string, string>
-            );
-            setErrors(fieldErrors);
-            return { success: false, error: "Validation failed" };
+              const fieldErrors = error.errors.reduce(
+                  (acc, curr) => {
+                      acc[curr.path[0]] = curr.message;
+                      return acc;
+                  },
+                  {} as Record<string, string>
+              );
+              setErrors(fieldErrors);
+              return { success: false, error: "Validation failed" };
           }
           
           const errorMessage = error instanceof Error ? error.message : "An error occurred";
           return { success: false, error: errorMessage };
-        }
-      };
+      }
+  };
     
     return {
-       data: mutate,
-       formData,
+      data: mutateAsync,
+      formData,
        setFormData,
        isPendingCreateChallenge:isPending,
        handleChange,
@@ -89,3 +93,4 @@ export const useCreateChallenge = (groupId?: string) => {
 
 
 }
+

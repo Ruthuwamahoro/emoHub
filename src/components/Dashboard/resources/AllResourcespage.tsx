@@ -536,6 +536,10 @@ const LearningResourcesUI: React.FC = () => {
                             {resource.resourceType || 'Article'}
                           </span>
                         </div>
+                        <span className="px-2 sm:px-3 py-3 bg-blue-100 text-green-700 rounded-xl text-xs sm:text-sm font-medium capitalize mb-3">
+                            Difficulty Level: {resource.difficultyLevel}
+                        </span>
+                        
                         
                         <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-base sm:text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
                           {resource.title}
@@ -548,8 +552,8 @@ const LearningResourcesUI: React.FC = () => {
                           <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm font-medium">
                             {getCategoryLabel(resource.category)}
                           </span>
-                          <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-medium capitalize">
-                            {resource.difficultyLevel}
+                          <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm font-medium">
+                            {resource.tags?.join(', ') || ''}
                           </span>
                         </div>
                         

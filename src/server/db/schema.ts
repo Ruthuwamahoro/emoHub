@@ -10,6 +10,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -320,10 +321,10 @@ const Challenges = pgTable("Challenges", {
   endDate: timestamp("end_date").notNull(),
   theme: varchar("theme", { length: 255 }).notNull(),
   user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }),
-  total_elements: integer("total_elements").default(0),
-  completed_elements: integer("completed_elements").default(0),
-  completed_percentage: decimal("completion_percentage", { precision: 5, scale: 2}).default("0"),
-  is_week_completed: boolean("is_week_completed").default(false),
+  // total_elements: integer("total_elements").default(0),
+  // completed_elements: integer("completed_elements").default(0),
+  // completed_percentage: decimal("completion_percentage", { precision: 5, scale: 2}).default("0"),
+  // is_week_completed: boolean("is_week_completed").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -335,9 +336,9 @@ const ChallengeElements = pgTable("challenge_elements", {
   }),
   title: varchar("title", { length: 255}).notNull(),
   description: varchar("description", { length: 255}).notNull(),
-  is_completed: boolean("is_completed").default(false),
-  completed_at: timestamp("completed_at"),
-  completed_by: uuid("completed_by").references(() => User.id),
+  // is_completed: boolean("is_completed").default(false),
+  // completed_at: timestamp("completed_at"),
+  // completed_by: uuid("completed_by").references(() => User.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -357,6 +358,16 @@ export const UserProgress = pgTable('user_progress', {
   updated_at: timestamp('updated_at').defaultNow(),
 });
 
+export const UserElementCompletions = pgTable("user_element_completions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id").references(() => User.id, { onDelete: "cascade" }).notNull(),
+  element_id: uuid("element_id").references(() => ChallengeElements.id, { onDelete: "cascade" }).notNull(),
+  challenge_id: uuid("challenge_id").references(() => Challenges.id, { onDelete: "cascade" }).notNull(),
+  completed_at: timestamp("completed_at").defaultNow(),
+  created_at: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  unique_user_element: unique().on(table.user_id, table.element_id),
+}));
 
 export const resourceTypeEnum =   pgEnum("resourceType", ["video", "audio", "article", "image"]);
 

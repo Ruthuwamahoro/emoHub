@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
                 last_activity_date: new Date(),
             });
 
-            // Fetch the newly created record
             userProgress = await db
                 .select()
                 .from(UserProgress)
@@ -43,7 +42,6 @@ export async function GET(req: NextRequest) {
         return sendResponse(200, userProgress[0], 'User progress retrieved successfully');
         
     } catch (error) {
-        console.error('Error retrieving user progress:', error);
         const err = error instanceof Error ? error?.message : 'An unexpected error occurred';
         return sendResponse(500, null, err);
     }

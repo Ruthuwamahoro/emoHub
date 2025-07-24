@@ -2,6 +2,7 @@
 import { useCreateEmotionCheckins } from '@/hooks/emotions/useCreateEmotions';
 import { usegetEmotions } from '@/hooks/emotions/useGetEmotions';
 import { useState } from 'react';
+import { TagSelector } from './CreatingTags';
 
 interface EmotionEntry {
     id: string;
@@ -226,7 +227,7 @@ export function EmotionsCheckIns() {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                {/* <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
                                     <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
                                             <span className="text-xs sm:text-sm">📝</span>
@@ -262,6 +263,29 @@ export function EmotionsCheckIns() {
                                             </span>
                                         ))}
                                     </div>
+                                </div> */}
+                                <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+                                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                            <span className="text-xs sm:text-sm">📝</span>
+                                        </div>
+                                        <span className="font-medium text-gray-900 text-sm sm:text-base">Context & Activities</span>
+                                    </div>
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                                        Select existing tags or create new ones to describe what influenced your mood
+                                    </p>
+                                    
+                                    <TagSelector
+                                        selectedTags={formData.activities}
+                                        onTagsChange={(tags) => updateFormData('activities', tags)}
+                                        placeholder="Search or create tags (e.g., School, work, family)"
+                                    />
+                                    
+                                    {formData.activities.length > 0 && (
+                                        <div className="mt-3 text-xs text-gray-500">
+                                            {formData.activities.length} tag{formData.activities.length !== 1 ? 's' : ''} selected
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

@@ -12,4 +12,5 @@ export interface WeeklyCard {
     endDate: string;
     theme: string;
     challenges: Challenge[];
+    user_id?: string;
   }

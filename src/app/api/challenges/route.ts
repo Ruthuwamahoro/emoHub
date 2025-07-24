@@ -1,5 +1,5 @@
 import db from "@/server/db";
-import { ChallengeElements, Challenges } from "@/server/db/schema";
+import { ChallengeElements, Challenges, UserElementCompletions } from "@/server/db/schema";
 import { 
   checkIfUserIsAdmin, 
   checkIfUserIsSpecialists, 
@@ -7,7 +7,7 @@ import {
   getUserIdFromSession 
 } from "@/utils/getUserIdFromSession";
 import { sendResponse } from "@/utils/Responses";
-import { desc, eq, isNull, or } from "drizzle-orm";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -57,8 +57,93 @@ export async function POST(req: NextRequest) {
 
 
 
+// export async function GET(req: NextRequest) {
+//   try {
+//     const userId = await getUserIdFromSession();
+    
+//     if (!userId) {
+//       return sendResponse(401, null, "User not authenticated");
+//     }
+
+//     const url = new URL(req.url);
+//     const groupId = url.searchParams.get("groupId");
+    
+//     const baseQuery = db.select({
+//       id: Challenges.id,
+//       weekNumber: Challenges.weekNumber,
+//       startDate: Challenges.startDate,
+//       endDate: Challenges.endDate,
+//       theme: Challenges.theme,
+//       group_id: Challenges.group_id, 
+//     }).from(Challenges);
+
+//     let challengesQuery;
+//     if (groupId) {
+//       challengesQuery = baseQuery.where(eq(Challenges.group_id, groupId));
+//     } else {
+//       challengesQuery = baseQuery.where(isNull(Challenges.group_id));
+//     }
+
+//     const challenges = await challengesQuery.orderBy(desc(Challenges.created_at));
+
+//     // Get all challenge elements with user-specific completion status
+//     const challengeElements = await db.select({
+//       id: ChallengeElements.id,
+//       challenge_id: ChallengeElements.challenge_id,
+//       title: ChallengeElements.title,
+//       description: ChallengeElements.description,
+//       completed: UserElementCompletions.id, // Will be null if not completed by this user
+//     })
+//     .from(ChallengeElements)
+//     .leftJoin(
+//       UserElementCompletions,
+//       and(
+//         eq(ChallengeElements.id, UserElementCompletions.element_id),
+//         eq(UserElementCompletions.user_id, userId)
+//       )
+//     );
+
+//     // Group elements by challenge and format completion status
+//     const elementsMap = challengeElements.reduce((acc, element) => {
+//       const challengeId = element.challenge_id ?? '';
+//       if (!acc[challengeId]) {
+//         acc[challengeId] = [];
+//       }
+//       acc[challengeId].push({
+//         id: element.id,
+//         title: element.title,
+//         description: element.description,
+//         completed: element.completed !== null, // Convert to boolean
+//       });
+//       return acc;
+//     }, {} as Record<string, any[]>);
+
+//     const result = challenges.map(challenge => ({
+//       id: challenge.id,
+//       weekNumber: challenge.weekNumber,
+//       startDate: challenge.startDate.toISOString().split('T')[0],
+//       endDate: challenge.endDate.toISOString().split('T')[0], 
+//       theme: challenge.theme,
+//       challenges: elementsMap[challenge.id] || [],
+//     }));
+
+//     return sendResponse(200, result, 'Challenges retrieved successfully');
+//   } catch (error) {
+//     console.error('Error in GET challenges:', error);
+//     const err = error instanceof Error ? error?.message : 'An unexpected error occurred';
+//     return sendResponse(500, null, err);
+//   }
+// }
+
+
 export async function GET(req: NextRequest) {
   try {
+    const userId = await getUserIdFromSession();
+    
+    if (!userId) {
+      return sendResponse(401, null, "User not authenticated");
+    }
+
     const url = new URL(req.url);
     const groupId = url.searchParams.get("groupId");
     
@@ -68,32 +153,37 @@ export async function GET(req: NextRequest) {
       startDate: Challenges.startDate,
       endDate: Challenges.endDate,
       theme: Challenges.theme,
-      group_id: Challenges.group_id, 
+      group_id: Challenges.group_id,
+      user_id: Challenges.user_id, // ← Include the creator's user_id
     }).from(Challenges);
 
     let challengesQuery;
     if (groupId) {
       challengesQuery = baseQuery.where(eq(Challenges.group_id, groupId));
     } else {
-
       challengesQuery = baseQuery.where(isNull(Challenges.group_id));
-
     }
 
-    console.log('SQL Query:', challengesQuery.toSQL());
-
     const challenges = await challengesQuery.orderBy(desc(Challenges.created_at));
-    
 
-
+    // Get all challenge elements with user-specific completion status
     const challengeElements = await db.select({
       id: ChallengeElements.id,
       challenge_id: ChallengeElements.challenge_id,
       title: ChallengeElements.title,
       description: ChallengeElements.description,
-      completed: ChallengeElements.is_completed,
-    }).from(ChallengeElements);
+      completed: UserElementCompletions.id, // Will be null if not completed by this user
+    })
+    .from(ChallengeElements)
+    .leftJoin(
+      UserElementCompletions,
+      and(
+        eq(ChallengeElements.id, UserElementCompletions.element_id),
+        eq(UserElementCompletions.user_id, userId)
+      )
+    );
 
+    // Group elements by challenge and format completion status
     const elementsMap = challengeElements.reduce((acc, element) => {
       const challengeId = element.challenge_id ?? '';
       if (!acc[challengeId]) {
@@ -103,7 +193,7 @@ export async function GET(req: NextRequest) {
         id: element.id,
         title: element.title,
         description: element.description,
-        completed: element.completed,
+        completed: element.completed !== null, // Convert to boolean
       });
       return acc;
     }, {} as Record<string, any[]>);
@@ -114,11 +204,13 @@ export async function GET(req: NextRequest) {
       startDate: challenge.startDate.toISOString().split('T')[0],
       endDate: challenge.endDate.toISOString().split('T')[0], 
       theme: challenge.theme,
+      user_id: challenge.user_id, 
       challenges: elementsMap[challenge.id] || [],
     }));
 
     return sendResponse(200, result, 'Challenges retrieved successfully');
   } catch (error) {
+    console.error('Error in GET challenges:', error);
     const err = error instanceof Error ? error?.message : 'An unexpected error occurred';
     return sendResponse(500, null, err);
   }

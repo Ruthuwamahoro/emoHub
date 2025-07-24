@@ -1,6 +1,6 @@
 "use client"
-import React, { useEffect, useRef, useState } from 'react';
-import { X,  FileText, Video, Image, Plus, Loader2, AlertCircle, CheckCircle2, Trash2, Edit, Link, Type, Play } from 'lucide-react';
+import React, {useRef, useState } from 'react';
+import { X,  FileText, Video, Plus, Loader2, AlertCircle, CheckCircle2, Trash2, Edit, Link, Type, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,9 @@ import { uploadImageToCloudinary } from '@/services/user/profile';
 import { Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UploadCloud } from 'lucide-react';
+import { useGetResourcesTags } from '@/hooks/users/resources/useCreateResourcesTags';
+import { ResourceTagSelector } from './CreateResourceTags';
+
 
 
 
@@ -57,6 +60,8 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
     isPending: isAssessmentPending 
   } = useCreateAssessment();
   const [resourceId, setResourceId] = useState<string>('');
+  const { data: resourcesTagsResponse, isLoading: isTagsLoading } = useGetResourcesTags();
+
 
 
   
@@ -167,7 +172,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
   
-    // Existing validations...
     if (!hookFormData.title.trim()) {
       newErrors.title = 'Title is required';
     }
@@ -184,7 +188,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       newErrors.url = 'Video URL is required';
     }
   
-    // Quiz validations
     if (extendedFormData.hasQuiz) {
       if (!extendedFormData.quizTitle.trim()) {
         newErrors.quizTitle = 'Quiz title is required';
@@ -194,7 +197,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
         newErrors.questions = 'At least one question is required for the quiz';
       }
   
-      // Validate each question
       extendedFormData.questions.forEach((question, index) => {
         if (!question.questionText.trim()) {
           newErrors[`question_${index}`] = `Question ${index + 1} text is required`;
@@ -213,7 +215,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
         }
       });
   
-      // Validate passing score
       if (extendedFormData.passingScore < 1 || extendedFormData.passingScore > 100) {
         newErrors.passingScore = 'Passing score must be between 1 and 100';
       }
@@ -235,11 +236,9 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       
       handleChange(syntheticEvent);
     } else {
-      // Handle extended form data
       setExtendedFormData(prev => ({ ...prev, [field]: value }));
     }
     
-    // Clear errors
     if (allErrors[field]) {
       setLocalErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -257,7 +256,7 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
 
   const addTag = () => {
     const trimmedTag = currentTag.trim().toLowerCase();
-    if(!trimmedTag) return; // Don't add empty tags
+    if(!trimmedTag) return; 
     if(!hookFormData?.tags) return ;
     if (trimmedTag && !hookFormData?.tags.includes(trimmedTag)) {
       const newTags = [...hookFormData?.tags, trimmedTag];
@@ -400,352 +399,324 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
             </TabsList>
 
             <TabsContent value="basic" className="space-y-8">
-  {/* Resource Type Selection */}
-  <div>
-    <Label className="text-base font-semibold mb-4 block">Resource Type *</Label>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {resourceTypes.map((type) => {
-        const IconComponent = type.icon;
-        const isSelected = hookFormData.resourceType === type.value;
-        return (
-          <Card
-            key={type.value}
-            className={cn(
-              "cursor-pointer transition-all duration-200 hover:shadow-md",
-              isSelected ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
-            )}
-            onClick={() => handleResourceTypeChange(type.value as RESOURCE_TYPE)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className={cn("p-2 rounded-lg", type.color)}>
-                  <IconComponent className="w-5 h-5" />
+              <div>
+                <Label className="text-base font-semibold mb-4 block">Resource Type *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {resourceTypes.map((type) => {
+                    const IconComponent = type.icon;
+                    const isSelected = hookFormData.resourceType === type.value;
+                    return (
+                      <Card
+                        key={type.value}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 hover:shadow-md",
+                          isSelected ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
+                        )}
+                        onClick={() => handleResourceTypeChange(type.value as RESOURCE_TYPE)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className={cn("p-2 rounded-lg", type.color)}>
+                              <IconComponent className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium text-sm">{type.label}</h3>
+                              <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            </div>
+                            {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-500" />}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm">{type.label}</h3>
-                  <p className="text-xs text-gray-600 mt-1">{type.description}</p>
-                </div>
-                {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-500" />}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-    {allErrors.resourceType && (
-      <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
-        <AlertCircle className="w-3 h-3" />
-        {allErrors.resourceType}
-      </p>
-    )}
-  </div>
-
-  {/* Basic Information */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="title">Title *</Label>
-        <Input
-          id="title"
-          value={hookFormData.title}
-          onChange={handleChange}
-          className={allErrors.title ? 'border-red-300' : ''}
-          placeholder="Enter resource title"
-        />
-        {allErrors.title && (
-          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            {allErrors.title}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="category">Category *</Label>
-        <Select value={hookFormData.category} onValueChange={(value) => handleInputChange('category', value)}>
-          <SelectTrigger className={allErrors.category ? 'border-red-300' : ''}>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-
-            <SelectContent>
-                {CATEGORY_OPTIONS.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                        {category.label} 
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
-        {allErrors.category && (
-          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            {allErrors.category}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="difficultyLevel">Difficulty Level *</Label>
-        <Select value={hookFormData.difficultyLevel} onValueChange={(value) => handleInputChange('difficultyLevel', value)}>
-          <SelectTrigger className={allErrors.difficultyLevel ? 'border-red-300' : ''}>
-            <SelectValue placeholder="Select difficulty" />
-          </SelectTrigger>
-          <SelectContent>
-
-            {DIFFICULTY_OPTIONS.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                        {category.label} 
-                    </SelectItem>
-            ))}
-
-          </SelectContent>
-        </Select>
-        {allErrors.difficultyLevel && (
-          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            {allErrors.difficultyLevel}
-          </p>
-        )}
-      </div>
-    </div>
-
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={hookFormData.description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
-          className={allErrors.description ? 'border-red-300' : ''}
-          placeholder="Describe what learners will gain from this resource"
-          rows={3}
-        />
-        {allErrors.description && (
-          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            {allErrors.description}
-          </p>
-        )}
-      </div>
-
-      {/* Tags */}
-      <div>
-        <Label htmlFor="tags">Tags</Label>
-        <div className="flex gap-2 mb-2">
-          <Input
-            value={currentTag}
-            onChange={(e) => setCurrentTag(e.target.value)}
-            placeholder="Add tag..."
-            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-          />
-          <Button type="button" onClick={addTag} size="sm" variant="outline">
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-        {hookFormData.tags && hookFormData.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {hookFormData.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                {tag}
-                <X
-                  className="w-3 h-3 cursor-pointer hover:text-red-500"
-                  onClick={() => removeTag(tag)}
-                />
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-
-  {/* Cover Image */}
-  <div>
-    <Label className="text-base font-semibold mb-4 block">Cover Image</Label>
-    <div className="space-y-4">
-      {hookFormData.coverImage ? (
-        <div className="relative">
-          <img
-            src={hookFormData.coverImage}
-            alt="Cover preview"
-            className="w-full h-48 object-cover rounded-lg border"
-          />
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={removeCoverImage}
-            className="absolute top-2 right-2"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      ) : (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-          <input
-            type="file"
-            ref={coverImageRef}
-            onChange={(e) => handleImageUpload(e, true)}
-            accept="image/*"
-            className="hidden"
-          />
-          <UploadCloud className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-900">
-              Click to upload cover image
-            </p>
-            <p className="text-xs text-gray-500">
-              PNG, JPG, GIF up to 5MB
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => coverImageRef.current?.click()}
-            disabled={isUploading}
-            className="mt-4"
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Choose Image
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-      {imageError && (
-        <p className="text-sm text-red-600 flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {imageError}
-        </p>
-      )}
-    </div>
-  </div>
-</TabsContent>
-
-<TabsContent value="content" className="space-y-8">
-  {/* Video URL (only for video resources) */}
-  {hookFormData.resourceType === 'video' && (
-    <div>
-      <Label htmlFor="url" className="text-base font-semibold mb-4 block">
-        Video URL *
-      </Label>
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              id="url"
-              value={hookFormData.url || ''}
-              onChange={handleChange}
-              className={allErrors.url ? 'border-red-300' : ''}
-              placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
-            />
-            {allErrors.url && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
-                {allErrors.url}
-              </p>
-            )}
-          </div>
-          <Button type="button" variant="outline" size="sm" className="shrink-0">
-            <Link className="w-4 h-4" />
-          </Button>
-        </div>
-        
-        {hookFormData.url && (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Play className="w-4 h-4" />
-              <span>Video preview will be available after saving</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )}
-
-  {/* Content */}
-  <div>
-    <Label htmlFor="content" className="text-base font-semibold mb-4 block">
-      {hookFormData.resourceType === 'article' ? 'Article Content *' : 'Video Description *'}
-    </Label>
-    <div className="space-y-4">
-      <Textarea
-        id="content"
-        value={hookFormData.content}
-        onChange={handleTextareaChange}     
-        className={cn(
-          "min-h-[300px] resize-none",
-          allErrors.content ? 'border-red-300' : ''
-        )}
-        placeholder={
-          hookFormData.resourceType === 'article'
-            ? "Write your article content here... You can use markdown formatting."
-            : "Describe what viewers will learn from this video..."
-        }
-      />
-      {allErrors.content && (
-        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {allErrors.content}
-        </p>
-      )}
-      
-      <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>
-          {hookFormData.resourceType === 'article' ? 'Markdown supported' : 'Plain text'}
-        </span>
-        <span>
-          {hookFormData.content.length} characters
-        </span>
-      </div>
-    </div>
-  </div>
-
-  {/* Content Preview */}
-  {hookFormData.content && (
-    <div>
-      <Label className="text-base font-semibold mb-4 block">Preview</Label>
-      <Card>
-        <CardContent className="p-6">
-          <div className="prose prose-sm max-w-none">
-            {hookFormData.resourceType === 'article' ? (
-              <div className="whitespace-pre-wrap break-words">
-                {hookFormData.content}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Video className="w-5 h-5 text-gray-400 mt-1" />
-                  <div>
-                    <p className="font-medium text-sm mb-2">Video Description:</p>
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap break-words">
-                      {hookFormData.content}
-                    </p>
-                  </div>
-                </div>
-                {hookFormData.url && (
-                  <div className="pt-4 border-t">
-                    <p className="text-xs text-gray-500 mb-2">Video Source:</p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Link className="w-4 h-4 text-blue-500" />
-                      <span className="text-blue-600 truncate">{hookFormData.url}</span>
-                    </div>
-                  </div>
+                {allErrors.resourceType && (
+                  <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {allErrors.resourceType}
+                  </p>
                 )}
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )}
-</TabsContent>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={hookFormData.title}
+                      onChange={handleChange}
+                      className={allErrors.title ? 'border-red-300' : ''}
+                      placeholder="Enter resource title"
+                    />
+                    {allErrors.title && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {allErrors.title}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="category">Category *</Label>
+                    <Select value={hookFormData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                      <SelectTrigger className={allErrors.category ? 'border-red-300' : ''}>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+
+                        <SelectContent>
+                            {CATEGORY_OPTIONS.map((category) => (
+                                <SelectItem key={category.value} value={category.value}>
+                                    {category.label} 
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {allErrors.category && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {allErrors.category}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="difficultyLevel">Difficulty Level *</Label>
+                    <Select value={hookFormData.difficultyLevel} onValueChange={(value) => handleInputChange('difficultyLevel', value)}>
+                      <SelectTrigger className={allErrors.difficultyLevel ? 'border-red-300' : ''}>
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+
+                        {DIFFICULTY_OPTIONS.map((category) => (
+                                <SelectItem key={category.value} value={category.value}>
+                                    {category.label} 
+                                </SelectItem>
+                        ))}
+
+                      </SelectContent>
+                    </Select>
+                    {allErrors.difficultyLevel && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {allErrors.difficultyLevel}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      value={hookFormData.description}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
+                      className={`resize-none ${allErrors.description ? 'border-red-300' : ''}`}
+                      placeholder="Describe what learners will gain from this resource"
+                      rows={3}
+                    />
+                    {allErrors.description && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {allErrors.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  <ResourceTagSelector
+                    selectedTags={hookFormData.tags || []}
+                    onTagsChange={(tags) => handleInputChange('tags', tags)}
+                    placeholder="Search or create resource tags..."
+                  />
+                </div>
+              </div>
+
+=              <div>
+                <Label className="text-base font-semibold mb-4 block">Cover Image</Label>
+                <div className="space-y-4">
+                  {hookFormData.coverImage ? (
+                    <div className="relative">
+                      <img
+                        src={hookFormData.coverImage}
+                        alt="Cover preview"
+                        className="w-full h-48 object-cover rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={removeCoverImage}
+                        className="absolute top-2 right-2"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                      <input
+                        type="file"
+                        ref={coverImageRef}
+                        onChange={(e) => handleImageUpload(e, true)}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <UploadCloud className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          Click to upload cover image
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF up to 5MB
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => coverImageRef.current?.click()}
+                        disabled={isUploading}
+                        className="mt-4"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Choose Image
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                  {imageError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {imageError}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="content" className="space-y-8">
+              {hookFormData.resourceType === 'video' && (
+                <div>
+                  <Label htmlFor="url" className="text-base font-semibold mb-4 block">
+                    Video URL *
+                  </Label>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Input
+                          id="url"
+                          value={hookFormData.url || ''}
+                          onChange={handleChange}
+                          className={allErrors.url ? 'border-red-300' : ''}
+                          placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                        />
+                        {allErrors.url && (
+                          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            {allErrors.url}
+                          </p>
+                        )}
+                      </div>
+                      <Button type="button" variant="outline" size="sm" className="shrink-0">
+                        <Link className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    {hookFormData.url && (
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Play className="w-4 h-4" />
+                          <span>Video preview will be available after saving</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="content" className="text-base font-semibold mb-4 block">
+                  {hookFormData.resourceType === 'article' ? 'Article Content *' : 'Video Description *'}
+                </Label>
+                <div className="space-y-4">
+                  <Textarea
+                    id="content"
+                    value={hookFormData.content}
+                    onChange={handleTextareaChange}     
+                    className={cn(
+                      "min-h-[300px] resize-none",
+                      allErrors.content ? 'border-red-300' : ''
+                    )}
+                    placeholder={
+                      hookFormData.resourceType === 'article'
+                        ? "Write your article content here... You can use markdown formatting."
+                        : "Describe what viewers will learn from this video..."
+                    }
+                  />
+                  {allErrors.content && (
+                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {allErrors.content}
+                    </p>
+                  )}
+                  
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>
+                      {hookFormData.resourceType === 'article' ? 'Markdown supported' : 'Plain text'}
+                    </span>
+                    <span>
+                      {hookFormData.content.length} characters
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {hookFormData.content && (
+                <div>
+                  <Label className="text-base font-semibold mb-4 block">Preview</Label>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="prose prose-sm max-w-none">
+                        {hookFormData.resourceType === 'article' ? (
+                          <div className="whitespace-pre-wrap break-words">
+                            {hookFormData.content}
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                              <Video className="w-5 h-5 text-gray-400 mt-1" />
+                              <div>
+                                <p className="font-medium text-sm mb-2">Video Description:</p>
+                                <p className="text-sm text-gray-600 whitespace-pre-wrap break-words">
+                                  {hookFormData.content}
+                                </p>
+                              </div>
+                            </div>
+                            {hookFormData.url && (
+                              <div className="pt-4 border-t">
+                                <p className="text-xs text-gray-500 mb-2">Video Source:</p>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Link className="w-4 h-4 text-blue-500" />
+                                  <span className="text-blue-600 truncate">{hookFormData.url}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </TabsContent>
 
             <QuizTabsContent
               extendedFormData={extendedFormData}
@@ -797,12 +768,6 @@ export const CreateResourceDialog: React.FC<CreateResourceDialogProps>=({
       </DialogContent>
     </Dialog>
   );
-
-
-
-
-
-
 };
 
 

@@ -7,7 +7,7 @@ import { z } from "zod";
 const challengeElementSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
   description: z.string().min(1, "Description is required").max(1000, "Description must be less than 1000 characters"),
-  completed: z.boolean().optional().default(false),
+  completed: z.boolean().optional().default(false)
 });
 
 const initialData: CreateElementChallengeData = {
@@ -35,8 +35,10 @@ export const useCreateChallengeElement = (challengeId: string) => {
       showToast(response.message || "Challenge element created successfully", "success");
       
       queryClient.invalidateQueries({ queryKey: ["Challenges"] });
+      queryClient.invalidateQueries({ queryKey: ["challenge-elements", challengeId] });
       queryClient.invalidateQueries({ queryKey: ["Challenge", challengeId] });
       queryClient.invalidateQueries({ queryKey: ['user-progress'] });
+
     },
     onError: (err: unknown) => {
       const error = err as Error;

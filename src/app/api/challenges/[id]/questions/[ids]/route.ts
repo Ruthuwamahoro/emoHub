@@ -8,7 +8,7 @@ export async function DELETE(req:NextRequest, {params}: {params: Promise<{ids: s
     try {
         const { ids } = await params;
         await db.delete(ChallengeElements).where(eq(ChallengeElements.id, ids));
-        return sendResponse(200, null, 'element created successfully')
+        return sendResponse(200, null, 'element deleted successfully')
         
     } catch (error) {
         const err = error instanceof Error ? error?.message : 'An expected error occured';

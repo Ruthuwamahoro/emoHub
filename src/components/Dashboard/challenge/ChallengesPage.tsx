@@ -14,8 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Challenge, WeeklyCard } from '@/types/challenges';
 import { useParams } from "next/navigation";
 import { useGetSingleGroup } from '@/hooks/users/groups/useGetSingleGroup';
-
-
+import { Alert } from '@/components/ui/alert';
 
 type FilterType = 'all' | 'completed' | 'incomplete';
 
@@ -95,6 +94,8 @@ const WeeklyChallengesCard: React.FC = () => {
   }, [data]);
 
   const canCreateResources = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
+
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -205,7 +206,7 @@ const WeeklyChallengesCard: React.FC = () => {
         endDate: ''
       });
     } catch (error) {
-      console.error('Update week failed:', error);
+      return error;
     } finally {
       setUpdatingWeek(null);
     }
@@ -228,6 +229,9 @@ const WeeklyChallengesCard: React.FC = () => {
     const { completedCount, totalCount, progressPercentage, isCompleted, remainingCount } = getCardProgress(card.challenges);
     const isExpanded = expandedCards.has(card.id);
     const isEditingThisWeek = editingWeek === card.id;
+    const isCreator = card.user_id === session?.user?.id;
+    const canModifyThisWeek = canCreateResources && isCreator;
+
     
     return (
       <div className="p-6 border-b border-gray-200">
@@ -330,7 +334,7 @@ const WeeklyChallengesCard: React.FC = () => {
                     <span>{remainingCount} remaining</span>
                   </div>
                 )}
-                  {canCreateResources && (
+                  {canModifyThisWeek && (
                     <div className="flex gap-1">
                       <button
                         onClick={(e) => {
@@ -398,7 +402,7 @@ const WeeklyChallengesCard: React.FC = () => {
 
 
 
-  const toggleChallenge = async (cardId: string, challengeId: string) => {
+const toggleChallenge = async (cardId: string, challengeId: string) => {
     const card = weeklyCards.find(c => c.id === cardId);
     const challenge = card?.challenges.find(c => c.id === challengeId);
     
@@ -408,53 +412,24 @@ const WeeklyChallengesCard: React.FC = () => {
     
     setUpdatingElements(prev => new Set(prev).add(challengeId));
     
-    setWeeklyCards(prev => 
-      prev.map(weekCard => 
-        weekCard.id === cardId 
-          ? {
-              ...weekCard,
-              challenges: weekCard.challenges.map(ch =>
-                ch.id === challengeId 
-                  ? { ...ch, completed: newCompletedState }
-                  : ch
-              )
-            }
-          : weekCard
-      )
-    );
-    
     try {
-      await updateElementProgressMutation.mutateAsync({
-        challengeId: cardId,
-        data: {
-          elementId: challengeId,
-          completed: newCompletedState
-        }
-      });
-      
+        await updateElementProgressMutation.mutateAsync({
+            challengeId: cardId,
+            data: {
+                elementId: challengeId,
+                completed: newCompletedState
+            }
+        });
     } catch (error) {
-      setWeeklyCards(prev => 
-        prev.map(weekCard => 
-          weekCard.id === cardId 
-            ? {
-                ...weekCard,
-                challenges: weekCard.challenges.map(ch =>
-                  ch.id === challengeId 
-                    ? { ...ch, completed: !newCompletedState }
-                    : ch
-                )
-              }
-            : weekCard
-        )
-      );
+        console.error('Failed to update challenge:', error);
     } finally {
-      setUpdatingElements(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(challengeId);
-        return newSet;
-      });
+        setUpdatingElements(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(challengeId);
+            return newSet;
+        });
     }
-  };
+};
 
   useEffect(() => {
     if (updateElementProgressMutation.isSuccess) {

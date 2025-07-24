@@ -17,6 +17,7 @@ export const useUpdateElementProgress = () => {
   >({
     mutationFn: ({ challengeId, data }) => updateElementProgress(challengeId, data),
     onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['Challenges', variables.challengeId] });
       queryClient.invalidateQueries({ queryKey: ['Challenges'] });
       queryClient.invalidateQueries({ queryKey: ['user-progress'] });
       
