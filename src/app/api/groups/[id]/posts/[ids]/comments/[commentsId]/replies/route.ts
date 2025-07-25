@@ -4,22 +4,35 @@ import { getUserIdFromSession } from '@/utils/getUserIdFromSession';
 import { Comment, Post, CommentReplies, User } from '@/server/db/schema';
 import db from '@/server/db';
 
+// Function to generate anonymous name based on user's real name
+const generateAnonymousName = (fullName: string): string => {
+  if (!fullName) return 'Anonymous User';
+  
+  const names = fullName.trim().split(' ');
+  if (names.length === 1) {
+    return `${names[0].charAt(0)}***`;
+  }
+  
+  const firstName = names[0];
+  const lastName = names[names.length - 1];
+  return `${firstName.charAt(0)}*** ${lastName.charAt(0)}***`;
+};
+
 type ReplyInsert = {
   comment_id: string;
   user_id: string;
   commentReplies: string;
+  isAnonymous: boolean;
 };
 
 export async function POST(
   req: NextRequest,
-  segmentedData: { params: Promise<{id: string; ids: string;commentsId: string}>}
+  segmentedData: { params: Promise<{id: string; ids: string; commentsId: string}>}
 ) {
   try {
     const params = await segmentedData.params;
+    const { id, ids, commentsId } = params;
 
-    const { id ,ids, commentsId } = params;
-
-    
     if (!id || !ids || !commentsId) {
       return NextResponse.json(
         { 
@@ -39,20 +52,18 @@ export async function POST(
       );
     }
 
-    const { commentReplies } = await req.json();
+    const { commentReplies, isAnonymous = false } = await req.json();
 
     const post = await db
       .select()
       .from(Post)
       .where(eq(Post.id, ids));
 
-    console.log("kiiididididididi", post)
-
     if (post.length === 0) {
       return NextResponse.json(
         { 
           status: 404, 
-          message: `Blog not found with id: ${ids}`, 
+          message: `Post not found with id: ${ids}`, 
           data: null 
         },
         { status: 404 }
@@ -68,7 +79,7 @@ export async function POST(
       return NextResponse.json(
         { 
           status: 404, 
-          message: `Comment not found with id: ${commentsId} for blog: ${ids}`, 
+          message: `Comment not found with id: ${commentsId} for post: ${ids}`, 
           data: null 
         },
         { status: 404 }
@@ -77,15 +88,16 @@ export async function POST(
 
     if (!commentReplies || typeof commentReplies !== 'string' || commentReplies.trim().length === 0) {
       return NextResponse.json(
-        { status: 400, message: "Reply commentReplies is required", data: null },
+        { status: 400, message: "Reply content is required", data: null },
         { status: 400 }
       );
     }
 
     const insertValues: ReplyInsert = {
-      comment_id:commentsId,
+      comment_id: commentsId,
       user_id,
       commentReplies: commentReplies.trim(),
+      isAnonymous: Boolean(isAnonymous),
     };
 
     const newReply = await db
@@ -93,10 +105,64 @@ export async function POST(
       .values(insertValues)
       .returning();
 
+    // Get user details for the response
+    const userDetails = await db
+      .select({
+        id: User.id,
+        name: User.fullName,
+        username: User.username,
+        image: User.profilePicUrl,
+        gender: User.gender,
+      })
+      .from(User)
+      .where(eq(User.id, user_id))
+      .limit(1);
+
+    const user = userDetails[0];
+    
+    // Create the response data with proper structure
+    let responseData: any = {
+      ...newReply[0],
+      likes: 0,
+      likesCount: 0,
+      isLiked: false
+    };
+
+    // Add author information based on anonymity
+    if (user) {
+      if (isAnonymous) {
+        responseData.author = {
+          id: user.id,
+          name: user.name || 'Anonymous User',
+          username: user.username,
+          image: user.image,
+          gender: user.gender,
+          anonymousName: generateAnonymousName(user.name || ''),
+          anonymity_name: generateAnonymousName(user.name || '')
+        };
+      } else {
+        responseData.author = {
+          id: user.id,
+          name: user.name || 'Anonymous User',
+          username: user.username,
+          image: user.image,
+          gender: user.gender
+        };
+      }
+    } else {
+      responseData.author = {
+        id: null,
+        name: 'Anonymous User',
+        username: null,
+        image: null,
+        gender: null
+      };
+    }
+
     return NextResponse.json({
       status: 200,
       message: "Reply added successfully",
-      data: newReply[0],
+      data: responseData,
     });
   } catch (error) {
     const errorMessage = error instanceof Error 
@@ -193,6 +259,7 @@ export async function GET(
         comment_id: CommentReplies.comment_id,
         user_id: CommentReplies.user_id,
         commentReplies: CommentReplies.commentReplies,
+        isAnonymous: CommentReplies.isAnonymous,
         createdAt: CommentReplies.createdAt,
         updatedAt: CommentReplies.updatedAt,
         author: {
@@ -212,28 +279,44 @@ export async function GET(
 
     const hasMore = offset + replies.length < totalCount;
 
+    // Process replies to handle anonymous display
+    const processedReplies = replies.map(reply => {
+      let authorInfo = reply.author
+        ? {
+            ...reply.author,
+            name: reply.author.name || 'Anonymous User'
+          }
+        : {
+            id: null,
+            name: 'Anonymous User',
+            username: null,
+            image: null,
+            gender: null
+          };
+
+      // If the reply is anonymous, add anonymous name fields
+      if (reply.isAnonymous && reply.author?.name) {
+        // Only override the name field for anonymous replies, do not add extra properties
+        authorInfo = {
+          ...authorInfo,
+          name: generateAnonymousName(reply.author.name)
+        };
+      }
+
+      return {
+        ...reply,
+        author: authorInfo,
+        likes: 0, 
+        likesCount: 0,
+        isLiked: false
+      };
+    });
+
     return NextResponse.json({
       status: 200,
       message: "Replies fetched successfully",
       data: {
-        replies: replies.map(reply => ({
-          ...reply,
-          author: reply.author
-            ? {
-                ...reply.author,
-                name: reply.author.name || 'Anonymous User'
-              }
-            : {
-                id: null,
-                name: 'Anonymous User',
-                username: null,
-                image: null,
-                gender: null
-              },
-          likes: 0, 
-          likesCount: 0,
-          isLiked: false
-        })),
+        replies: processedReplies,
         totalCount,
         hasMore,
         currentPage: page,

@@ -4,15 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, ThumbsUp, MoreHorizontal, Reply } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useCreateRepliesComment } from '@/hooks/users/groups/posts/comments/useCreateReplies';
-import { Avatar as AvatarImages } from "@/utils/genderAvatar";
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import type { CommentReply } from '@/services/user/groups/comments/getCommentReplies';
+import { getInitials } from '../TopNav';
 
 interface CommentRepliesProps {
   groupId: string;
   postId: string;
   commentId: string;
   commentAuthorName: string;
-  commentReplies: any;
+  commentReplies: CommentReply[];
   initialRepliesCount?: number;
 }
 
@@ -28,7 +30,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
   const [showReplies, setShowReplies] = useState(false);
   const [page, setPage] = useState(1);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-
 
   const {
     formData: replyFormData,
@@ -61,6 +62,18 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
   };
 
   const getUserAvatar = (reply: CommentReply) => {
+    // Check if reply is anonymous
+    if (reply.isAnonymous) {
+      const anonymousName = reply.author.anonymousName || reply.author.anonymity_name || 'Anonymous';
+      return (
+        <div className="relative">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+            {getInitials(anonymousName)}
+          </div>
+        </div>
+      );
+    }
+
     if (reply.author.image) {
       return (
         <div className="relative">
@@ -69,38 +82,51 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
             alt={reply.author.name} 
             className="w-7 h-7 rounded-full object-cover ring-1 ring-white shadow-sm"
           />
-          <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 border border-white rounded-full"></div>
         </div>
       );
     }
+    const displayName = reply.author.name || reply.author.username || 'Anonymous';
+    
     return (
-      <AvatarImages
-        gender={reply.author.gender || 'other'} 
-        name={reply.author.username || reply.author.name} 
-        size={28}
-      />
+      <div className="relative">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+          {getInitials(displayName)}
+        </div>
+      </div>
     );
   };
 
   const getCurrentUserAvatar = () => {
-    if (session?.user?.profilePicUrl) {
+    const userFullName = session?.user?.fullName || 'Anonymous';
+    
+    if (replyFormData.isAnonymous) {
       return (
         <div className="relative">
-          <img 
-            src={session.user.profilePicUrl}
-            alt="Your avatar" 
-            className="w-7 h-7 rounded-full object-cover ring-1 ring-blue-200 shadow-sm"
-          />
-          <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-blue-400 border border-white rounded-full"></div>
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+            {getInitials(userFullName)}
+          </div>
         </div>
       );
     }
+  
+    if (session?.user?.profilePicUrl) {
+      return (
+        <div className="relative">
+          <img
+            src={session.user.profilePicUrl}
+            alt="Your avatar"
+            className="w-7 h-7 rounded-full object-cover ring-1 ring-blue-200 shadow-sm"
+          />
+        </div>
+      );
+    }
+  
     return (
-      <AvatarImages
-        gender={session?.user?.gender || 'other'} 
-        name={session?.user?.username || 'You'} 
-        size={28}
-      />
+      <div className="relative">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+          {getInitials(userFullName)}
+        </div>
+      </div>
     );
   };
 
@@ -108,6 +134,11 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
     if (session?.user?.username === reply.author.username) {
       return "You";
     }
+    
+    if (reply.isAnonymous) {
+      return reply.author.anonymousName || reply.author.anonymity_name || 'Anonymous';
+    }
+    
     return reply.author.name || 'Anonymous';
   };
 
@@ -118,8 +149,6 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
     }
   };
 
-
-
   const submitReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyFormData.commentReplies?.trim()) return;
@@ -127,7 +156,7 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
     try {
       await handleReplySubmit(groupId, postId, commentId);
       setReplyingTo(null);
-      setReplyFormData({ commentReplies: '' });
+      setReplyFormData({ commentReplies: '', isAnonymous: false });
     } catch (error) {
       console.error('Reply submission error:', error);
     }
@@ -140,7 +169,7 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
 
   const cancelReply = () => {
     setReplyingTo(null);
-    setReplyFormData({ commentReplies: '' });
+    setReplyFormData({ commentReplies: '', isAnonymous: false });
   };
 
   if (totalCount === 0) {
@@ -150,12 +179,28 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
           onClick={startReply}
           className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors duration-200"
         >
-          <Reply className="w-3 h-3" />
-          <span className="font-medium">Reply</span>
+          <Reply className="w-4 h-4 font-extrabold text-orange-500" />
+          <span className="font-bold text-orange-500">Reply</span>
         </button>
 
         {replyingTo === commentId && (
           <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center space-x-2 p-2 border rounded-lg bg-gray-50 mb-2">
+              <Label htmlFor="reply-anonymous-toggle" className="text-xs font-medium">
+                Reply anonymously
+              </Label>
+              <Switch
+                id="reply-anonymous-toggle"
+                checked={replyFormData.isAnonymous ?? false}
+                onCheckedChange={(checked) => handleReplyInputField({ 
+                  target: { id: 'isAnonymous', value: checked } 
+                } as any)}
+              />
+              <span className="text-xs text-gray-600">
+                {replyFormData.isAnonymous ? 'Anonymous' : 'Show your name'}
+              </span>
+            </div>
+
             <form onSubmit={submitReply}>
               <div className="flex space-x-2">
                 {getCurrentUserAvatar()}
@@ -165,7 +210,11 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
                     name="commentReplies"
                     value={replyFormData.commentReplies || ''}
                     onChange={handleReplyInputField}
-                    placeholder={`Reply to ${commentAuthorName}...`}
+                    placeholder={
+                      replyFormData.isAnonymous 
+                        ? `Reply anonymously to ${commentAuthorName}...`
+                        : `Reply to ${commentAuthorName}...`
+                    }
                     className="w-full p-2 pr-8 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-xs bg-white"
                     rows={2}
                     autoFocus
@@ -206,11 +255,11 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
           className="flex items-center space-x-2 text-xs text-gray-600 hover:text-blue-600 transition-colors duration-200"
         >
           {showReplies ? (
-            <ChevronUp className="w-3 h-3" />
+            <ChevronUp className="w-3 h-3 text-orange-500" />
           ) : (
-            <ChevronDown className="w-3 h-3" />
+            <ChevronDown className="w-3 h-3 text-orange-500" />
           )}
-          <span className="font-medium">
+          <span className="font-medium text-orange-500">
             {totalCount} {totalCount === 1 ? 'reply' : 'replies'}
           </span>
         </button>
@@ -219,8 +268,8 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
           onClick={startReply}
           className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors duration-200"
         >
-          <Reply className="w-3 h-3" />
-          <span className="font-medium">Reply</span>
+          <Reply className="w-4 h-4 text-orange-500" />
+          <span className="font-medium text-orange-500">Reply</span>
         </button>
       </div>
 
@@ -235,9 +284,14 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
                     <span className="font-medium text-xs text-gray-900 truncate">
                       {getUserDisplayName(reply)}
                     </span>
-                    <span className="text-xs text-gray-500 flex-shrink-0">
+                    <span className="text-xs text-blue-500 flex-shrink-0">
                       {formatDate(reply.createdAt)}
                     </span>
+                    {reply.isAnonymous && (
+                      <span className="text-xs bg-slate-500 text-white font-extrabold px-2 py-0.5 rounded">
+                        Anonymous
+                      </span>
+                    )}
                   </div>
                   <p className="text-gray-800 text-xs leading-relaxed break-words">
                     {reply.commentReplies}
@@ -259,6 +313,23 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
 
           {replyingTo === commentId && (
             <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
+              {/* Anonymous toggle for reply */}
+              <div className="flex items-center space-x-2 p-2 border rounded-lg bg-gray-50 mb-2">
+                <Label htmlFor="reply-anonymous-toggle" className="text-xs font-medium">
+                  Reply anonymously
+                </Label>
+                <Switch
+                  id="reply-anonymous-toggle"
+                  checked={replyFormData.isAnonymous ?? false}
+                  onCheckedChange={(checked) => handleReplyInputField({ 
+                    target: { id: 'isAnonymous', value: checked } 
+                  } as any)}
+                />
+                <span className="text-xs text-gray-600">
+                  {replyFormData.isAnonymous ? 'Anonymous' : 'Show your name'}
+                </span>
+              </div>
+
               <form onSubmit={submitReply}>
                 <div className="flex space-x-2">
                   {getCurrentUserAvatar()}
@@ -268,7 +339,11 @@ const CommentReplies: React.FC<CommentRepliesProps> = ({
                       name="commentReplies"
                       value={replyFormData.commentReplies || ''}
                       onChange={handleReplyInputField}
-                      placeholder={`Reply to ${commentAuthorName}...`}
+                      placeholder={
+                        replyFormData.isAnonymous 
+                          ? `Reply anonymously to ${commentAuthorName}...`
+                          : `Reply to ${commentAuthorName}...`
+                      }
                       className="w-full p-2 pr-8 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-xs bg-white"
                       rows={2}
                       autoFocus

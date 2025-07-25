@@ -1,23 +1,26 @@
 import axios from "axios";
 
-export type CommentReply = {
+export interface CommentReply {
   id: string;
   comment_id: string;
   user_id: string;
   commentReplies: string;
+  isAnonymous: boolean; 
   createdAt: string;
   updatedAt: string;
-  author: {
-    id: string;
-    name: string;
-    username: string;
-    image?: string;
-    gender?: string;
-  };
   likes?: number;
   likesCount?: number;
   isLiked?: boolean;
-};
+  author: {
+    id: string | null;
+    name: string;
+    username: string | null;
+    image?: string | null;
+    gender?: string | null;
+    anonymousName?: string; 
+    anonymity_name?: string; 
+  };
+}
 
 export type GetCommentRepliesResponse = {
   status: number;

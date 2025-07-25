@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import { useCommentLikes } from '@/hooks/users/groups/posts/comments/usePostCommentLikes';
+import { Badge } from '@/components/ui/badge';
 
 interface CommentProps {
   comment: {
@@ -15,6 +16,7 @@ interface CommentProps {
     createdAt: string;
     isLiked?: boolean;
     likesCount?: number;
+    isAnonymous?: boolean;
   };
   groupId: string;
   postId: string;
@@ -26,6 +28,7 @@ const CommentComponent: React.FC<CommentProps> = ({
   postId 
 }) => {
   const { toggleCommentLike, isPending } = useCommentLikes();
+  console.log("+++++++++++++++++++++++++++++++++++++++**************", comment);
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,6 +70,12 @@ const CommentComponent: React.FC<CommentProps> = ({
           <span className="font-medium text-gray-900 text-sm">
             {comment.author.name}
           </span>
+
+          {comment.isAnonymous && (
+            <Badge className="text-xs bg-slate-500">
+              Anonymous
+            </Badge>
+          )}
           <span className="text-gray-500 text-xs">
             {formatTimeAgo(comment.createdAt)}
           </span>

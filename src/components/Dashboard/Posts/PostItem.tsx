@@ -15,6 +15,7 @@ import { getInitials } from '../TopNav';
 import { formatDistanceToNow } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
 interface Comment {
   id: string | number;
@@ -140,6 +141,8 @@ const PostModal: React.FC<{
                   <h3 className="font-semibold text-gray-900 text-lg leading-tight">{post.title}</h3>
                 </div>
               )}
+
+
               
               {/* {post.textContent && (
                 <div className="mb-4">
@@ -238,9 +241,15 @@ const PostModal: React.FC<{
                           <span className="font-medium text-sm text-gray-900 truncate">
                             {getCommentUserDisplayName(comment)}
                           </span>
-                          <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(comment.createdAt)}</span>
+                          <span className="text-xs text-blue-700 flex-shrink-0">{formatDate(comment.createdAt)}</span>
+                          {comment.isAnonymous && (
+                            <Badge className="text-xs bg-slate-500 text-white font-extrabold px-2 py-0.5 rounded">
+                              Anonymous
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-gray-800 text-sm leading-relaxed break-words">{comment.content}</p>
+                        
                       </div>
 
                       <div className="flex items-center mt-2 ml-3 space-x-4">
@@ -344,7 +353,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
             {getInitials(anonymityName)}
           </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
@@ -357,7 +365,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
             alt={post.author?.fullName || post.author?.name || 'User'} 
             className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg"
           />
-          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
@@ -368,7 +375,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg">
           {getInitials(realName)}
         </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
       </div>
     );
   };
@@ -394,7 +400,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
             alt="Your avatar" 
             className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-200 shadow-sm"
           />
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
@@ -403,20 +408,18 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
           {getInitials(session?.user?.fullName)}
         </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-400 border-2 border-white rounded-full"></div>
       </div>
     );
   };
 
   const getCommentUserAvatar = (comment: Comment) => {
     if (comment.isAnonymous) {
-      const anonymousName = comment.author.anonymousName || comment.author.anonymity_name || 'Anonymous User';
+      const anonymousName = comment.author.anonymousName || comment.author.anonymity_name || session?.user?.fullName;
       return (
         <div className="relative">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
             {getInitials(anonymousName)}
           </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
@@ -429,7 +432,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
             alt={comment.author.name} 
             className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm"
           />
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
         </div>
       );
     }
@@ -439,7 +441,6 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
           {getInitials(comment.author.name)}
         </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></div>
       </div>
     );
   };
@@ -450,7 +451,7 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
     }
   
     if (comment.isAnonymous) {
-      return comment?.author?.anonymousName || comment?.author?.anonymity_name || 'Anonymous User'; 
+      return comment?.author?.anonymousName || comment?.author?.anonymity_name || 'You'; 
     }
     
     return comment.author.name || 'Anonymous User'; 
@@ -622,6 +623,11 @@ const PostItem: React.FC<{ post: any }> = ({ post }) => {
                     </div>
                   </div>
                 </div>
+                {post.isAnonymous && (
+                  <Badge className="text-xs bg-slate-500 text-white font-extrabold px-2 py-0.5 rounded">
+                    Anonymous
+                  </Badge>
+                )}
               </div>
               <button
                 onClick={(e) => {

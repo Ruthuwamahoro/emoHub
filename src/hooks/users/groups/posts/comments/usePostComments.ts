@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import showToast from '@/utils/showToast';
 import { useState } from 'react';
 import { z } from 'zod'; 
+import { group } from 'console';
 
 interface CreatePostsCommentInterface {
     content: string;
@@ -40,12 +41,16 @@ export const useCreateComment = (ids: string) => {
             setFormData(initialData);
             setErrors({});
             
+            queryClient.invalidateQueries({
+                queryKey: ["Posts", variables.id]
+        })
             queryClient.invalidateQueries({ 
                 queryKey: ["Posts", variables.id, variables.ids] 
             });
             queryClient.invalidateQueries({ 
                 queryKey: ['Posts'] 
             });
+
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 
