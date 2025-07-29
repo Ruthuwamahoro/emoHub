@@ -16,7 +16,7 @@ export const COMMON_LINKS = [
     },
     {
       label: "Help & Support",
-      href: "/help",
+      href: "/dashboard/help",
       icon: <MdHelpOutline className="text-white h-5 w-5 flex-shrink-0" />,
     },
     {
@@ -157,7 +157,7 @@ export const ROLE_BASED_LINKS = {
       },
       {
         label: "Events Management",
-        href: "/admin/events",
+        href: "/dashboard/events",
         icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {

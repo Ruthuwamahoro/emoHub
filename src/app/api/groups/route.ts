@@ -8,15 +8,10 @@ import { checkIfUserIsAdmin, checkIfUserIsSpecialists, checkIfUserIsSuperAdmin, 
 
 export const POST = async (req: NextRequest) => {
   try {
-    const [isAdmin, isSpecialists, isSuperAdmin] = await Promise.all([
-      checkIfUserIsAdmin(),
-      checkIfUserIsSpecialists(),
-      checkIfUserIsSuperAdmin()
-    ])
 
-    const isAuthorized = isAdmin || isSpecialists || isSuperAdmin;
+
     const userId = await getUserIdFromSession();
-    if(!isAuthorized || !userId){
+    if(!userId){
         return sendResponse(401, 'Unauthorized', 'You are not authorized to perform this action')
     }
     const { name, categoryId, description, image } = await req.json();

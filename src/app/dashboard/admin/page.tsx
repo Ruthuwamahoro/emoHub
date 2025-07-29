@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Users, 
   MessageSquare, 
@@ -9,9 +9,9 @@ import {
   Calendar 
 } from 'lucide-react';
 import EmotionGauge from '@/components/Dashboard/emotions/EmotionsTracker';
+import { useSession } from 'next-auth/react';
 
 
-// Types for dashboard metrics
 interface DashboardMetrics {
   reflections: number;
   groups: number;
@@ -25,10 +25,9 @@ interface StatCardProps {
   title: string;
   value: number;
   icon: React.ReactNode;
-  trend?: number; // Optional trend percentage
+  trend?: number;
 }
 
-// Reusable StatCard component
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-100">
@@ -54,7 +53,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
   );
 };
 
-// Main Admin Dashboard component
 const AdminDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     reflections: 0,
@@ -66,26 +64,23 @@ const AdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [emoji, setEmoji] = useState('')
+  const [greeting, setGreeting] = useState('');
 
-  // Simulate API data fetching
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // TODO: Replace with actual API call
-        // const response = await fetch('/api/dashboard/metrics');
-        // const data = await response.json();
-        
-        // Simulated API response with realistic data
         const simulatedData: DashboardMetrics = {
-          reflections: 1247,
+          reflections: 24,
           groups: 34,
-          emotionalCheckIns: 892,
-          resources: 156,
-          users: 2341,
-          activeEvents: 12,
+          emotionalCheckIns: 18,
+          resources: 4,
+          users: 21,
+          activeEvents: 8,
         };
         
         // Simulate loading delay
@@ -102,6 +97,38 @@ const AdminDashboard: React.FC = () => {
 
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    const getTimeBasedGreeting = () => {
+      const currentHour = new Date().getHours();
+      
+      if (currentHour >= 5 && currentHour < 12) {
+        setGreeting('Good morning');
+        setEmoji('🌅');
+      } else if (currentHour >= 12 && currentHour < 17) {
+        setGreeting('Good afternoon');
+        setEmoji('☀️');
+      } else if (currentHour >= 17 && currentHour < 21) {
+        setGreeting('Good evening');
+        setEmoji('🌆');
+      } else {
+        setGreeting('Good night');
+        setEmoji('🌙');
+      }
+    };
+
+    getTimeBasedGreeting();
+    
+    const interval = setInterval(getTimeBasedGreeting, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const { data: session } = useSession();
+  const fullName = useMemo(() => 
+    session?.user?.fullName?.split(" ")[0] || '', 
+    [session?.user?.fullName]
+  );  
 
   // Loading state
   if (loading) {
@@ -157,6 +184,15 @@ const AdminDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Admin Dashboard
           </h1>
+          <p className="h-1 w-20 bg-slate-500 mb-8"></p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-2xl font-bold tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-black via-amber-600 to-amber-600 bg-clip-text text-transparent font-bold">
+                  {greeting},
+                </span>
+                <br />
+                <span className="text-slate-800 font-bold">{fullName || 'Friend'}!</span>
+              </h1>
+          <p></p>
           <p className="text-gray-600">
             Overview of your platform's key metrics and performance indicators
           </p>
@@ -168,19 +204,19 @@ const AdminDashboard: React.FC = () => {
             title="Reflections"
             value={metrics.reflections}
             icon={<MessageSquare />}
-            trend={12}
+            trend={1}
           />
           <StatCard
             title="Groups"
             value={metrics.groups}
             icon={<UsersIcon />}
-            trend={5}
+            trend={3}
           />
           <StatCard
             title="Emotional Check-ins"
             value={metrics.emotionalCheckIns}
             icon={<Heart />}
-            trend={8}
+            trend={5}
           />
           <StatCard
             title="Resources"
@@ -192,27 +228,19 @@ const AdminDashboard: React.FC = () => {
             title="Total Users"
             value={metrics.users}
             icon={<Users />}
-            trend={15}
+            trend={20}
           />
           <StatCard
             title="Active Events"
             value={metrics.activeEvents}
             icon={<Calendar />}
-            trend={3}
+            trend={2}
           />
-        </div>
-
-        {/* Additional Dashboard Content Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
-          <p className="text-gray-600">
-            Additional dashboard components like charts, recent activities, or detailed analytics can be added here.
-          </p>
         </div>
       </div>
       <div className="mb-8 sm:mb-9 lg:mb-10 mt-20">
           <EmotionGauge />
-        </div>
+      </div>
     </div>
   );
 };

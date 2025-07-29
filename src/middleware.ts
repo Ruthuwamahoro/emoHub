@@ -17,7 +17,6 @@ export default async function middleware(request: NextRequest) {
     '/dashboard/emotioncheckins',
     '/dashboard/dailyreflection',
     '/dashboard/community',
-    '/dashboard/events',
     '/dashboard/profile',
     '/dashboard/challenges',
     '/dashboard/resources'
@@ -28,7 +27,6 @@ export default async function middleware(request: NextRequest) {
     '/dashboard/admin/usermanagement',
     '/dashboard/emotions',
     '/dashboard/reflection',
-    '/admin/events'
   ];
   
   const sharedRoutes = [
@@ -36,7 +34,10 @@ export default async function middleware(request: NextRequest) {
     '/dashboard/challenges', 
     '/dashboard/resources',
     '/dashboard/community',
-    '/dashboard/profile'
+    '/dashboard/profile',
+    '/dashboard/events',
+    '/dashboard/help'
+
   ];
   
   if (pathname === '/') {

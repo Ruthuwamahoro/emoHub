@@ -8,12 +8,9 @@ import { useGetAllGroups } from '@/hooks/users/groups/useGetGroups';
 import { useJoinGroup } from '@/hooks/users/groups/useJoinGroup';
 import { useExitGroup } from '@/hooks/users/groups/useExitGroup';
 import showToast from '@/utils/showToast';
-import { RequestModal } from './RequestModeratorForm';
-import { ManagementModal } from './ManagingRequest';
 import { CreateGroupModal } from './CreateGroupFormModal';
 import { useAllMembersGroup } from '@/hooks/users/groups/members/useGetAllmembers';
 import { Edit2 } from 'lucide-react';
-import { Delete } from 'lucide-react';
 import { DeleteIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -61,7 +58,6 @@ export default function CommunityGroups() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportedPosts, setShowReportedPosts] = useState(false);
@@ -76,33 +72,11 @@ export default function CommunityGroups() {
   const { exitGroup } = useExitGroup();
   
   const groups = data?.data as Group[] | undefined;
-  const canManageGroups = ['Admin', 'Specialist', 'SuperAdmin'].includes(session?.user?.role ?? '');
+  const canManageGroups = ['Admin', 'Specialist', 'SuperAdmin', 'User'].includes(session?.user?.role ?? '');
   const isRegularUser = !canManageGroups;
 
 
-  const [requests] = useState<GroupRequest[]>([
-    {
-      id: 1,
-      userId: 'user1',
-      userName: 'John Doe',
-      groupName: 'Tech Enthusiasts',
-      description: 'A group for discussing latest tech trends',
-      requestType: 'create',
-      status: 'pending',
-      createdAt: '2024-01-15'
-    },
-    {
-      id: 2,
-      userId: 'user2',
-      userName: 'Jane Smith',
-      groupName: 'Fitness Community',
-      description: '',
-      requestType: 'moderator',
-      status: 'pending',
-      createdAt: '2024-01-16',
-      groupId: 2
-    }
-  ]);
+
 
 
   const [reportedPosts] = useState<ReportedPost[]>([
@@ -185,13 +159,6 @@ export default function CommunityGroups() {
     router.push(`/dashboard/community/groups/${group_id}`);
   };
 
-  const handleApproveRequest = async (requestId: number) => {
-    showToast('Request approved successfully!', 'success');
-  };
-
-  const handleRejectRequest = async (requestId: number) => {
-    showToast('Request rejected', 'error');
-  };
 
   const isGroupCreator = (group: Group) => {
     return group.userId === session?.user?.id;
@@ -399,37 +366,18 @@ export default function CommunityGroups() {
                     >
                       <PlusCircle className="mr-1 sm:mr-2" size={16} /> 
                       <span className="hidden xs:inline">Create Group</span>
-                      <span className="xs:hidden">Create</span>
-                    </Button>
-
-                    <Button 
-                      onClick={() => setIsManageModalOpen(true)}
-                      className="flex-1 sm:flex-none flex items-center justify-center bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
-                    >
-                      <Settings className="mr-1 sm:mr-2" size={16} /> 
-                      <span className="hidden xs:inline">Manage</span>
-                      <span className="xs:hidden">Manage</span>
+                      <span className="xs:hidden">Create Group</span>
                     </Button>
                   </>
                 )}
-                {isRegularUser && (
-                  <Button 
-                    onClick={() => setIsRequestModalOpen(true)}
-                    className="flex-1 sm:flex-none flex items-center justify-center bg-gradient-to-r from-slate-500 to-slate-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
-                  >
-                    <UserPlus className="mr-1 sm:mr-2" size={16} /> 
-                    <span className="hidden xs:inline">Request</span>
-                    <span className="xs:hidden">Request</span>
-                  </Button>
-                )}
 
-                <Button             
+                {/* <Button             
                   onClick={() => setShowReportedPosts(true)}
                   className="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
                 >
                   <span className="hidden sm:inline">Reported Posts</span>
                   <span className="sm:hidden">Reports</span>
-                </Button>
+                </Button> */}
               </div>
             </div>
             
@@ -586,22 +534,8 @@ export default function CommunityGroups() {
                         
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-2">
-                            <div className="flex -space-x-1 sm:-space-x-2">
-                              {[...Array(3)].map((_, i) => (
-                                <div 
-                                  key={i} 
-                                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
-                                >
-                                  {String.fromCharCode(65 + i)}
-                                </div>
-                              ))}
-                            </div>
+                            
                             <span className="text-xs sm:text-sm text-gray-500">+{group.memberCount || 0} members</span>
-                          </div>
-                          
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
-                            <span className="text-xs sm:text-sm font-medium text-gray-600">4.8</span>
                           </div>
                         </div>
                         
@@ -691,24 +625,7 @@ export default function CommunityGroups() {
           />
         )}
 
-        {isRequestModalOpen && isRegularUser && (
-          <RequestModal 
-            onClose={() => setIsRequestModalOpen(false)}
-            onRequestSent={() => {
-              setIsRequestModalOpen(false);
-              showToast('Request sent successfully! You will be notified once reviewed. ✨', 'success');
-            }}
-          />
-        )}
 
-        {isManageModalOpen && canManageGroups && (
-          <ManagementModal 
-            requests={requests}
-            onClose={() => setIsManageModalOpen(false)}
-            onApproveRequest={handleApproveRequest}
-            onRejectRequest={handleRejectRequest}
-          />
-        )}
       </div>
     </div>
   );

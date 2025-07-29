@@ -176,25 +176,29 @@ const generateTourSteps = (userRole: string, allLinks: any[]): Step[] => {
       '/dashboard',
       '/dashboard/emotioncheckins',
       '/dashboard/challenges',
-      '/dashboard/resources'
+      '/dashboard/resources',
+      '/dashboard/events'
     ],
     specialist: [
       '/dashboard',
       '/dashboard/patients',
       '/dashboard/appointments',
-      '/dashboard/patient-analytics'
+      '/dashboard/patient-analytics',
+      '/dashboard/events'
+
     ],
     admin: [
       '/admin/dashboard',
       '/dashboard/admin/usermanagement',
       '/admin/analytics',
-      '/dashboard/resources'
+      '/dashboard/resources',
+      '/dashboard/events'
     ],
     superadmin: [
       '/superadmin/dashboard',
       '/superadmin/overview',
       '/superadmin/all-users',
-      '/superadmin/platform-analytics'
+      '/superadmin/platform-analytics',
     ]
   };
   

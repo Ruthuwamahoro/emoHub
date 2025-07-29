@@ -253,9 +253,6 @@ export default function HeaderDashboard() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button variant="ghost" size="icon" className="p-2 hidden sm:flex">
-                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
-              </Button>
 
               <Button 
                 variant="ghost" 

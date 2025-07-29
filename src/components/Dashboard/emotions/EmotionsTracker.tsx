@@ -265,7 +265,7 @@ function EnhancedEmotionGauge() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-8 text-center">
             <h1 className="text-2xl text-left font-medium bg-slate-700 bg-clip-text text-transparent mb-2">
-              Your Emotional Journey
+              Emotional Journey
             </h1>
             <p className="text-base text-left text-slate-600 max-w-xl">
               Track, understand, and nurture your emotional well-being with AI-powered insights
