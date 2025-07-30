@@ -7,6 +7,16 @@ import { TiGroup } from "react-icons/ti";
 import { FaHome, FaUserCircle } from "react-icons/fa";
 import { TbWriting, TbTargetArrow } from "react-icons/tb";
 import { HiUserGroup } from "react-icons/hi";
+import { Settings } from "lucide-react";
+import { Users } from "lucide-react";
+import { Brain } from "lucide-react";
+import { Heart } from "lucide-react";
+import { Trophy } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { FileText } from "lucide-react";
+import { Users2 } from "lucide-react";
+import { CalendarDays } from "lucide-react";
+import { User } from "lucide-react";
 
 export const COMMON_LINKS = [
     {
@@ -114,56 +124,56 @@ export const ROLE_BASED_LINKS = {
       },
     ],
   
-    admin: [
+    admin : [
       {
         label: "Admin Dashboard",
         href: "/dashboard/admin",
-        icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Settings className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "User Management",
         href: "/dashboard/admin/usermanagement",
-        icon: <IconUsers className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Users className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "All Emotion Insights",
         href: "/dashboard/emotions",
-        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Brain className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Emotion Checkins",
         href: "/dashboard/emotioncheckins",
-        icon: <RiMentalHealthFill className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Heart className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Weekly challenges",
         href: "/dashboard/challenges",
-        icon: <MdAdminPanelSettings className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Trophy className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Daily Reflection",
         href: "/dashboard/reflection",
-        icon: <MdOutlineCalendarToday className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Calendar className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Content Management",
         href: "/dashboard/resources",
-        icon: <GrResources className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <FileText className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Community Management",
         href: "/dashboard/community",
-        icon: <TiGroup className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <Users2 className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Events Management",
         href: "/dashboard/events",
-        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <CalendarDays className="text-white h-5 w-5 flex-shrink-0" />,
       },
       {
         label: "Profile",
         href: "/dashboard/profile",
-        icon: <MdEventRepeat className="text-white h-5 w-5 flex-shrink-0" />,
+        icon: <User className="text-white h-5 w-5 flex-shrink-0" />,
       }
     ],
   
