@@ -630,7 +630,7 @@ const toggleChallenge = async (cardId: string, challengeId: string) => {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
 
     {groupId ? (
-      <div className="bg-slate-50 rounded-2xl shadow-2xl border border-purple-200 p-8 text-black">
+      <div className="bg-slate-200 rounded-2xl shadow-2xl border border-purple-200 p-8 text-black">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{groupData?.group?.name}</h1>
