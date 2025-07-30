@@ -336,9 +336,6 @@ const ChallengeElements = pgTable("challenge_elements", {
   }),
   title: varchar("title", { length: 255}).notNull(),
   description: varchar("description", { length: 255}).notNull(),
-  // is_completed: boolean("is_completed").default(false),
-  // completed_at: timestamp("completed_at"),
-  // completed_by: uuid("completed_by").references(() => User.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
