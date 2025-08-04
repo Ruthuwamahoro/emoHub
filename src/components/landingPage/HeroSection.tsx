@@ -223,7 +223,6 @@ export const EmoHubLanding = () => {
         </div>
       </div>
 
-      {/* Decorative Background Elements */}
       <div className="absolute bottom-0 left-0 w-full h-16 sm:h-20 md:h-24 lg:h-32 xl:h-40 bg-gradient-to-r from-amber-50 via-transparent to-orange-50 opacity-40 pointer-events-none"></div>
       <div className="absolute top-1/3 right-0 w-16 sm:w-20 md:w-24 lg:w-32 xl:w-40 h-32 sm:h-48 md:h-64 lg:h-72 xl:h-96 bg-gradient-to-l from-red-50 to-transparent opacity-30 pointer-events-none"></div>
 
