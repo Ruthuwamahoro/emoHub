@@ -6,7 +6,7 @@ A comprehensive full-stack web application designed to foster emotional intellig
 
 The platform combines evidence-based psychological principles with modern web technologies to create an engaging, supportive environment where users can:
 
-- Access guided emotional intelligence assessments/ and exercises
+- Access guided emotional intelligence resources
 - Participate in community discussions and support groups
 - Access educational resources and interactive content
 - Engage in mindfulness and wellness challenges
@@ -20,7 +20,7 @@ Built with modern web technologies including Next.js, TypeScript, and a robust P
 ## Tech Stack
 
 ### Frontend
-- **Next.js 14** - React framework with App Router
+- **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe JavaScript
 - **Tailwind CSS** - Utility-first CSS framework
 - **shadcn/ui** - Reusable component library
@@ -36,7 +36,6 @@ Built with modern web technologies including Next.js, TypeScript, and a robust P
 ### Development Tools
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
-- **Husky** - Git hooks (if configured)
 
 ## Environment Setup
 
@@ -62,6 +61,8 @@ Before setting up the project, ensure that there is the following installed:
    npm install
    # or
    yarn install
+   # or 
+   pnpm install
    ```
 
 3. **Environment Configuration**
@@ -70,16 +71,18 @@ Before setting up the project, ensure that there is the following installed:
    ```env
    # Database
    DATABASE_URL=your-database-url
-   AUTH_GITHUB_ID="your-github-id"
-   AUTH_GITHUB_SECRET="your-github-secret"
+   AUTH_GOOGLE_ID="your-github-id"
+   AUTH_GOOGLE_SECRET="your-github-secret"
    JWT_SECRET="your secret key"
    CLOUDINARY_CLOUD_NAME=my-cloud-NAME
    CLOUDINARY_API_KEY=yourcloudinary-PI-KEY
    CLOUDINARY_API_SECRET=your-cloudinary-secret
    SECRET_KEY=your-secret
-    EMAIL_USER=your-email
-    EMAIL_PASS=your-email-password
-    NEXT_PUBLIC_APP_URL=next-url-password
+   EMAIL_USER=your-email
+   EMAIL_PASS=your-email-password
+   NEXT_PUBLIC_APP_URL=next-url-password
+   GEMINI_API_KEY="Your gemini third party api"
+   NEXTAUTH_SECRET="Your next auth secret"
    ```
 
 4. **Database Setup**
@@ -113,6 +116,8 @@ Before setting up the project, ensure that there is the following installed:
    npm run dev
    # or
    yarn dev
+   # or 
+   pnpm run dev
    ```
    
    Open [http://localhost:3000](http://localhost:3000) in browser.

@@ -95,7 +95,6 @@ export const EmoHubLanding = () => {
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}>
                 {titleText.split(' ').map((word, wordIndex) => {
-                  // Check for emotional/Ubuntu related words in different languages
                   const emotionalWords = ['Emotional', 'Amarangamutima', 'Ubuntu'];
                   const isEmotionalWord = emotionalWords.some(emoWord => 
                     word.toLowerCase().includes(emoWord.toLowerCase())
@@ -125,7 +124,6 @@ export const EmoHubLanding = () => {
               </p>
             </div>
 
-            {/* CTA Button */}
             <div className={`flex flex-col sm:flex-row gap-4 sm:gap-5 pt-2 sm:pt-4 lg:pt-6 transition-all duration-1000 delay-600 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
@@ -141,7 +139,6 @@ export const EmoHubLanding = () => {
               </button>
             </div>
 
-            {/* Feature Tags */}
             <div className={`flex flex-wrap justify-start gap-2 sm:gap-3 lg:gap-4 pt-3 sm:pt-4 lg:pt-6 transition-all duration-1000 delay-800 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
